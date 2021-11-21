@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Istios on 卷王郑天驰</title>
+    <link>https://zhengtianchi.github.io/istio/</link>
+    <description>Recent content in Istios on 卷王郑天驰</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright>
+    <lastBuildDate>Sun, 21 Nov 2021 18:51:58 +0800</lastBuildDate><atom:link href="https://zhengtianchi.github.io/istio/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>istio - 多集群管控入门</title>
+      <link>https://zhengtianchi.github.io/istio/%E5%A4%9A%E4%BA%91/</link>
+      <pubDate>Sun, 21 Nov 2021 18:51:58 +0800</pubDate>
+      
+      <guid>https://zhengtianchi.github.io/istio/%E5%A4%9A%E4%BA%91/</guid>
+      <description>多云 Multi-cluster service mesh 多集群服务网格，配置工作负载来路由跨集群的流量。所有这些都符合应用Istio配置，如&#39; VirtualServices &amp;lsquo;， &#39; DestinationRules &amp;lsquo;， &#39; Sidecar &amp;</description>
+    </item>
+    
+  </channel>
+</rss>
