@@ -282,7 +282,7 @@ $  kubectl label namespace istioinaction istio-injection=enabled
 $  kubectl -n istioinaction apply -f ./catalog.yaml
 ```
 
-![image-20211120214227189](img/image-20211120214227189.png)
+![image-20211120214227189](/images/img/image-20211120214227189.png)
 
 测试用用例如上所示。
 
@@ -472,7 +472,7 @@ SNI Auto Passthrough，顾名思义，不需要手动创建“VirtualServices”
 
 这是使用SNI集群完成的，这些集群使用“snii -dnat”路由器模式在东西网关中自动配置。
 
-![image-20211120180746067](img/image-20211120180746067.png)
+![image-20211120180746067](/images/img/image-20211120180746067.png)
 
 SNI Auto Passthrough 模式 使用 Istio Gateway 配置
 
