@@ -1,11 +1,9 @@
 <rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
     <channel>
-        <title>卷王郑天驰</title>
-        <link>https://zhengtianchi.github.io/</link>
-        <description>杭州奋斗逼，云原生卷王，兰溪土狗</description>
-        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Sun, 21 Nov 2021 18:51:58 &#43;0800</lastBuildDate>
-            <atom:link href="https://zhengtianchi.github.io/index.xml" rel="self" type="application/rss+xml" />
-        <item>
+        <title>所有文章 - 卷王郑天驰</title>
+        <link>https://zhengtianchi.github.io/posts/</link>
+        <description>所有文章 | 卷王郑天驰</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Sun, 21 Nov 2021 18:51:58 &#43;0800</lastBuildDate><atom:link href="https://zhengtianchi.github.io/posts/" rel="self" type="application/rss+xml" /><item>
     <title>istio - 多集群管控入门</title>
     <link>https://zhengtianchi.github.io/%E5%A4%9A%E4%BA%91/</link>
     <pubDate>Sun, 21 Nov 2021 18:51:58 &#43;0800</pubDate>
