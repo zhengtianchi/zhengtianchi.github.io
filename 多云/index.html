@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>istio - 多集群管控入门 - 卷王郑天驰</title><meta name="Description" content="istio 多集群管控流程介绍."><meta property="og:title" content="istio - 多集群管控入门" />
+<meta property="og:description" content="istio 多集群管控流程介绍." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://zhengtianchi.github.io/%E5%A4%9A%E4%BA%91/" /><meta property="og:image" content="https://zhengtianchi.github.io/logo.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-11-21T18:51:58+08:00" />
+<meta property="article:modified_time" content="2021-11-21T18:51:58+08:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://zhengtianchi.github.io/logo.png"/>
+
+<meta name="twitter:title" content="istio - 多集群管控入门"/>
+<meta name="twitter:description" content="istio 多集群管控流程介绍."/>
+<meta name="application-name" content="ztc">
+<meta name="apple-mobile-web-app-title" content="ztc"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://zhengtianchi.github.io/%E5%A4%9A%E4%BA%91/" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "istio - 多集群管控入门",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/zhengtianchi.github.io\/%E5%A4%9A%E4%BA%91\/"
+        },"image": ["https:\/\/zhengtianchi.github.io\/images\/Apple-Devices-Preview.png"],"genre": "posts","keywords": "istio, 多集群","wordcount":  6149 ,
+        "url": "https:\/\/zhengtianchi.github.io\/%E5%A4%9A%E4%BA%91\/","datePublished": "2021-11-21T18:51:58+08:00","dateModified": "2021-11-21T18:51:58+08:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
+            "@type": "Organization",
+            "name": "xxxx","logo": "https:\/\/zhengtianchi.github.io\/images\/avatar.png"},"author": {
+                "@type": "Person",
+                "name": "郑天驰"
+            },"description": "istio 多集群管控流程介绍."
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="卷王郑天驰"><span class="header-title-pre"><i class='far fa-kiss-wink-heart fa-fw'></i></span>卷王郑天驰</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 所有文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/categories/documentation/"> 文档 </a><a class="menu-item" href="/about/"> 关于 </a><a class="menu-item" href="https://github.com/zhengtianchi/" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="卷王郑天驰"><span class="header-title-pre"><i class='far fa-kiss-wink-heart fa-fw'></i></span>卷王郑天驰</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">所有文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/categories/documentation/" title="">文档</a><a class="menu-item" href="/about/" title="">关于</a><a class="menu-item" href="https://github.com/zhengtianchi/" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content always-active" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">istio - 多集群管控入门</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="https://zhengtianchi.github.io" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>郑天驰</a></span>&nbsp;<span class="post-category">收录于 <a href="/categories/istio/"><i class="far fa-folder fa-fw"></i>istio</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="212111-08-2151">212111-08-2151</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 6149 字&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 13 分钟&nbsp;<span id="/%E5%A4%9A%E4%BA%91/" class="leancloud_visitors" data-flag-title="istio - 多集群管控入门">
+                        <i class="far fa-eye fa-fw"></i>&nbsp;<span class=leancloud-visitors-count></span>&nbsp;次阅读
+                    </span>&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#多集群服务网格">多集群服务网格</a></li>
+    <li><a href="#多集群部署模型">多集群部署模型</a>
+      <ul>
+        <li><a href="#primary-remote-部署模型">Primary-Remote 部署模型</a></li>
+        <li><a href="#primary-primary部署模型">Primary-Primary部署模型</a></li>
+        <li><a href="#external控制平面">External控制平面</a></li>
+      </ul>
+    </li>
+    <li><a href="#多集群下的服务发现">多集群下的服务发现</a></li>
+    <li><a href="#跨集群工作负载连接">跨集群工作负载连接</a></li>
+    <li><a href="#集群之间的相互信任">集群之间的相互信任</a>
+      <ul>
+        <li><a href="#plug-in-ca-certificates">Plug-in CA Certificates</a></li>
+        <li><a href="#external-certificate-authority-integration">External certificate authority integration</a></li>
+      </ul>
+    </li>
+  </ul>
+
+  <ul>
+    <li><a href="#第一步-创建集群">第一步 创建集群</a></li>
+    <li><a href="#第二步-配置-plug-in-ca-certificates-建立相互信任">第二步 配置 plug-in CA certificates 建立相互信任</a></li>
+    <li><a href="#第三步-安装各个集群的控制面">第三步 安装各个集群的控制面</a></li>
+    <li><a href="#第四步-启动跨集群的服务发现">第四步 启动跨集群的服务发现</a></li>
+    <li><a href="#第五步-建立跨集群连接">第五步 建立跨集群连接</a></li>
+    <li><a href="#第六步-验证跨集群-workload-discovery">第六步 验证跨集群 workload discovery</a></li>
+    <li><a href="#第七步-集群间的负载均衡">第七步 集群间的负载均衡</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><h1 id="多云管理">多云管理</h1>
+<ul>
+<li><strong>Multi-cluster service mesh</strong>  多集群服务网格，配置工作负载来路由跨集群的流量。所有这些都符合应用Istio配置，如' VirtualServices &lsquo;， ' DestinationRules &lsquo;， ' Sidecar &lsquo;等。</li>
+<li><strong>Mesh Federation</strong> 网格联邦，表示公开并支持两个独立服务网格的工作负载的通信</li>
+</ul>
+<p>对于网格联邦，您可以查看Istio文档<a href="https://istio.io/latest/docs/ops/deployment/deployment-models/#multiple-meshes" target="_blank" rel="noopener noreffer">multiple mesh</a> 或一个名为<a href="https://docs.solo.io/gloo-mesh/latest/" target="_blank" rel="noopener noreffer">Gloo mesh</a>的开源项目，以帮助自动化配置以支持它。</p>
+<h2 id="多集群服务网格">多集群服务网格</h2>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/1.multi-cluster-service-mesh-reqs.png"
+        data-srcset="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/1.multi-cluster-service-mesh-reqs.png, https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/1.multi-cluster-service-mesh-reqs.png 1.5x, https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/1.multi-cluster-service-mesh-reqs.png 2x"
+        data-sizes="auto"
+        alt="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/1.multi-cluster-service-mesh-reqs.png"
+        title="1.multi cluster service mesh reqs" /></p>
+<p>多集群服务网格需要跨集群发现、连接和共同信任</p>
+<ul>
+<li>
+<p><strong>跨集群工作负载发现</strong> -控制平面必须发现对等集群中的工作负载，以便配置服务代理 (例如，集群的<code>API server </code>必须可以访问对面集群中的Istio控制平面)。</p>
+</li>
+<li>
+<p><strong>跨集群工作负载连接性</strong> -工作负载之间必须具有连接性。除非您可以初始化到工作负载端点的连接，否则对工作负载端点的感知是没有用的。</p>
+</li>
+<li>
+<p><strong>集群之间的共同信任</strong> -跨集群的工作负载必须相互认证以使Istio的安全特性成为可能的<code>PeerAuthentication</code>和<code>AuthorizationPolicy</code>。</p>
+</li>
+</ul>
+<h2 id="多集群部署模型">多集群部署模型</h2>
+<p>集群分类：</p>
+<ul>
+<li><strong>主集群</strong> （Primary Cluster）  :  安装Istio控制平面的集群</li>
+<li><strong>远端集群</strong>（Remote Cluster）: 安装控制平面的远端集群</li>
+</ul>
+<p>部署模型：</p>
+<ul>
+<li>Primary-Remote(共享控制平面)</li>
+<li>Primary-Primary(复用控制平面)</li>
+<li>External控制平面</li>
+</ul>
+<h3 id="primary-remote-部署模型">Primary-Remote 部署模型</h3>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/2.primary-remote.png"
+        data-srcset="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/2.primary-remote.png, https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/2.primary-remote.png 1.5x, https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/2.primary-remote.png 2x"
+        data-sizes="auto"
+        alt="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/2.primary-remote.png"
+        title="2.primary remote" /></p>
+<p><strong>Primary-Remote</strong>部署模型有一个管理网格的单一控制平面，因此，它经常被称为单一控制平面或共享控制平面部署模型。
+这种模型使用更少的资源，然而，主集群的中断会影响整个网格，因此它的可用性很低。</p>
+<h3 id="primary-primary部署模型">Primary-Primary部署模型</h3>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/3.primary-primary.png"
+        data-srcset="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/3.primary-primary.png, https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/3.primary-primary.png 1.5x, https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/3.primary-primary.png 2x"
+        data-sizes="auto"
+        alt="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/3.primary-primary.png"
+        title="3.primary primary" /></p>
+<p><strong>Primary-Primary</strong> 部署模型有多个控制平面，这确保了更高的可用性，因为中断的范围仅限于发生中断的集群，但也需要更多的资源。我们将此模型称为复制控制平面部署模型。</p>
+<h3 id="external控制平面">External控制平面</h3>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/4.external-control-plane.png"
+        data-srcset="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/4.external-control-plane.png, https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/4.external-control-plane.png 1.5x, https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/4.external-control-plane.png 2x"
+        data-sizes="auto"
+        alt="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/4.external-control-plane.png"
+        title="4.external control plane" /></p>
+<p><strong>External控制平面</strong> 为所有集群远程到控制平面的部署模型。这种部署模型使云提供商能够将Istio作为托管服务提供。</p>
+<h2 id="多集群下的服务发现">多集群下的服务发现</h2>
+<p>Istio的控制平面需要与<code>Kubernetes API</code>服务器通信，以收集相关信息来配置服务代理，比如 <code>services</code> 和 <code>endpoints</code>。</p>
+<p>但是对 kubernetes 的 <code>api server</code> 的访问，存在安全的问题，因为您可以查找资源细节、查询敏感信息，并更新或删除资源，从而使集群处于糟糕且不可逆的状态。</p>
+<p>可以参考 RBAC 来解决这个问题</p>
+<p>为<code>istiod</code> 提供<code>remote cluster</code>的<code> service account token</code> , <code>istiod</code>使用 这个<code>token</code> 对 remote cluster 进行身份验证，并发现运行在其中的工作负载。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/6.remote-cluster-token.png"
+        data-srcset="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/6.remote-cluster-token.png, https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/6.remote-cluster-token.png 1.5x, https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/6.remote-cluster-token.png 2x"
+        data-sizes="auto"
+        alt="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/6.remote-cluster-token.png"
+        title="6.remote cluster token" /></p>
+<h2 id="跨集群工作负载连接">跨集群工作负载连接</h2>
+<p>两种情况：</p>
+<ul>
+<li>集群处于同一网络平面，工作负载使用 IP 连接，天生满足条件。</li>
+<li>集群处于不同网络，必须使用位于 网格边缘的特殊 istio 入口网关来代理跨集群网络</li>
+</ul>
+<p>在“多网络”网格中桥接集群的入口网关 称为 <strong>“东西向网关”</strong>， 东西向网关将 作为一个 <strong>反向代理</strong>，将请求发送到个字集群中的工作负载。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/7.east-west-gateways.png"
+        data-srcset="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/7.east-west-gateways.png, https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/7.east-west-gateways.png 1.5x, https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/7.east-west-gateways.png 2x"
+        data-sizes="auto"
+        alt="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/7.east-west-gateways.png"
+        title="7.east west gateways" /></p>
+<h2 id="集群之间的相互信任">集群之间的相互信任</h2>
+<p>拥有公共信任可以确保不同集群的工作负载可以相互进行身份验证。</p>
+<p>实现集群之间相互信任的方法：</p>
+<ul>
+<li>第一种方法是使用我们称为<strong>Plug-In CA Certificates</strong>的东西，它是由一个公共根证书颁发机构颁发的用户定义的证书。</li>
+<li>第二种方法是集成一个外部证书颁发机构，两个集群都使用它来签署证书。</li>
+</ul>
+<h3 id="plug-in-ca-certificates">Plug-in CA Certificates</h3>
+<p>默认情况下，Istio CA生成自签名根证书和密钥，并使用它们对工作负载证书进行签名。要保护根CA密匙，应该使用在安全机器上脱机运行的根CA，并使用根CA向在每个集群中运行的Istio CA颁发中间证书。</p>
+<p>Istio CA可以使用管理员指定的证书和密钥对工作负载证书进行签名，并将管理员指定的根证书作为信任根分发到工作负载。</p>
+<p>因为，不是让 istio 生成中间证书颁发机构，而是通过在Istio安装名称空间上提供秘密证书来指定要使用的证书（就是创建一个secret 持久化到 etcd 中）。您可以对两个集群都这样做，并使用由公共根CA签名的中间CA。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/8.common-trust.png"
+        data-srcset="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/8.common-trust.png, https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/8.common-trust.png 1.5x, https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/8.common-trust.png 2x"
+        data-sizes="auto"
+        alt="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/8.common-trust.png"
+        title="8.common trust" /></p>
+<p>上图为 使用由同一根签名的中间CA证书</p>
+<p>但是上述方法存在安全风险：</p>
+<p>如果暴露中间证书颁发机构，攻击者可以使用这些签名来签署证书，然后这些证书将被信任，直到检测到暴露和中间CA的证书被撤销。</p>
+<h3 id="external-certificate-authority-integration">External certificate authority integration</h3>
+<ul>
+<li>Cert-manager (待补充，见原文)</li>
+<li>Custom development （待补充，见原文）</li>
+</ul>
+<h1 id="多集群多网络多控制平面服务网格概述">多集群、多网络、多控制平面服务网格概述</h1>
+<ul>
+<li><strong>West-cluster:</strong> Kubernetes cluster，该cluster在us-west区域拥有私有网络。我们将运行<code>webapp</code>服务。</li>
+<li><strong>East-cluster:</strong> Kubernetes cluster，它在us-east区域拥有自己的私有网络。在那里我们将运行<code>catalog</code>服务。</li>
+</ul>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/9.multi-cluster-mesh.png"
+        data-srcset="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/9.multi-cluster-mesh.png, https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/9.multi-cluster-mesh.png 1.5x, https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/9.multi-cluster-mesh.png 2x"
+        data-sizes="auto"
+        alt="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/9.multi-cluster-mesh.png"
+        title="9.multi cluster mesh" /></p>
+<p>本文将建立一个一个多集群、多网络、多控制平面的服务网格，使用东西网关连接网络，并使用<code>primary-primary</code>部署模型</p>
+<h2 id="第一步-创建集群">第一步 创建集群</h2>
+<p>创建两个 <code>kubernetes</code> 集群，每个集群都位于不同的网络上。</p>
+<h2 id="第二步-配置-plug-in-ca-certificates-建立相互信任">第二步 配置 plug-in CA certificates 建立相互信任</h2>
+<p>Istio 默认会生成一个在 Istio-system namespace 下的 <code>istio-ca-secret</code>的 secret。</p>
+<p>通过插入我们自己的证书颁发机构，可以覆盖这个 <code>secret</code>。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/10.cacerts.png"
+        data-srcset="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/10.cacerts.png, https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/10.cacerts.png 1.5x, https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/10.cacerts.png 2x"
+        data-sizes="auto"
+        alt="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/10.cacerts.png"
+        title="10.cacerts" /></p>
+<p>​                                       cacert密钥由根CA的公钥和中间CA的公钥和私钥组成。根CA的私钥在集群外“安全”存储</p>
+<p>创建一个<code>cacerts</code> secret，包含如下输入文件<code>ca-cert.pem</code>, <code>ca-key.pem</code>, <code>root-cert.pem</code> 和<code>cert-chain.pem</code>。需要注意的是创建出来的secret的名称必须是<code>cacerts</code>，这样才能被istio正确挂载。</p>
+<ul>
+<li>ca-cert.pem - 中间CA的证书</li>
+<li>ca-key.pem - 中间CA的私钥</li>
+<li>root-cert.pem - 颁发中间CA的根CA的证书，用于验证由它颁发的任何中间CA颁发的证书</li>
+<li>cert-chain.pem - 中间CA证书和根CA证书的连接，形成信任链</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 通过创建命名空间&#39; istio-system &#39;，然后将证书作为名为&#39; cacerts &#39;的秘密文件应用，在每个集群中配置中间CA。</span>
+
+<span class="c1"># setting up certificates for the west-cluster （在 west-cluster 下操作）</span>
+$  kubectl create namespace istio-system
+$  kubectl create secret generic cacerts -n istio-system <span class="se">\
+</span><span class="se"></span>       --from-file<span class="o">=</span>ch12/certs/west-cluster/ca-cert.pem <span class="se">\
+</span><span class="se"></span>       --from-file<span class="o">=</span>ch12/certs/west-cluster/ca-key.pem <span class="se">\
+</span><span class="se"></span>       --from-file<span class="o">=</span>ch12/certs/root-cert.pem <span class="se">\
+</span><span class="se"></span>       --from-file<span class="o">=</span>ch12/certs/west-cluster/cert-chain.pem
+
+<span class="c1"># setting up certificates for the east-cluster (在 east-cluster 下操作)</span>
+$  kubectl create namespace istio-system
+$  kubectl create secret generic cacerts -n istio-system <span class="se">\
+</span><span class="se"></span>       --from-file<span class="o">=</span>ch12/certs/east-cluster/ca-cert.pem <span class="se">\
+</span><span class="se"></span>       --from-file<span class="o">=</span>ch12/certs/east-cluster/ca-key.pem <span class="se">\
+</span><span class="se"></span>       --from-file<span class="o">=</span>ch12/certs/root-cert.pem <span class="se">\
+</span><span class="se"></span>       --from-file<span class="o">=</span>ch12/certs/east-cluster/cert-chain.pem
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="第三步-安装各个集群的控制面">第三步 安装各个集群的控制面</h2>
+<p>继续安装Istio控制面，该控制面将挑选插件CA证书(即用户定义的中间证书)来签署工作负载证书。</p>
+<p><strong>标记集群的网络拓扑</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 标记 west-cluster的 网络拓扑</span>
+$  kubectl label namespace istio-system topology.istio.io/network<span class="o">=</span>west-network
+<span class="c1"># 标记 east-cluster的 网络拓扑</span>
+$  kubectl label namespace istio-system topology.istio.io/network<span class="o">=</span>east-network
+</code></pre></td></tr></table>
+</div>
+</div><p>通过这些标签，Istio形成了对网络拓扑的理解，并使用它来决定如何配置工作负载。</p>
+<p><strong>部署控制面</strong></p>
+<p>部署 west 集群</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"># 方式一
+$ istioctl install --set profile=demo \
+  --set values.global.meshID=usmesh \
+  --set values.global.multiCluster.clusterName=west-cluster \
+  --set values.global.network=west-network
+  
+# 方式二 使用 istioOperator 部署
+apiVersion: install.istio.io/v1alpha1
+metadata:
+ name: istio-controlplane
+ namespace: istio-system
+kind: IstioOperator
+spec:
+  profile: demo
+  components:
+    egressGateways:
+    - name: istio-egressgateway
+      enabled: false
+ values:
+   global:
+     meshID: usmesh    # 属性&#39; meshID &#39;使我们能够识别这个安装属于哪个网格。 Istio提供了在集群中安装多个网格的选项，允许团队分别管理他们网格的操作。
+     multiCluster:
+       clusterName: west-cluster
+     network: west-network
+     
+# 上述 yaml 使用如下命令安装：
+$ istioctl install -f xxx.yaml
+</code></pre></td></tr></table>
+</div>
+</div><p>使用同样的方式部署 east 集群， 和 west 集群的不同在于 clusterName 和 network 不同</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">install.istio.io/v1alpha1</span><span class="w">
+</span><span class="w"></span><span class="nt">metadata</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">istio-controlplane</span><span class="w">
+</span><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l">istio-system</span><span class="w">
+</span><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">IstioOperator</span><span class="w">
+</span><span class="w"></span><span class="nt">spec</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">profile</span><span class="p">:</span><span class="w"> </span><span class="l">demo</span><span class="w">
+</span><span class="w">  </span><span class="nt">components</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span><span class="nt">egressGateways</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">istio-egressgateway</span><span class="w">
+</span><span class="w">      </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span><span class="w">  </span><span class="nt">values</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span><span class="nt">global</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span><span class="nt">meshID</span><span class="p">:</span><span class="w"> </span><span class="l">usmesh</span><span class="w">
+</span><span class="w">      </span><span class="nt">multiCluster</span><span class="p">:</span><span class="w">
+</span><span class="w">        </span><span class="nt">clusterName</span><span class="p">:</span><span class="w"> </span><span class="l">east-cluster</span><span class="w">
+</span><span class="w">      </span><span class="nt">network</span><span class="p">:</span><span class="w"> </span><span class="l">east-network</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>在 west 和 east 集群 安装完控制面后，我们有了两个独立的网格，两个网格都运行着 istiod ，但是只发现本地的服务。当前网格的状态如下图所示：</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/11.disjointed-meshes.png"
+        data-srcset="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/11.disjointed-meshes.png, https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/11.disjointed-meshes.png 1.5x, https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/11.disjointed-meshes.png 2x"
+        data-sizes="auto"
+        alt="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/11.disjointed-meshes.png"
+        title="11.disjointed meshes" /></p>
+<p>当前网格缺乏跨集群工作负载发现和连接，会在 第四步 和 第五步 讨论。</p>
+<p>此时可以在集群中创建一些工作负载，分别在 west 和 east 集群中，运行如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 在 west 集群安装应用和 网关</span>
+$  kubectl create ns istioinaction
+$  kubectl label namespace istioinaction istio-injection<span class="o">=</span>enabled
+$  kubectl -n istioinaction apply -f ./webapp-deployment-svc.yaml
+$  kubectl -n istioinaction apply -f ./webapp-gw-vs.yaml
+$  kubectl -n istioinaction apply -f ./catalog-svc.yaml
+
+<span class="c1"># 在 east 集群安装 catalog</span>
+$  kubectl create ns istioinaction
+$  kubectl label namespace istioinaction istio-injection<span class="o">=</span>enabled
+$  kubectl -n istioinaction apply -f ./catalog.yaml
+</code></pre></td></tr></table>
+</div>
+</div><p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="img/image-20211120214227189.png"
+        data-srcset="img/image-20211120214227189.png, img/image-20211120214227189.png 1.5x, img/image-20211120214227189.png 2x"
+        data-sizes="auto"
+        alt="img/image-20211120214227189.png"
+        title="image-20211120214227189" /></p>
+<p>测试用用例如上所示。</p>
+<h2 id="第四步-启动跨集群的服务发现">第四步 启动跨集群的服务发现</h2>
+<p>为了从远程集群中查询信息，istio 需要使用 <code>service account </code>进行身份验证。</p>
+<p>istio 在安装时会创建一个名为 <code>istio-reader-service-account</code> 的 <code>service account</code>，具有可被另一个控制平面使用的最小权限集。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">$ kubectl get sa -n istio-system
+
+NAME                                   SECRETS   AGE
+default                                <span class="m">1</span>         4d20h
+istio-egressgateway-service-account    <span class="m">1</span>         4d20h
+istio-ingressgateway-service-account   <span class="m">1</span>         4d20h
+istio-reader-service-account           <span class="m">1</span>         4d20h
+istiod-service-account                 <span class="m">1</span>         4d20h
+</code></pre></td></tr></table>
+</div>
+</div><p>但是，我们需要使服务帐户令牌对对端的集群可用，以及证书来启动到远程集群的安全连接。</p>
+<p><strong>创建对端集群访问的secret</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 在 east-cluster上执行如下：  (创建时，务必指明集群名称 --name)</span>
+$  istioctl x create-remote-secret --name<span class="o">=</span><span class="s2">&#34;east-cluster&#34;</span>
+<span class="c1"># 得到如下结果</span>
+
+<span class="c1"># This file is autogenerated, do not edit.</span>
+apiVersion: v1
+kind: Secret
+metadata:
+  annotations:
+    networking.istio.io/cluster: east-cluster
+  creationTimestamp: null
+  labels:
+    istio/multiCluster: <span class="s2">&#34;true&#34;</span>
+  name: istio-remote-secret-east-cluster
+  namespace: istio-system
+stringData:
+  east-cluster: <span class="p">|</span>
+    apiVersion: v1
+    clusters:   <span class="c1"># 包含集群地址和验证API服务器提供的连接的证书颁发机构数据的集群列表。</span>
+    - cluster:
+        certificate-authority-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUN5RENDQWJDZ0F3SUJBZ0lCQURBTkJna3Foa2lHOXcwQkF...
+        server: https://10.20.144.83:6443
+      name: east-cluster
+    contexts:  <span class="c1"># 上下文列表，每组一个用户和一个集群，这简化了切换集群(与我们的用例无关)。</span>
+    - context:
+        cluster: east-cluster
+        user: east-cluster
+      name: east-cluster
+    current-context: east-cluster
+    kind: Config
+    preferences: <span class="o">{}</span>
+    users:     <span class="c1"># 一个列表，定义了包含要对API服务器进行身份验证的令牌的用户</span>
+    - name: east-cluster
+      user:
+        token: eyJhbGciOiJSUzI1NiIsImtpZCI6....
+---
+
+<span class="c1"># 该命令使用默认的 istio-reader-service-account service account 为远程集群访问创建secret。</span>
+<span class="c1"># 上述的 secret 就是“kubectl”需要启动到Kubernetes API服务器的安全连接并对其进行身份验证的全部内容。</span>
+
+<span class="c1"># 需要将 上述内容 手动 执行 kubectl apply -f xxx.yaml 应到到 west-cluster</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>⚠️  注意</p>
+<ul>
+<li>上述的内容，先在一个集群中(east-cluster)生成 secret 的 yaml ，然后将生成的 yaml 放到 remote 集群中(west-cluster) 中 执行 apply</li>
+</ul>
+<p>一旦在 remote 集群中创建了secret，<code>istiod</code>就会获取它，并在新添加的 remote 集群中查询工作负载。通过查看日志可以更详细看到细节：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 在 remote 集群中(west-cluster) 查看 istiod 的日志</span>
+$ kubectl logs deploy/istiod -n istio-system <span class="p">|</span> grep <span class="s1">&#39;Adding cluster&#39;</span>
+
+2021-10-08T08:47:32.408052Z     info    Adding <span class="nv">cluster_id</span><span class="o">=</span>east-cluster from
+  <span class="nv">secret</span><span class="o">=</span>istio-system/istio-remote-secret-east-cluster
+  
+<span class="c1"># 通过日志可以验证集群是否初始化完成，并且west-cluster的控制面可以发现 east-cluster 的 workload</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>为了配置成 <code>primary-primary </code>部署模式，同样要对 对端集群做同样的操作，使得 east-cluster 的控制面可以发现 west-cluster 的 workload。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 在west-cluster 中执行如下：</span>
+$ kubectl x create-remote-secret --name<span class="o">=</span><span class="s2">&#34;west-cluster&#34;</span>
+<span class="c1"># 将生成的secret 放到 east-cluster中apply,配置 east-cluster查看west-cluster</span>
+$ kubectl apply -f 刚刚生成的secret.yaml
+
+secret/istio-remote-secret-west-cluster created
+</code></pre></td></tr></table>
+</div>
+</div><p>❤️ 现在，双方的控制面都可以查询到对端集群的 workload，接下来要去设置跨集群连接。</p>
+<h2 id="第五步-建立跨集群连接">第五步 建立跨集群连接</h2>
+<p>不同内部网络(在我们的实例中是集群网络)之间的流量称为“东西流量”</p>
+<p>将内部服务通过网关定向到内部网络的流量称为“南北向流量”</p>
+<ul>
+<li>南北向流量管理：使用Ingress将Kubernetes中的应用暴露成对外提供的服务，针对这个对外暴露的服务可以实现灰度发布、A/B测试、全量发布、流量管理等。我们把这种流量管理称为南北向流量管理，也就是入口请求到集群服务的流量管理。</li>
+<li>东西向流量管理：Istio还有侧重于集群服务网格之间的流量管理，我们把这类管理称为东西向流量管理。</li>
+</ul>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/12.east-west-traffic.png"
+        data-srcset="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/12.east-west-traffic.png, https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/12.east-west-traffic.png 1.5x, https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/12.east-west-traffic.png 2x"
+        data-sizes="auto"
+        alt="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/12.east-west-traffic.png"
+        title="12.east west traffic" /></p>
+<p>对于不同云服务商的集群，或者网络并非对等连接的地方，istio 提供了东西向网关作为解决方案。</p>
+<p><strong>Istio 东西向网关</strong></p>
+<p>东西向网关的目标初了成为跨集群东西向流量的入口点之外，还在于使这对运营服务的团队透明。为了实现这一目标，它必须:</p>
+<ul>
+<li>开启跨集群的细粒度流量管理</li>
+<li>通过路由加密流量，实现负载之间的双向认证</li>
+</ul>
+<p>istio 有两个特性：</p>
+<ul>
+<li>SNI cluster</li>
+<li>SNI Auto Passthrough</li>
+</ul>
+<p><strong>东西向网关配置 SNI cluster</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="c"># cluster-east-eastwest-gateway.yaml</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">install.istio.io/v1alpha1</span><span class="w">
+</span><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">IstioOperator</span><span class="w">
+</span><span class="w"></span><span class="nt">metadata</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">istio-eastwestgateway </span><span class="w"> </span><span class="c"># 一定不能和前面的 istioOperator 资源相同，如果相同，将会覆盖之前的istioOpeator</span><span class="w">
+</span><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l">istio-system</span><span class="w">
+</span><span class="w"></span><span class="nt">spec</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">profile</span><span class="p">:</span><span class="w"> </span><span class="l">empty</span><span class="w">
+</span><span class="w">  </span><span class="nt">components</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span><span class="nt">ingressGateways</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">istio-eastwestgateway</span><span class="w">
+</span><span class="w">      </span><span class="nt">label</span><span class="p">:</span><span class="w">
+</span><span class="w">        </span><span class="nt">istio</span><span class="p">:</span><span class="w"> </span><span class="l">eastwestgateway</span><span class="w">
+</span><span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l">istio-eastwestgateway</span><span class="w">
+</span><span class="w">      </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span><span class="w">      </span><span class="nt">k8s</span><span class="p">:</span><span class="w">
+</span><span class="w">        </span><span class="nt">env</span><span class="p">:</span><span class="w">
+</span><span class="w">          </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">ISTIO_META_ROUTER_MODE   </span><span class="w"> </span><span class="c"># SNI集群的配置是一个可选特性</span><span class="w">
+</span><span class="w">            </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;sni-dnat&#34;</span><span class="w">               </span><span class="c"># 网关路由器模式设置为&#39; snii -dnat &#39;来启用, 自动配置SNI集群</span><span class="w">
+</span><span class="w">          </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">ISTIO_META_REQUESTED_NETWORK_VIEW</span><span class="w"> </span><span class="c"># The network to which traffic is routed</span><span class="w">
+</span><span class="w">            </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l">east-network</span><span class="w">
+</span><span class="w">        </span><span class="nt">service</span><span class="p">:</span><span class="w">
+</span><span class="w">          </span><span class="nt">ports</span><span class="p">:</span><span class="w">
+</span><span class="w">            </span><span class="c"># redacted for brevity</span><span class="w">
+</span><span class="w">  </span><span class="nt">values</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span><span class="nt">global</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span><span class="nt">meshID</span><span class="p">:</span><span class="w"> </span><span class="l">usmesh</span><span class="w">
+</span><span class="w">      </span><span class="nt">multiCluster</span><span class="p">:</span><span class="w">
+</span><span class="w">        </span><span class="nt">clusterName</span><span class="p">:</span><span class="w"> </span><span class="l">east-cluster   </span><span class="w"> </span><span class="c"># 注意：这是 east-cluster</span><span class="w">
+</span><span class="w">      </span><span class="nt">network</span><span class="p">:</span><span class="w"> </span><span class="l">east-network</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 在 east 集群中执行如下，apply 上述的yaml</span>
+$ istioctl install -y -f ./cluster-east-eastwest-gateway.yaml
+
+✔ Ingress gateways installed
+✔ Installation <span class="nb">complete</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>安装了东西向网关后，可以查询网关的集群代理配置并将输出过滤为仅包含“catalog”文本的行，来验证SNI集群是否配置了。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 在 east 集群中执行如下：</span>
+$  istioctl pc clusters deploy/istio-eastwestgateway.istio-system  <span class="se">\
+</span><span class="se"></span>    <span class="p">|</span> grep catalog <span class="p">|</span> awk <span class="s1">&#39;{printf &#34;CLUSTER: %s\n&#34;, $1}&#39;</span>
+
+CLUSTER: catalog.istioinaction.svc.cluster.local
+CLUSTER: outbound_.80_._.catalog.istioinaction.svc.cluster.local
+</code></pre></td></tr></table>
+</div>
+</div><p><strong>如何使用SNI Auto Passthrough路由跨集群流量</strong></p>
+<p>SNI Auto Passthrough，顾名思义，不需要手动创建“VirtualServices”来路由允许的流量。</p>
+<p>这是使用SNI集群完成的，这些集群使用“snii -dnat”路由器模式在东西网关中自动配置。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="img/image-20211120180746067.png"
+        data-srcset="img/image-20211120180746067.png, img/image-20211120180746067.png 1.5x, img/image-20211120180746067.png 2x"
+        data-sizes="auto"
+        alt="img/image-20211120180746067.png"
+        title="image-20211120180746067" /></p>
+<p>SNI Auto Passthrough 模式 使用 Istio Gateway 配置</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">networking.istio.io/v1alpha3</span><span class="w">
+</span><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">Gateway</span><span class="w">
+</span><span class="w"></span><span class="nt">metadata</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">cross-network-gateway</span><span class="w">
+</span><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l">istio-system</span><span class="w">
+</span><span class="w"></span><span class="nt">spec</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">selector</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span><span class="nt">istio</span><span class="p">:</span><span class="w"> </span><span class="l">eastwestgateway</span><span class="w">
+</span><span class="w">  </span><span class="nt">servers</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span>- <span class="nt">port</span><span class="p">:</span><span class="w">
+</span><span class="w">        </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="m">15443</span><span class="w">
+</span><span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">tls</span><span class="w">
+</span><span class="w">        </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l">TLS</span><span class="w">
+</span><span class="w">      </span><span class="nt">tls</span><span class="p">:</span><span class="w">
+</span><span class="w">        </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l">AUTO_PASSTHROUGH</span><span class="w">
+</span><span class="w">      </span><span class="nt">hosts</span><span class="p">:</span><span class="w">
+</span><span class="w">        </span>- <span class="s2">&#34;*.local&#34;</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 把east-cluster的workload 暴露给 west-cluster</span>
+<span class="c1"># 在 east-cluster 上操作</span>
+$ kubectl apply -n istio-system -f 上述.yaml
+
+gateway.networking.istio.io/cross-network-gateway created
+</code></pre></td></tr></table>
+</div>
+</div><p>同样，需要在west-cluster上进行相似的操作</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># west-cluster 环境中</span>
+
+<span class="c1"># 首先部署 istioOperator 创建东西向网关， kubectl apply -f 下述yaml</span>
+
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  name: istio-eastwestgateway
+  namespace: istio-system
+spec:
+  profile: empty
+  components:
+    ingressGateways:
+    - name: istio-eastwestgateway
+      label:
+        istio: eastwestgateway
+        app: istio-eastwestgateway
+        topology.istio.io/network: west-network
+      enabled: <span class="nb">true</span>
+      k8s:
+        env:
+        - name: ISTIO_META_ROUTER_MODE
+          value: <span class="s2">&#34;sni-dnat&#34;</span>
+        <span class="c1"># The network to which traffic is routed</span>
+        - name: ISTIO_META_REQUESTED_NETWORK_VIEW
+          value: west-network
+        service:
+          ports:
+          - name: status-port
+            port: <span class="m">15021</span>
+            targetPort: <span class="m">15021</span>
+          - name: mtls
+            port: <span class="m">15443</span>
+            targetPort: <span class="m">15443</span>
+          - name: tcp-istiod
+            port: <span class="m">15012</span>
+            targetPort: <span class="m">15012</span>
+          - name: tcp-webhook
+            port: <span class="m">15017</span>
+            targetPort: <span class="m">15017</span>  
+  values:
+    global:
+      meshID: usmesh
+      multiCluster:
+        clusterName: west-cluster   <span class="c1"># 注意：这是 west-cluster</span>
+      network: west-network
+  
+<span class="c1"># 然后将集群中的服务暴露给 east-cluster, kubectl apply -f 下述yaml (其实这个和在east-cluster中配置的yaml是一样)</span>
+
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: cross-network-gateway
+  namespace: istio-system
+spec:
+  selector:
+    istio: eastwestgateway
+  servers:
+    - port:
+        number: <span class="m">15443</span>
+        name: tls
+        protocol: TLS
+      tls:
+        mode: AUTO_PASSTHROUGH
+      hosts:
+        - <span class="s2">&#34;*.local&#34;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>使用 SNI 自动直通配置网关后，网关上的传入流量将使用 SNI 集群路由到预期的工作负载。 Istio 的控制平面侦听这些资源的创建并发现<em>现在</em>存在路由跨集群流量的路径。 因此，它使用新发现的端点更新所有工作负载。</p>
+<h2 id="第六步-验证跨集群-workload-discovery">第六步 验证跨集群 workload discovery</h2>
+<p>之前的步骤中，我们已经准备好了测试用例，现在可以派上用场了。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="img/image-20211120214336727.png"
+        data-srcset="img/image-20211120214336727.png, img/image-20211120214336727.png 1.5x, img/image-20211120214336727.png 2x"
+        data-sizes="auto"
+        alt="img/image-20211120214336727.png"
+        title="image-20211120214336727" /></p>
+<p>测试用例描述：</p>
+<ul>
+<li>在 west-cluster 中，部署了 webapp ，它有 deployment 和 service ，同时部署了 catalog，但是catalog只部署了service</li>
+<li>在easy-cluster中，部署了catalog，它有 deployment 和 service</li>
+</ul>
+<p>经过之前的部署，现在 east-cluster 的 workloads 已经暴露于 west-cluster ，我们希望 west-cluster 中的 webapp 的 envoy cluster 配置中，存在一个 catalog 的 endpoints， 因为我们并没有在 west-cluster 中部署 catalog 的deployment，而是在 east-cluster 中部署了 catalog 的 deployment，如果集群之间没有打通，那么在 west-cluster 中 是不会存在 catalog 的 endpoints。</p>
+<p>并且，这个 endpoints 应该指向 东西向网关的地址，该地址将请求代理到其网络中的 catalog workload</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 首先获取 east-cluster 的 east-west gateway 的 地址 (在 east-cluster 下操作)</span>
+$ kubectl -n istio-system get svc istio-eastwestgateway -o <span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.status.loadBalancer.ingress[0].ip}&#39;</span>
+
+40.114.190.251
+
+<span class="c1"># 将其与 west-cluster 中的 workload 在跨集群通讯时使用的地址进行比较 (在 west-cluster 下操作)</span>
+$ istioctl pc endpoints deploy/webapp.istioinaction <span class="p">|</span> grep catalog
+
+40.114.190.251:15443  HEALTHY  OK  outbound<span class="p">|</span>80<span class="o">||</span>catalog.istioinaction.svc.cluster.local
+^-----------^^---^
+         <span class="p">|</span>       <span class="p">|</span>
+         <span class="p">|</span>
+
+<span class="c1"># 如果 catalog 的 endpoint 与 东西向网关的地址匹配，那么就可以发现 workload ,实现跨集群通讯。</span>
+
+<span class="c1"># 让我们在west-cluster中手动发起一个到catalog 的请求         </span>
+$  <span class="nv">EXT_IP</span><span class="o">=</span><span class="k">$(</span>kubectl -n istio-system get svc istio-ingressgateway <span class="se">\
+</span><span class="se"></span>     -o <span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.status.loadBalancer.ingress[0].ip}&#39;</span><span class="k">)</span>
+
+$  curl http://<span class="nv">$EXT_IP</span>/api/catalog -H <span class="s2">&#34;Host: webapp.istioinaction.io&#34;</span>
+
+<span class="o">[</span>
+  <span class="o">{</span>
+    <span class="s2">&#34;id&#34;</span>: 0,
+    <span class="s2">&#34;color&#34;</span>: <span class="s2">&#34;teal&#34;</span>,
+    <span class="s2">&#34;department&#34;</span>: <span class="s2">&#34;Clothing&#34;</span>,
+    <span class="s2">&#34;name&#34;</span>: <span class="s2">&#34;Small Metal Shoes&#34;</span>,
+    <span class="s2">&#34;price&#34;</span>: <span class="s2">&#34;232.00&#34;</span>
+  <span class="o">}</span>
+<span class="o">]</span>
+
+<span class="c1"># 可以看到，对入口网关的请求被路由到了 west-cluster 中的 webapp 中， 然后被分配到了 east-cluster 中的 caltalog workload，并最终服务于请求。</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>至此，我们已经验证集群、多网络、多控制平面服务网格的建立，并发现了跨集群的工作负载，它们可以使用东西网关作为通道启动相互验证的连接。</p>
+<p>让我们回顾一下建立多集群服务网格需要做些什么:</p>
+<ol>
+<li><strong>跨集群工作负载发现</strong>通过使用包含服务帐户令牌和证书的* kubecconfig *为每个控制平面提供对对等集群的访问，这个过程使用了&rsquo; istioctl &lsquo;，我们只将它应用到相反的集群。</li>
+<li><strong>跨集群工作负载连接性</strong>通过配置东西网关在不同集群(驻留在不同网络中)的工作负载之间路由流量，并为每个集群标记网络信息，以便Istio知道网络负载驻留。</li>
+<li>通过使用颁发相反集群的中间证书的公共信任根来配置集群之间的<strong>信任</strong>。</li>
+</ol>
+<h2 id="第七步-集群间的负载均衡">第七步 集群间的负载均衡</h2>
+<p>这部分放在 <strong>负载均衡</strong> 部分，和本地负载均衡一起介绍。</p>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>更新于 212111-08-2151</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/%E5%A4%9A%E4%BA%91/index.md" target="_blank">阅读原始文档</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://zhengtianchi.github.io/%E5%A4%9A%E4%BA%91/" data-title="istio - 多集群管控入门" data-hashtags="istio,多集群"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://zhengtianchi.github.io/%E5%A4%9A%E4%BA%91/" data-hashtag="istio"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Hacker News" data-sharer="hackernews" data-url="https://zhengtianchi.github.io/%E5%A4%9A%E4%BA%91/" data-title="istio - 多集群管控入门"><i class="fab fa-hacker-news fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://zhengtianchi.github.io/%E5%A4%9A%E4%BA%91/" data-title="istio - 多集群管控入门"><i data-svg-src="https://cdn.jsdelivr.net/npm/simple-icons@2.14.0/icons/line.svg"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://zhengtianchi.github.io/%E5%A4%9A%E4%BA%91/" data-title="istio - 多集群管控入门" data-ralateuid="xxxx"><i class="fab fa-weibo fa-fw"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/istio/">istio</a>,&nbsp;<a href="/tags/%E5%A4%9A%E9%9B%86%E7%BE%A4/">多集群</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"></div>
+</div>
+<div id="comments"><div id="valine" class="comment"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://valine.js.org/">Valine</a>.
+            </noscript></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.87.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/dillonzq/LoveIt" target="_blank" rel="noopener noreffer" title="LoveIt 0.2.10"><i class="far fa-kiss-wink-heart fa-fw"></i> LoveIt</a>
+                </div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2021</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">xxxx</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/valine/valine.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/css/lightgallery.min.css"><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/algoliasearch@4.2.0/dist/algoliasearch-lite.umd.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lazysizes@5.2.2/lazysizes.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/js/lightgallery.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lg-thumbnail.js@1.2.0/dist/lg-thumbnail.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lg-zoom.js@1.2.0/dist/lg-zoom.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sharer.js@0.4.0/sharer.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{"valine":{"appId":"QGzwQXOqs5JOhN4RGPOkR2mR-MdYXbMMI","appKey":"WBmoGyJtbqUswvfLh6L8iEBr","avatar":"mp","el":"#valine","emojiCDN":"https://cdn.jsdelivr.net/npm/emoji-datasource-google@5.0.1/img/google/64/","emojiMaps":{"100":"1f4af.png","alien":"1f47d.png","anger":"1f4a2.png","angry":"1f620.png","anguished":"1f627.png","astonished":"1f632.png","black_heart":"1f5a4.png","blue_heart":"1f499.png","blush":"1f60a.png","bomb":"1f4a3.png","boom":"1f4a5.png","broken_heart":"1f494.png","brown_heart":"1f90e.png","clown_face":"1f921.png","cold_face":"1f976.png","cold_sweat":"1f630.png","confounded":"1f616.png","confused":"1f615.png","cry":"1f622.png","crying_cat_face":"1f63f.png","cupid":"1f498.png","dash":"1f4a8.png","disappointed":"1f61e.png","disappointed_relieved":"1f625.png","dizzy":"1f4ab.png","dizzy_face":"1f635.png","drooling_face":"1f924.png","exploding_head":"1f92f.png","expressionless":"1f611.png","face_vomiting":"1f92e.png","face_with_cowboy_hat":"1f920.png","face_with_hand_over_mouth":"1f92d.png","face_with_head_bandage":"1f915.png","face_with_monocle":"1f9d0.png","face_with_raised_eyebrow":"1f928.png","face_with_rolling_eyes":"1f644.png","face_with_symbols_on_mouth":"1f92c.png","face_with_thermometer":"1f912.png","fearful":"1f628.png","flushed":"1f633.png","frowning":"1f626.png","ghost":"1f47b.png","gift_heart":"1f49d.png","green_heart":"1f49a.png","grimacing":"1f62c.png","grin":"1f601.png","grinning":"1f600.png","hankey":"1f4a9.png","hear_no_evil":"1f649.png","heart":"2764-fe0f.png","heart_decoration":"1f49f.png","heart_eyes":"1f60d.png","heart_eyes_cat":"1f63b.png","heartbeat":"1f493.png","heartpulse":"1f497.png","heavy_heart_exclamation_mark_ornament":"2763-fe0f.png","hole":"1f573-fe0f.png","hot_face":"1f975.png","hugging_face":"1f917.png","hushed":"1f62f.png","imp":"1f47f.png","innocent":"1f607.png","japanese_goblin":"1f47a.png","japanese_ogre":"1f479.png","joy":"1f602.png","joy_cat":"1f639.png","kiss":"1f48b.png","kissing":"1f617.png","kissing_cat":"1f63d.png","kissing_closed_eyes":"1f61a.png","kissing_heart":"1f618.png","kissing_smiling_eyes":"1f619.png","laughing":"1f606.png","left_speech_bubble":"1f5e8-fe0f.png","love_letter":"1f48c.png","lying_face":"1f925.png","mask":"1f637.png","money_mouth_face":"1f911.png","nauseated_face":"1f922.png","nerd_face":"1f913.png","neutral_face":"1f610.png","no_mouth":"1f636.png","open_mouth":"1f62e.png","orange_heart":"1f9e1.png","partying_face":"1f973.png","pensive":"1f614.png","persevere":"1f623.png","pleading_face":"1f97a.png","pouting_cat":"1f63e.png","purple_heart":"1f49c.png","rage":"1f621.png","relaxed":"263a-fe0f.png","relieved":"1f60c.png","revolving_hearts":"1f49e.png","right_anger_bubble":"1f5ef-fe0f.png","robot_face":"1f916.png","rolling_on_the_floor_laughing":"1f923.png","scream":"1f631.png","scream_cat":"1f640.png","see_no_evil":"1f648.png","shushing_face":"1f92b.png","skull":"1f480.png","skull_and_crossbones":"2620-fe0f.png","sleeping":"1f634.png","sleepy":"1f62a.png","slightly_frowning_face":"1f641.png","slightly_smiling_face":"1f642.png","smile":"1f604.png","smile_cat":"1f638.png","smiley":"1f603.png","smiley_cat":"1f63a.png","smiling_face_with_3_hearts":"1f970.png","smiling_imp":"1f608.png","smirk":"1f60f.png","smirk_cat":"1f63c.png","sneezing_face":"1f927.png","sob":"1f62d.png","space_invader":"1f47e.png","sparkling_heart":"1f496.png","speak_no_evil":"1f64a.png","speech_balloon":"1f4ac.png","star-struck":"1f929.png","stuck_out_tongue":"1f61b.png","stuck_out_tongue_closed_eyes":"1f61d.png","stuck_out_tongue_winking_eye":"1f61c.png","sunglasses":"1f60e.png","sweat":"1f613.png","sweat_drops":"1f4a6.png","sweat_smile":"1f605.png","thinking_face":"1f914.png","thought_balloon":"1f4ad.png","tired_face":"1f62b.png","triumph":"1f624.png","two_hearts":"1f495.png","unamused":"1f612.png","upside_down_face":"1f643.png","weary":"1f629.png","white_frowning_face":"2639-fe0f.png","white_heart":"1f90d.png","wink":"1f609.png","woozy_face":"1f974.png","worried":"1f61f.png","yawning_face":"1f971.png","yellow_heart":"1f49b.png","yum":"1f60b.png","zany_face":"1f92a.png","zipper_mouth_face":"1f910.png","zzz":"1f4a4.png"},"enableQQ":false,"highlight":true,"lang":"zh-cn","pageSize":10,"placeholder":"你的评论 ...","recordIP":true,"serverURLs":"https://leancloud.hugoloveit.com","visitor":true}},"lightGallery":{"actualSize":false,"exThumbImage":"data-thumbnail","hideBarsDelay":2000,"selector":".lightgallery","speed":400,"thumbContHeight":80,"thumbWidth":80,"thumbnail":true},"search":{"algoliaAppID":"PASDMWALPK","algoliaIndex":"index.zh-cn","algoliaSearchKey":"b42948e51daaa93df92381c8e2ac0f93","highlightTag":"em","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50,"type":"algolia"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>
