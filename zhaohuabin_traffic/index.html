@@ -1,0 +1,2850 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>istio - 流量走向详解 - 卷王郑天驰</title><meta name="Description" content="istio 流量走向详解."><meta property="og:title" content="istio - 流量走向详解" />
+<meta property="og:description" content="istio 流量走向详解." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://zhengtianchi.github.io/zhaohuabin_traffic/" /><meta property="og:image" content="https://zhengtianchi.github.io/logo.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-11-21T18:51:58+08:00" />
+<meta property="article:modified_time" content="2021-11-21T18:51:58+08:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://zhengtianchi.github.io/logo.png"/>
+
+<meta name="twitter:title" content="istio - 流量走向详解"/>
+<meta name="twitter:description" content="istio 流量走向详解."/>
+<meta name="application-name" content="ztc">
+<meta name="apple-mobile-web-app-title" content="ztc"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://zhengtianchi.github.io/zhaohuabin_traffic/" /><link rel="prev" href="https://zhengtianchi.github.io/envoy_1/" /><link rel="next" href="https://zhengtianchi.github.io/%E5%A4%9A%E4%BA%91/" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "istio - 流量走向详解",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/zhengtianchi.github.io\/zhaohuabin_traffic\/"
+        },"image": ["https:\/\/zhengtianchi.github.io\/images\/Apple-Devices-Preview.png"],"genre": "posts","keywords": "istio, envoy","wordcount":  17548 ,
+        "url": "https:\/\/zhengtianchi.github.io\/zhaohuabin_traffic\/","datePublished": "2021-11-21T18:51:58+08:00","dateModified": "2021-11-21T18:51:58+08:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
+            "@type": "Organization",
+            "name": "xxxx","logo": "https:\/\/zhengtianchi.github.io\/images\/avatar.png"},"author": {
+                "@type": "Person",
+                "name": "郑天驰"
+            },"description": "istio 流量走向详解."
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="卷王郑天驰"><span class="header-title-pre"><i class='far fa-kiss-wink-heart fa-fw'></i></span>卷王郑天驰</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 所有文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/categories/documentation/"> 文档 </a><a class="menu-item" href="/about/"> 关于 </a><a class="menu-item" href="https://github.com/zhengtianchi/" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="卷王郑天驰"><span class="header-title-pre"><i class='far fa-kiss-wink-heart fa-fw'></i></span>卷王郑天驰</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">所有文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/categories/documentation/" title="">文档</a><a class="menu-item" href="/about/" title="">关于</a><a class="menu-item" href="https://github.com/zhengtianchi/" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content always-active" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">istio - 流量走向详解</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="https://zhengtianchi.github.io" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>郑天驰</a></span>&nbsp;<span class="post-category">收录于 <a href="/categories/istio/"><i class="far fa-folder fa-fw"></i>istio</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="212111-08-2151">212111-08-2151</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 17548 字&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 36 分钟&nbsp;<span id="/zhaohuabin_traffic/" class="leancloud_visitors" data-flag-title="istio - 流量走向详解">
+                        <i class="far fa-eye fa-fw"></i>&nbsp;<span class=leancloud-visitors-count></span>&nbsp;次阅读
+                    </span>&nbsp;</div>
+        </div><div class="featured-image"><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/medium_istio.png"
+        data-srcset="/images/medium_istio.png, /images/medium_istio.png 1.5x, /images/medium_istio.png 2x"
+        data-sizes="auto"
+        alt="/images/medium_istio.png"
+        title="istio 流量走向详解." /></div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#前言">前言</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#统一的服务模型">统一的服务模型</a></li>
+    <li><a href="#标准数据面-api">标准数据面 API</a></li>
+    <li><a href="#业务dsl语言">业务DSL语言</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#控制面组件">控制面组件</a>
+      <ul>
+        <li><a href="#discovery-services">Discovery Services</a></li>
+        <li><a href="#k8s-api-server">K8S API Server</a></li>
+      </ul>
+    </li>
+    <li><a href="#数据面组件">数据面组件</a>
+      <ul>
+        <li><a href="#pilot-agent">Pilot-agent</a></li>
+        <li><a href="#envoy">Envoy</a></li>
+      </ul>
+    </li>
+    <li><a href="#命令行工具">命令行工具</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#基本概念和术语">基本概念和术语</a></li>
+    <li><a href="#xds服务接口">XDS服务接口</a></li>
+    <li><a href="#xds服务接口的最终一致性考虑">XDS服务接口的最终一致性考虑</a></li>
+    <li><a href="#ads聚合发现服务">ADS聚合发现服务</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#bookinfo程序结构">Bookinfo程序结构</a></li>
+    <li><a href="#xds接口调试方法">xDS接口调试方法</a>
+      <ul>
+        <li><a href="#pilot调试方法">Pilot调试方法</a></li>
+        <li><a href="#envoy调试方法">Envoy调试方法</a></li>
+      </ul>
+    </li>
+    <li><a href="#envoy启动过程分析">Envoy启动过程分析</a>
+      <ul>
+        <li><a href="#proxy_init">Proxy_init</a></li>
+        <li><a href="#proxyv2">Proxyv2</a>
+          <ul>
+            <li><a href="#envoy初始配置文件">Envoy初始配置文件</a>
+              <ul>
+                <li><a href="#node">Node</a></li>
+                <li><a href="#admin">Admin</a></li>
+                <li><a href="#dynamic_resources">Dynamic_resources</a></li>
+                <li><a href="#static_resources">Static_resources</a></li>
+                <li><a href="#tracing">Tracing</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#envoy配置分析">Envoy配置分析</a>
+      <ul>
+        <li><a href="#通过管理接口获取完整配置">通过管理接口获取完整配置</a></li>
+        <li><a href="#envoy配置文件结构">Envoy配置文件结构</a>
+          <ul>
+            <li><a href="#bootstrap">Bootstrap</a></li>
+            <li><a href="#clusters">Clusters</a>
+              <ul>
+                <li><a href="#outbound-cluster">Outbound Cluster</a></li>
+                <li><a href="#inbound-cluster">Inbound Cluster</a></li>
+                <li><a href="#blackholecluster">BlackHoleCluster</a></li>
+                <li><a href="#passthroughcluster">PassthroughCluster</a></li>
+              </ul>
+            </li>
+            <li><a href="#listeners">Listeners</a>
+              <ul>
+                <li><a href="#virtualoutbound-listener">VirtualOutbound Listener</a></li>
+                <li><a href="#outbound-listener">Outbound Listener</a></li>
+                <li><a href="#virtualinbound-listener">VirtualInbound Listener</a></li>
+              </ul>
+            </li>
+            <li><a href="#routes">Routes</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#bookinfo端到端调用分析">Bookinfo端到端调用分析</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><h1 id="istio-流量走向详解">istio 流量走向详解</h1>
+<h2 id="前言">前言</h2>
+<p>Istio作为一个service mesh开源项目,其中最重要的功能就是对网格中微服务之间的流量进行管理,包括服务发现,请求路由和服务间的可靠通信。Istio实现了service mesh的控制面，并整合Envoy开源项目作为数据面的sidecar，一起对流量进行控制。</p>
+<p>Istio体系中流量管理配置下发以及流量规则如何在数据面生效的机制相对比较复杂，通过官方文档容易管中窥豹，难以了解其实现原理。本文尝试结合系统架构、配置文件和代码对Istio流量管理的架构和实现机制进行分析，以达到从整体上理解Pilot和Envoy的流量管理机制的目的。</p>
+<h1 id="pilot高层架构">Pilot高层架构</h1>
+<p>Istio控制面中负责流量管理的组件为Pilot，Pilot的高层架构如下图所示：</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/pilot-architecture.png"
+        data-srcset="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/pilot-architecture.png, https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/pilot-architecture.png 1.5x, https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/pilot-architecture.png 2x"
+        data-sizes="auto"
+        alt="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/pilot-architecture.png"
+        title="img" /></p>
+<p>Pilot Architecture（来自<a href="https://istio.io/docs/concepts/traffic-management/" target="_blank" rel="noopener noreffer">Isio官网文档</a><a href="#ref01" rel="">[1]</a>)</p>
+<p>根据上图,Pilot主要实现了下述功能：</p>
+<h2 id="统一的服务模型">统一的服务模型</h2>
+<p>Pilot定义了网格中服务的标准模型，这个标准模型独立于各种底层平台。由于有了该标准模型，各个不同的平台可以通过适配器和Pilot对接，将自己特有的服务数据格式转换为标准格式，填充到Pilot的标准模型中。</p>
+<p>例如Pilot中的Kubernetes适配器通过Kubernetes API服务器得到kubernetes中service和pod的相关信息，然后翻译为标准模型提供给Pilot使用。通过适配器模式，Pilot还可以从Mesos, Cloud Foundry, Consul等平台中获取服务信息，还可以开发适配器将其他提供服务发现的组件集成到Pilot中。</p>
+<h2 id="标准数据面-api">标准数据面 API</h2>
+<p>Pilo使用了一套起源于Envoy项目的<a href="https://github.com/envoyproxy/data-plane-api/blob/master/API_OVERVIEW.md" target="_blank" rel="noopener noreffer">标准数据面API</a>[<a href="https://zhaohuabing.com/post/2018-09-25-istio-traffic-management-impl-intro/#ref02" target="_blank" rel="noopener noreffer">2]</a>来将服务信息和流量规则下发到数据面的sidecar中。</p>
+<p>通过采用该标准API，Istio将控制面和数据面进行了解耦，为多种数据面sidecar实现提供了可能性。事实上基于该标准API已经实现了多种Sidecar代理和Istio的集成，除Istio目前集成的Envoy外，还可以和Linkerd, Nginmesh等第三方通信代理进行集成，也可以基于该API自己编写Sidecar实现。</p>
+<p>控制面和数据面解耦是Istio后来居上，风头超过Service mesh鼻祖Linkerd的一招妙棋。Istio站在了控制面的高度上，而Linkerd则成为了可选的一种sidecar实现，可谓降维打击的一个典型成功案例！</p>
+<p>数据面标准API也有利于生态圈的建立，开源，商业的各种sidecar以后可能百花齐放，用户也可以根据自己的业务场景选择不同的sidecar和控制面集成，如高吞吐量的，低延迟的，高安全性的等等。有实力的大厂商可以根据该API定制自己的sidecar，例如蚂蚁金服开源的Golang版本的Sidecar MOSN(Modular Observable Smart Netstub)（SOFAMesh中Golang版本的Sidecar)；小厂商则可以考虑采用成熟的开源项目或者提供服务的商业sidecar实现。</p>
+<p>备注：Istio和Envoy项目联合制定了Envoy V2 API,并采用该API作为Istio控制面和数据面流量管理的标准接口。</p>
+<h2 id="业务dsl语言">业务DSL语言</h2>
+<p>Pilot还定义了一套DSL（Domain Specific Language）语言，DSL语言提供了面向业务的高层抽象，可以被运维人员理解和使用。运维人员使用该DSL定义流量规则并下发到Pilot，这些规则被Pilot翻译成数据面的配置，再通过标准API分发到Envoy实例，可以在运行期对微服务的流量进行控制和调整。</p>
+<p>Pilot的规则DSL是采用K8S API Server中的<a href="https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/" target="_blank" rel="noopener noreffer">Custom Resource (CRD)</a>[<a href="https://zhaohuabing.com/post/2018-09-25-istio-traffic-management-impl-intro/#ref03" target="_blank" rel="noopener noreffer">3]</a>实现的，因此和其他资源类型如Service Pod Deployment的创建和使用方法类似，都可以用Kubectl进行创建。</p>
+<p>通过运用不同的流量规则，可以对网格中微服务进行精细化的流量控制，如按版本分流，断路器，故障注入，灰度发布等。</p>
+<h1 id="istio流量管理相关组件">Istio流量管理相关组件</h1>
+<p>我们可以通过下图了解Istio流量管理涉及到的相关组件。虽然该图来自Istio Github old pilot repo, 但图中描述的组件及流程和目前Pilot的最新代码的架构基本是一致的。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/traffic-managment-components.png"
+        data-srcset="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/traffic-managment-components.png, https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/traffic-managment-components.png 1.5x, https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/traffic-managment-components.png 2x"
+        data-sizes="auto"
+        alt="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/traffic-managment-components.png"
+        title="img" /></p>
+<p>Pilot Design Overview (来自<a href="https://github.com/istio/old_pilot_repo/blob/master/doc/design.md" target="_blank" rel="noopener noreffer">Istio old_pilot_repo</a><a href="#ref04" rel="">[4]</a>)</p>
+<p>图例说明：图中红色的线表示控制流，黑色的线表示数据流。蓝色部分为和Pilot相关的组件。</p>
+<p>从上图可以看到，Istio中和流量管理相关的有以下组件：</p>
+<h2 id="控制面组件">控制面组件</h2>
+<h3 id="discovery-services">Discovery Services</h3>
+<p>对应的docker为gcr.io/istio-release/pilot,进程为pilot-discovery，该组件的功能包括：</p>
+<ul>
+<li>从Service provider（如kubernetes或者consul）中获取服务信息</li>
+<li>从K8S API Server中获取流量规则(K8S CRD Resource)</li>
+<li>将服务信息和流量规则转化为数据面可以理解的格式，通过标准的数据面API下发到网格中的各个sidecar中。</li>
+</ul>
+<h3 id="k8s-api-server">K8S API Server</h3>
+<p>提供Pilot相关的CRD Resource的增、删、改、查。和Pilot相关的CRD有以下几种:</p>
+<ul>
+<li><a href="https://istio.io/docs/reference/config/networking/virtual-service/" target="_blank" rel="noopener noreffer"><strong>Virtualservice</strong></a>：用于定义路由规则，如根据来源或 Header 制定规则，或在不同服务版本之间分拆流量。</li>
+<li><a href="https://istio.io/docs/reference/config/networking/destination-rule/" target="_blank" rel="noopener noreffer"><strong>DestinationRule</strong></a>：定义目的服务的配置策略以及可路由子集。策略包括断路器、负载均衡以及 TLS 等。</li>
+<li><a href="https://istio.io/docs/reference/config/networking/service-entry/" target="_blank" rel="noopener noreffer"><strong>ServiceEntry</strong></a>：可以使用ServiceEntry向Istio中加入附加的服务条目，以使网格内可以向istio 服务网格之外的服务发出请求。</li>
+<li><a href="https://istio.io/docs/reference/config/networking/gateway/" target="_blank" rel="noopener noreffer"><strong>Gateway</strong></a>：为网格配置网关，以允许一个服务可以被网格外部访问。</li>
+<li><a href="https://istio.io/docs/reference/config/networking/envoy-filter/" target="_blank" rel="noopener noreffer"><strong>EnvoyFilter</strong></a>：可以为Envoy配置过滤器。由于Envoy已经支持Lua过滤器，因此可以通过EnvoyFilter启用Lua过滤器，动态改变Envoy的过滤链行为。我之前一直在考虑如何才能动态扩展Envoy的能力，EnvoyFilter提供了很灵活的扩展性。</li>
+<li><a href="https://istio.io/docs/reference/config/networking/sidecar/" target="_blank" rel="noopener noreffer"><strong>Sidecar</strong></a>：缺省情况下，Pilot将会把和Envoy Sidecar所在namespace的所有services的相关配置，包括inbound和outbound listenter, cluster, route等，都下发给Enovy。使用Sidecar可以对Pilot向Envoy Sidcar下发的配置进行更细粒度的调整，例如只向其下发该Sidecar 所在服务需要访问的那些外部服务的相关outbound配置。</li>
+</ul>
+<h2 id="数据面组件">数据面组件</h2>
+<p>在数据面有两个进程Pilot-agent和envoy，这两个进程被放在一个docker容器gcr.io/istio-release/proxyv2中。</p>
+<h3 id="pilot-agent">Pilot-agent</h3>
+<p>该进程根据K8S API Server中的配置信息生成Envoy的配置文件，并负责启动Envoy进程。注意Envoy的大部分配置信息都是通过xDS接口从Pilot中动态获取的，因此Agent生成的只是用于初始化Envoy的少量静态配置。在后面的章节中，本文将对Agent生成的Envoy配置文件进行进一步分析。</p>
+<h3 id="envoy">Envoy</h3>
+<p>Envoy由Pilot-agent进程启动，启动后，Envoy读取Pilot-agent为它生成的配置文件，然后根据该文件的配置获取到Pilot的地址，通过数据面标准API的xDS接口从pilot获取动态配置信息，包括路由（route），监听器（listener），服务集群（cluster）和服务端点（endpoint）。Envoy初始化完成后，就根据这些配置信息对微服务间的通信进行寻址和路由。</p>
+<h2 id="命令行工具">命令行工具</h2>
+<p>kubectl和Istioctl，由于Istio的配置是基于K8S的CRD，因此可以直接采用kubectl对这些资源进行操作。Istioctl则针对Istio对CRD的操作进行了一些封装。Istioctl支持的功能参见该<a href="https://istio.io/docs/reference/commands/istioctl" target="_blank" rel="noopener noreffer">表格</a>。</p>
+<h1 id="数据面标准api">数据面标准API</h1>
+<p>前面讲到，Pilot采用了一套标准的API来向数据面Sidecar提供服务发现，负载均衡池和路由表等流量管理的配置信息。该标准API的文档参见<a href="https://www.envoyproxy.io/docs/envoy/latest/configuration/overview/v2_overview" target="_blank" rel="noopener noreffer">Envoy v2 API</a>[<a href="https://zhaohuabing.com/post/2018-09-25-istio-traffic-management-impl-intro/#ref05" target="_blank" rel="noopener noreffer">5]</a>。<a href="https://github.com/envoyproxy/data-plane-api/tree/master/envoy/api/v2" target="_blank" rel="noopener noreffer">Data Plane API Protocol Buffer Definition</a>[<a href="https://zhaohuabing.com/post/2018-09-25-istio-traffic-management-impl-intro/#ref06" target="_blank" rel="noopener noreffer">6]</a>)给出了v2 grpc接口相关的数据结构和接口定义。</p>
+<p>（备注：Istio早期采用了Envoy v1 API，目前的版本中则使用V2 API，V1已被废弃）。</p>
+<h2 id="基本概念和术语">基本概念和术语</h2>
+<p>首先我们需要了解数据面API中涉及到的一些基本概念：</p>
+<ul>
+<li><strong>Host</strong>：能够进行网络通信的实体（如移动设备、服务器上的应用程序）。在此文档中，主机是逻辑网络应用程序。一块物理硬件上可能运行有多个主机，只要它们是可以独立寻址的。在EDS接口中，也使用“Endpoint”来表示一个应用实例，对应一个IP+Port的组合。</li>
+<li><strong>Downstream</strong>：下游主机连接到 Envoy，发送请求并接收响应。</li>
+<li><strong>Upstream</strong>：上游主机接收来自 Envoy 的连接和请求，并返回响应。</li>
+<li><strong>Listener</strong>：监听器是命名网地址（例如，端口、unix domain socket等)，可以被下游客户端连接。Envoy 暴露一个或者多个监听器给下游主机连接。在Envoy中,Listener可以绑定到端口上直接对外服务，也可以不绑定到端口上，而是接收其他listener转发的请求。</li>
+<li><strong>Cluster</strong>：集群是指 Envoy 连接的一组上游主机，集群中的主机是对等的，对外提供相同的服务，组成了一个可以提供负载均衡和高可用的服务集群。Envoy 通过服务发现来发现集群的成员。可以选择通过主动健康检查来确定集群成员的健康状态。Envoy 通过负载均衡策略决定将请求路由到哪个集群成员。</li>
+</ul>
+<h2 id="xds服务接口">XDS服务接口</h2>
+<p>Istio数据面API定义了xDS服务接口，Pilot通过该接口向数据面sidecar下发动态配置信息，以对Mesh中的数据流量进行控制。xDS中的DS表示discovery service，即发现服务，表示xDS接口使用动态发现的方式提供数据面所需的配置数据。而x则是一个代词，表示有多种discover service。这些发现服务及对应的数据结构如下：</p>
+<ul>
+<li>LDS (Listener Discovery Service) <a href="https://github.com/envoyproxy/data-plane-api/blob/master/envoy/api/v2/lds.proto" target="_blank" rel="noopener noreffer">envoy.api.v2.Listener</a></li>
+<li>CDS (Cluster Discovery Service) <a href="https://github.com/envoyproxy/data-plane-api/blob/master/envoy/api/v2/rds.proto" target="_blank" rel="noopener noreffer">envoy.api.v2.RouteConfiguration</a></li>
+<li>EDS (Endpoint Discovery Service) <a href="https://github.com/envoyproxy/data-plane-api/blob/master/envoy/api/v2/cds.proto" target="_blank" rel="noopener noreffer">envoy.api.v2.Cluster</a></li>
+<li>RDS (Route Discovery Service) <a href="https://github.com/envoyproxy/data-plane-api/blob/master/envoy/api/v2/eds.proto" target="_blank" rel="noopener noreffer">envoy.api.v2.ClusterLoadAssignment</a></li>
+</ul>
+<h2 id="xds服务接口的最终一致性考虑">XDS服务接口的最终一致性考虑</h2>
+<p>xDS的几个接口是相互独立的，接口下发的配置数据是最终一致的。但在配置更新过程中，可能暂时出现各个接口的数据不匹配的情况，从而导致部分流量在更新过程中丢失。</p>
+<p>设想这种场景：在CDS/EDS只知道cluster X的情况下,RDS的一条路由配置将指向Cluster X的流量调整到了Cluster Y。在CDS/EDS向Mesh中Envoy提供Cluster Y的更新前，这部分导向Cluster Y的流量将会因为Envoy不知道Cluster Y的信息而被丢弃。</p>
+<p>对于某些应用来说，短暂的部分流量丢失是可以接受的，例如客户端重试可以解决该问题，并不影响业务逻辑。对于另一些场景来说，这种情况可能无法容忍。可以通过调整xDS接口的更新逻辑来避免该问题，对上面的情况，可以先通过CDS/EDS更新Y Cluster，然后再通过RDS将X的流量路由到Y。</p>
+<p>一般来说，为了避免Envoy配置数据更新过程中出现流量丢失的情况，xDS接口应采用下面的顺序：</p>
+<ol>
+<li>CDS 首先更新Cluster数据（如果有变化）</li>
+<li>EDS 更新相应Cluster的Endpoint信息（如果有变化）</li>
+<li>LDS 更新CDS/EDS相应的Listener。</li>
+<li>RDS 最后更新新增Listener相关的Route配置。</li>
+<li>删除不再使用的CDS cluster和 EDS endpoints。</li>
+</ol>
+<h2 id="ads聚合发现服务">ADS聚合发现服务</h2>
+<p>保证控制面下发数据一致性，避免流量在配置更新过程中丢失的另一个方式是使用ADS(Aggregated Discovery Services)，即聚合的发现服务。ADS通过一个gRPC流来发布所有的配置更新，以保证各个xDS接口的调用顺序，避免由于xDS接口更新顺序导致的配置数据不一致问题。</p>
+<p>关于XDS接口的详细介绍可参考<a href="https://www.envoyproxy.io/docs/envoy/latest/api-docs/xds_protocol" target="_blank" rel="noopener noreffer">xDS REST and gRPC protocol</a>[<a href="https://zhaohuabing.com/post/2018-09-25-istio-traffic-management-impl-intro/#ref07" target="_blank" rel="noopener noreffer">7]</a></p>
+<h1 id="bookinfo-示例程序分析">Bookinfo 示例程序分析</h1>
+<p>下面我们以Bookinfo为例对Istio中的流量管理实现机制，以及控制面和数据面的交互进行进一步分析。</p>
+<h2 id="bookinfo程序结构">Bookinfo程序结构</h2>
+<p>下图显示了Bookinfo示例程序中各个组件的IP地址，端口和调用关系，以用于后续的分析。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/bookinfo.png"
+        data-srcset="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/bookinfo.png, https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/bookinfo.png 1.5x, https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/bookinfo.png 2x"
+        data-sizes="auto"
+        alt="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/bookinfo.png"
+        title="img" /></p>
+<h2 id="xds接口调试方法">xDS接口调试方法</h2>
+<p>首先我们看看如何对xDS接口的相关数据进行查看和分析。Envoy v2接口采用了gRPC，由于gRPC是基于二进制的RPC协议，无法像V1的REST接口一样通过curl和浏览器进行进行分析。但我们还是可以通过Pilot和Envoy的调试接口查看xDS接口的相关数据。</p>
+<h3 id="pilot调试方法">Pilot调试方法</h3>
+<p>Pilot在15014端口提供了下述<a href="https://github.com/istio/istio/tree/master/pilot/pkg/proxy/envoy/v2" target="_blank" rel="noopener noreffer">调试接口</a>[<a href="https://zhaohuabing.com/post/2018-09-25-istio-traffic-management-impl-intro/#ref08" target="_blank" rel="noopener noreffer">8]</a>下述方法查看xDS接口相关数据。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="nv">PILOT</span><span class="o">=</span>istio-pilot.istio-system:15014
+
+<span class="c1"># What is sent to envoy</span>
+<span class="c1"># Listeners and routes</span>
+curl <span class="nv">$PILOT</span>/debug/adsz
+
+<span class="c1"># Endpoints</span>
+curl <span class="nv">$PILOT</span>/debug/edsz
+
+<span class="c1"># Clusters</span>
+curl <span class="nv">$PILOT</span>/debug/cdsz
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="envoy调试方法">Envoy调试方法</h3>
+<p>Envoy提供了管理接口，缺省为localhost的15000端口，可以获取listener，cluster以及完整的配置数据导出功能。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">kubectl <span class="nb">exec</span> productpage-v1-6d8bc58dd7-ts8kw -c istio-proxy curl http://127.0.0.1:15000/help
+  /: Admin home page
+  /certs: print certs on machine
+  /clusters: upstream cluster status
+  /config_dump: dump current Envoy configs <span class="o">(</span>experimental<span class="o">)</span>
+  /cpuprofiler: enable/disable the CPU profiler
+  /healthcheck/fail: cause the server to fail health checks
+  /healthcheck/ok: cause the server to pass health checks
+  /help: print out list of admin commands
+  /hot_restart_version: print the hot restart compatibility version
+  /listeners: print listener addresses
+  /logging: query/change logging levels
+  /quitquitquit: <span class="nb">exit</span> the server
+  /reset_counters: reset all counters to zero
+  /runtime: print runtime values
+  /runtime_modify: modify runtime values
+  /server_info: print server version/status information
+  /stats: print server stats
+  /stats/prometheus: print server stats in prometheus format
+</code></pre></td></tr></table>
+</div>
+</div><p>进入productpage pod 中的istio-proxy(Envoy) container，可以看到有下面的监听端口</p>
+<ul>
+<li>9080: productpage进程对外提供的服务端口</li>
+<li>15001: Envoy的Virtual Outbound监听器，iptable会将productpage服务发出的出向流量导入该端口中由Envoy进行处理</li>
+<li>15006: Envoy的Virtual Inbound监听器，iptable会将发到productpage的入向流量导入该端口中由Envoy进行处理</li>
+<li>15000: Envoy管理端口，该端口绑定在本地环回地址上，只能在Pod内访问。</li>
+<li>15090：指向127.0.0.1：15000/stats/prometheus, 用于对外提供Envoy的性能统计指标</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">master $ kubectl <span class="nb">exec</span> productpage-v1-6d8bc58dd7-ts8kw -c istio-proxy --  netstat -ln
+Active Internet connections <span class="o">(</span>only servers<span class="o">)</span>
+Proto Recv-Q Send-Q Local Address           Foreign Address         State
+tcp        <span class="m">0</span>      <span class="m">0</span> 0.0.0.0:15090           0.0.0.0:*               LISTEN
+tcp        <span class="m">0</span>      <span class="m">0</span> 0.0.0.0:9080            0.0.0.0:*               LISTEN
+tcp        <span class="m">0</span>      <span class="m">0</span> 127.0.0.1:15000         0.0.0.0:*               LISTEN
+tcp        <span class="m">0</span>      <span class="m">0</span> 0.0.0.0:15001           0.0.0.0:*               LISTEN
+tcp        <span class="m">0</span>      <span class="m">0</span> 0.0.0.0:15006           0.0.0.0:*               LISTEN
+tcp6       <span class="m">0</span>      <span class="m">0</span> :::15020                :::*                    LISTEN
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="envoy启动过程分析">Envoy启动过程分析</h2>
+<p>Istio通过K8s的<a href="https://zhaohuabing.com/2018/05/23/istio-auto-injection-with-webhook" target="_blank" rel="noopener noreffer">Admission webhook</a>[<a href="https://zhaohuabing.com/post/2018-09-25-istio-traffic-management-impl-intro/#ref09" target="_blank" rel="noopener noreffer">9]</a>机制实现了sidecar的自动注入，Mesh中的每个微服务会被加入Envoy相关的容器。下面是Productpage微服务的Pod内容，可见除productpage之外，Istio还在该Pod中注入了两个容器istio-init和istio-proxy，为了节约下载镜像的时间，加快业务Pod的启动速度，这两个容器使用了相同的镜像文件，但启动命令不同。</p>
+<p>备注：下面Pod description中只保留了需要关注的内容，删除了其它不重要的部分。为方便查看，本文中后续的其它配置文件以及命令行输出也会进行类似处理。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">master $ kubectl describe pod productpage-v1-6d8bc58dd7-ts8kw
+Name:               productpage-v1-6d8bc58dd7-ts8kw
+Namespace:          default
+Labels:             <span class="nv">app</span><span class="o">=</span>productpage
+                    <span class="nv">version</span><span class="o">=</span>v1
+Init Containers:
+  istio-init:
+    Image:         docker.io/istio/proxyv2:1.4.1
+    Command:
+      istio-iptables
+      -p
+      <span class="m">15001</span>
+      -z
+      <span class="m">15006</span>
+      -u
+      <span class="m">1337</span>
+      -m
+      REDIRECT
+      -i
+      *
+      -x
+
+      -b
+      *
+      -d
+      <span class="m">15020</span>
+Containers:
+  productpage:
+    Image:          docker.io/istio/examples-bookinfo-productpage-v1:1.15.0
+    Port:           9080/TCP
+  istio-proxy:
+    Image:         docker.io/istio/proxyv2:1.4.1
+    Port:          15090/TCP
+    Args:
+      proxy
+      sidecar
+      --domain
+      <span class="k">$(</span>POD_NAMESPACE<span class="k">)</span>.svc.cluster.local
+      --configPath
+      /etc/istio/proxy
+      --binaryPath
+      /usr/local/bin/envoy
+      --serviceCluster
+      productpage.<span class="k">$(</span>POD_NAMESPACE<span class="k">)</span>
+      --drainDuration
+      45s
+      --parentShutdownDuration
+      1m0s
+      --discoveryAddress
+      istio-pilot.istio-system:15010
+      --zipkinAddress
+      zipkin.istio-system:9411
+      --proxyLogLevel<span class="o">=</span>warning
+      --proxyComponentLogLevel<span class="o">=</span>misc:error
+      --connectTimeout
+      10s
+      --proxyAdminPort
+      <span class="m">15000</span>
+      --concurrency
+      <span class="m">2</span>
+      --controlPlaneAuthPolicy
+      NONE
+      --dnsRefreshRate
+      300s
+      --statusPort
+      <span class="m">15020</span>
+      --applicationPorts
+      <span class="m">9080</span>
+      --trust-domain<span class="o">=</span>cluster.local   
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="proxy_init">Proxy_init</h3>
+<p>Productpage的Pod中有一个InitContainer proxy_init，InitContrainer是K8S提供的机制，用于在Pod中执行一些初始化任务.在Initialcontainer执行完毕并退出后，才会启动Pod中的其它container。</p>
+<p>从上面的Pod description可以看到，proxy_init容器执行的命令是istio-iptables，这是一个go编译出来的二进制文件，该二进制文件会调用iptables命令创建了一些列iptables规则来劫持Pod中的流量。该命令有这些关键的参数：</p>
+<ul>
+<li>命令行参数 -p 15001表示出向流量被iptable重定向到Envoy的15001端口</li>
+<li>命令行参数 -z 15006表示入向流量被iptable重定向到Envoy的15006端口</li>
+<li>命令行参数 -u 1337参数用于排除用户ID为1337，即Envoy自身的流量，以避免Iptable把Envoy发出的数据又重定向到Envoy，形成死循环。</li>
+</ul>
+<p>Iptables规则的详细内容参见istio源码中的shell脚本<a href="https://github.com/istio/istio/blob/1.4.0/tools/packaging/common/istio-iptables.sh" target="_blank" rel="noopener noreffer">tools/packaging/common/istio-iptables.sh</a>。</p>
+<h3 id="proxyv2">Proxyv2</h3>
+<p>前面提到，该容器中有两个进程Pilot-agent和envoy。我们进入容器中看看这两个进程的相关信息。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">master $ kubectl <span class="nb">exec</span> productpage-v1-6d8bc58dd7-ts8kw -c istio-proxy -- ps -ef
+UID        PID  PPID  C STIME TTY          TIME CMD
+istio-p+     <span class="m">1</span>     <span class="m">0</span>  <span class="m">0</span> 10:46 ?        00:00:02 /usr/local/bin/pilot-agent proxy sidecar --domain default.svc.cluster.local --configPath /etc/istio/proxy --binaryPath/usr/local/bin/envoy --serviceCluster productpage.default --drainDuration 45s --parentShutdownDuration 1m0s --discoveryAddress istio-pilot.istio-system:15010 --zipkinAddress zipkin.istio-system:9411 --proxyLogLevel<span class="o">=</span>warning --proxyComponentLogLevel<span class="o">=</span>misc:error --connectTimeout 10s --proxyAdminPort <span class="m">15000</span> --concurrency <span class="m">2</span> --controlPlaneAuthPolicy NONE --dnsRefreshRate 300s --statusPort <span class="m">15020</span> --applicationPorts <span class="m">9080</span> --trust-domain<span class="o">=</span>cluster.local
+istio-p+    <span class="m">20</span>     <span class="m">1</span>  <span class="m">0</span> 10:46 ?        00:00:07 /usr/local/bin/envoy -c /etc/istio/proxy/envoy-rev0.json --restart-epoch <span class="m">0</span> --drain-time-s <span class="m">45</span> --parent-shutdown-time-s <span class="m">60</span> --service-cluster productpage.default --service-node sidecar~10.40.0.18~productpage-v1-6d8bc58dd7-ts8kw.default~default.svc.cluster.local --max-obj-name-len <span class="m">189</span> --local-address-ip-version v4 --log-format <span class="o">[</span>Envoy <span class="o">(</span>Epoch 0<span class="o">)]</span> <span class="o">[</span>%Y-%m-%d %T.%e<span class="o">][</span>%t<span class="o">][</span>%l<span class="o">][</span>%n<span class="o">]</span> %v -l warning --component-log-level misc:error --concurrency <span class="m">2</span>
+istio-p+    <span class="m">68</span>     <span class="m">0</span>  <span class="m">0</span> 11:27 ?        00:00:00 ps -ef
+</code></pre></td></tr></table>
+</div>
+</div><p>Envoy的大部分配置都是dynamic resource，包括网格中服务相关的service cluster, listener, route规则等。这些dynamic resource是通过xDS接口从Istio控制面中动态获取的。但Envoy如何知道xDS server的地址呢？这是在Envoy初始化配置文件中以static resource的方式配置的。</p>
+<h4 id="envoy初始配置文件">Envoy初始配置文件</h4>
+<p>Pilot-agent进程根据启动参数和K8S API Server中的配置信息生成Envoy的初始配置文件，并负责启动Envoy进程。从ps命令输出可以看到Pilot-agent在启动Envoy进程时传入了pilot地址和zipkin地址，并为Envoy生成了一个初始化配置文件envoy-rev0.json。</p>
+<p>可以使用下面的命令将productpage pod中该文件导出来查看其中的内容：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">kubectl <span class="nb">exec</span> productpage-v1-6d8bc58dd7-ts8kw -c istio-proxy cat /etc/istio/proxy/envoy-rev0.json &gt; envoy-rev0.json
+</code></pre></td></tr></table>
+</div>
+</div><p>配置文件的结构如图所示：</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/envoy-rev0.png"
+        data-srcset="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/envoy-rev0.png, https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/envoy-rev0.png 1.5x, https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/envoy-rev0.png 2x"
+        data-sizes="auto"
+        alt="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/envoy-rev0.png"
+        title="img" /></p>
+<p>其中各个配置节点的内容如下：</p>
+<h5 id="node">Node</h5>
+<p>包含了Envoy所在节点相关信息。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="p">{</span>
+    <span class="nt">&#34;node&#34;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="s2">&#34;sidecar~10.40.0.18~productpage-v1-6d8bc58dd7-ts8kw.default~default.svc.cluster.local&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;cluster&#34;</span><span class="p">:</span> <span class="s2">&#34;productpage.default&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;locality&#34;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="nt">&#34;metadata&#34;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&#34;CLUSTER_ID&#34;</span><span class="p">:</span> <span class="s2">&#34;Kubernetes&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;CONFIG_NAMESPACE&#34;</span><span class="p">:</span> <span class="s2">&#34;default&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;EXCHANGE_KEYS&#34;</span><span class="p">:</span> <span class="s2">&#34;NAME,NAMESPACE,INSTANCE_IPS,LABELS,OWNER,PLATFORM_METADATA,WORKLOAD_NAME,CANONICAL_TELEMETRY_SERVICE,MESH_ID,SERVICE_ACCOUNT&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;INCLUDE_INBOUND_PORTS&#34;</span><span class="p">:</span> <span class="s2">&#34;9080&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;INSTANCE_IPS&#34;</span><span class="p">:</span> <span class="s2">&#34;10.40.0.18,fe80::94df:47ff:fef3:bc99&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;INTERCEPTION_MODE&#34;</span><span class="p">:</span> <span class="s2">&#34;REDIRECT&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;ISTIO_PROXY_SHA&#34;</span><span class="p">:</span> <span class="s2">&#34;istio-proxy:3af92d895f6cb80993fc8bb04dc9b2008183f2ba&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;ISTIO_VERSION&#34;</span><span class="p">:</span> <span class="s2">&#34;1.4.1&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;LABELS&#34;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&#34;app&#34;</span><span class="p">:</span> <span class="s2">&#34;productpage&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;pod-template-hash&#34;</span><span class="p">:</span> <span class="s2">&#34;6d8bc58dd7&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;security.istio.io/tlsMode&#34;</span><span class="p">:</span> <span class="s2">&#34;istio&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="s2">&#34;v1&#34;</span>
+            <span class="p">},</span>
+            <span class="nt">&#34;MESH_ID&#34;</span><span class="p">:</span> <span class="s2">&#34;cluster.local&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;NAME&#34;</span><span class="p">:</span> <span class="s2">&#34;productpage-v1-6d8bc58dd7-ts8kw&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;NAMESPACE&#34;</span><span class="p">:</span> <span class="s2">&#34;default&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;OWNER&#34;</span><span class="p">:</span> <span class="s2">&#34;kubernetes://api/apps/v1/namespaces/default/deployments/productpage-v1&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;POD_NAME&#34;</span><span class="p">:</span> <span class="s2">&#34;productpage-v1-6d8bc58dd7-ts8kw&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;POD_PORTS&#34;</span><span class="p">:</span> <span class="s2">&#34;[{\&#34;containerPort\&#34;:9080,\&#34;protocol\&#34;:\&#34;TCP\&#34;},{\&#34;name\&#34;:\&#34;http-envoy-prom\&#34;,\&#34;containerPort\&#34;:15090,\&#34;protocol\&#34;:\&#34;TCP\&#34;}]&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;SERVICE_ACCOUNT&#34;</span><span class="p">:</span> <span class="s2">&#34;bookinfo-productpage&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;WORKLOAD_NAME&#34;</span><span class="p">:</span> <span class="s2">&#34;productpage-v1&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;app&#34;</span><span class="p">:</span> <span class="s2">&#34;productpage&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;pod-template-hash&#34;</span><span class="p">:</span> <span class="s2">&#34;6d8bc58dd7&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;security.istio.io/tlsMode&#34;</span><span class="p">:</span> <span class="s2">&#34;istio&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;sidecar.istio.io/status&#34;</span><span class="p">:</span> <span class="s2">&#34;{\&#34;version\&#34;:\&#34;8d80e9685defcc00b0d8c9274b60071ba8810537e0ed310ea96c1de0785272c7\&#34;,\&#34;initContainers\&#34;:[\&#34;istio-init\&#34;],\&#34;containers\&#34;:[\&#34;istio-proxy\&#34;],\&#34;volumes\&#34;:[\&#34;istio-envoy\&#34;,\&#34;istio-certs\&#34;],\&#34;imagePullSecrets\&#34;:null}&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="s2">&#34;v1&#34;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h5 id="admin">Admin</h5>
+<p>配置Envoy的日志路径以及管理端口。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json">    <span class="s2">&#34;admin&#34;</span><span class="err">:</span> <span class="p">{</span>
+        <span class="nt">&#34;access_log_path&#34;</span><span class="p">:</span> <span class="s2">&#34;/dev/null&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;address&#34;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&#34;socket_address&#34;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&#34;address&#34;</span><span class="p">:</span> <span class="s2">&#34;127.0.0.1&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;port_value&#34;</span><span class="p">:</span> <span class="mi">15000</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h5 id="dynamic_resources">Dynamic_resources</h5>
+<p>配置动态资源,这里配置了ADS服务器。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="p">{</span>
+    <span class="nt">&#34;dynamic_resources&#34;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&#34;lds_config&#34;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&#34;ads&#34;</span><span class="p">:</span> <span class="p">{}</span>
+        <span class="p">},</span>
+        <span class="nt">&#34;cds_config&#34;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&#34;ads&#34;</span><span class="p">:</span> <span class="p">{}</span>
+        <span class="p">},</span>
+        <span class="nt">&#34;ads_config&#34;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&#34;api_type&#34;</span><span class="p">:</span> <span class="s2">&#34;GRPC&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;grpc_services&#34;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="nt">&#34;envoy_grpc&#34;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&#34;cluster_name&#34;</span><span class="p">:</span> <span class="s2">&#34;xds-grpc&#34;</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">]</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h5 id="static_resources">Static_resources</h5>
+<p>配置静态资源，包括了prometheus_stats、xds-grpc和zipkin三个cluster和一个在15090上监听的listener。其中xds-grpc cluster对应前面dynamic_resources中ADS配置，指明了Envoy用于获取动态资源的服务器地址。prometheus_stats cluster和15090 listener用于对外提供兼容prometheus格式的统计指标。zipkin cluster则是外部的zipkin调用跟踪服务器地址，Envoy会向该地址上报兼容zipkin格式的调用跟踪信息。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span><span class="lnt">113
+</span><span class="lnt">114
+</span><span class="lnt">115
+</span><span class="lnt">116
+</span><span class="lnt">117
+</span><span class="lnt">118
+</span><span class="lnt">119
+</span><span class="lnt">120
+</span><span class="lnt">121
+</span><span class="lnt">122
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="p">{</span>
+    <span class="nt">&#34;static_resources&#34;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&#34;clusters&#34;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;prometheus_stats&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;STATIC&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;connect_timeout&#34;</span><span class="p">:</span> <span class="s2">&#34;0.250s&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;lb_policy&#34;</span><span class="p">:</span> <span class="s2">&#34;ROUND_ROBIN&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;hosts&#34;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">{</span>
+                        <span class="nt">&#34;socket_address&#34;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="nt">&#34;protocol&#34;</span><span class="p">:</span> <span class="s2">&#34;TCP&#34;</span><span class="p">,</span>
+                            <span class="nt">&#34;address&#34;</span><span class="p">:</span> <span class="s2">&#34;127.0.0.1&#34;</span><span class="p">,</span>
+                            <span class="nt">&#34;port_value&#34;</span><span class="p">:</span> <span class="mi">15000</span>
+                        <span class="p">}</span>
+                    <span class="p">}</span>
+                <span class="p">]</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;xds-grpc&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;STRICT_DNS&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;dns_refresh_rate&#34;</span><span class="p">:</span> <span class="s2">&#34;300s&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;dns_lookup_family&#34;</span><span class="p">:</span> <span class="s2">&#34;V4_ONLY&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;connect_timeout&#34;</span><span class="p">:</span> <span class="s2">&#34;10s&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;lb_policy&#34;</span><span class="p">:</span> <span class="s2">&#34;ROUND_ROBIN&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;hosts&#34;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">{</span>
+                        <span class="nt">&#34;socket_address&#34;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="nt">&#34;address&#34;</span><span class="p">:</span> <span class="s2">&#34;istio-pilot.istio-system&#34;</span><span class="p">,</span>
+                            <span class="nt">&#34;port_value&#34;</span><span class="p">:</span> <span class="mi">15010</span>
+                        <span class="p">}</span>
+                    <span class="p">}</span>
+                <span class="p">],</span>
+                <span class="nt">&#34;circuit_breakers&#34;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&#34;thresholds&#34;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="p">{</span>
+                            <span class="nt">&#34;priority&#34;</span><span class="p">:</span> <span class="s2">&#34;DEFAULT&#34;</span><span class="p">,</span>
+                            <span class="nt">&#34;max_connections&#34;</span><span class="p">:</span> <span class="mi">100000</span><span class="p">,</span>
+                            <span class="nt">&#34;max_pending_requests&#34;</span><span class="p">:</span> <span class="mi">100000</span><span class="p">,</span>
+                            <span class="nt">&#34;max_requests&#34;</span><span class="p">:</span> <span class="mi">100000</span>
+                        <span class="p">},</span>
+                        <span class="p">{</span>
+                            <span class="nt">&#34;priority&#34;</span><span class="p">:</span> <span class="s2">&#34;HIGH&#34;</span><span class="p">,</span>
+                            <span class="nt">&#34;max_connections&#34;</span><span class="p">:</span> <span class="mi">100000</span><span class="p">,</span>
+                            <span class="nt">&#34;max_pending_requests&#34;</span><span class="p">:</span> <span class="mi">100000</span><span class="p">,</span>
+                            <span class="nt">&#34;max_requests&#34;</span><span class="p">:</span> <span class="mi">100000</span>
+                        <span class="p">}</span>
+                    <span class="p">]</span>
+                <span class="p">},</span>
+                <span class="nt">&#34;upstream_connection_options&#34;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&#34;tcp_keepalive&#34;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&#34;keepalive_time&#34;</span><span class="p">:</span> <span class="mi">300</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="nt">&#34;http2_protocol_options&#34;</span><span class="p">:</span> <span class="p">{}</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;zipkin&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;STRICT_DNS&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;dns_refresh_rate&#34;</span><span class="p">:</span> <span class="s2">&#34;300s&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;dns_lookup_family&#34;</span><span class="p">:</span> <span class="s2">&#34;V4_ONLY&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;connect_timeout&#34;</span><span class="p">:</span> <span class="s2">&#34;1s&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;lb_policy&#34;</span><span class="p">:</span> <span class="s2">&#34;ROUND_ROBIN&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;hosts&#34;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">{</span>
+                        <span class="nt">&#34;socket_address&#34;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="nt">&#34;address&#34;</span><span class="p">:</span> <span class="s2">&#34;zipkin.istio-system&#34;</span><span class="p">,</span>
+                            <span class="nt">&#34;port_value&#34;</span><span class="p">:</span> <span class="mi">9411</span>
+                        <span class="p">}</span>
+                    <span class="p">}</span>
+                <span class="p">]</span>
+            <span class="p">}</span>
+        <span class="p">],</span>
+        <span class="nt">&#34;listeners&#34;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="nt">&#34;address&#34;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&#34;socket_address&#34;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&#34;protocol&#34;</span><span class="p">:</span> <span class="s2">&#34;TCP&#34;</span><span class="p">,</span>
+                        <span class="nt">&#34;address&#34;</span><span class="p">:</span> <span class="s2">&#34;0.0.0.0&#34;</span><span class="p">,</span>
+                        <span class="nt">&#34;port_value&#34;</span><span class="p">:</span> <span class="mi">15090</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="nt">&#34;filter_chains&#34;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">{</span>
+                        <span class="nt">&#34;filters&#34;</span><span class="p">:</span> <span class="p">[</span>
+                            <span class="p">{</span>
+                                <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;envoy.http_connection_manager&#34;</span><span class="p">,</span>
+                                <span class="nt">&#34;config&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                    <span class="nt">&#34;codec_type&#34;</span><span class="p">:</span> <span class="s2">&#34;AUTO&#34;</span><span class="p">,</span>
+                                    <span class="nt">&#34;stat_prefix&#34;</span><span class="p">:</span> <span class="s2">&#34;stats&#34;</span><span class="p">,</span>
+                                    <span class="nt">&#34;route_config&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                        <span class="nt">&#34;virtual_hosts&#34;</span><span class="p">:</span> <span class="p">[</span>
+                                            <span class="p">{</span>
+                                                <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;backend&#34;</span><span class="p">,</span>
+                                                <span class="nt">&#34;domains&#34;</span><span class="p">:</span> <span class="p">[</span>
+                                                    <span class="s2">&#34;*&#34;</span>
+                                                <span class="p">],</span>
+                                                <span class="nt">&#34;routes&#34;</span><span class="p">:</span> <span class="p">[</span>
+                                                    <span class="p">{</span>
+                                                        <span class="nt">&#34;match&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                                            <span class="nt">&#34;prefix&#34;</span><span class="p">:</span> <span class="s2">&#34;/stats/prometheus&#34;</span>
+                                                        <span class="p">},</span>
+                                                        <span class="nt">&#34;route&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                                            <span class="nt">&#34;cluster&#34;</span><span class="p">:</span> <span class="s2">&#34;prometheus_stats&#34;</span>
+                                                        <span class="p">}</span>
+                                                    <span class="p">}</span>
+                                                <span class="p">]</span>
+                                            <span class="p">}</span>
+                                        <span class="p">]</span>
+                                    <span class="p">},</span>
+                                    <span class="nt">&#34;http_filters&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                        <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;envoy.router&#34;</span>
+                                    <span class="p">}</span>
+                                <span class="p">}</span>
+                            <span class="p">}</span>
+                        <span class="p">]</span>
+                    <span class="p">}</span>
+                <span class="p">]</span>
+            <span class="p">}</span>
+        <span class="p">]</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h5 id="tracing">Tracing</h5>
+<p>配置分布式链路跟踪，这里配置的后端cluster是前面static_resources里面定义的zipkin cluster。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json">  <span class="s2">&#34;tracing&#34;</span><span class="err">:</span> <span class="p">{</span>
+    <span class="nt">&#34;http&#34;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;envoy.zipkin&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;config&#34;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&#34;collector_cluster&#34;</span><span class="p">:</span> <span class="s2">&#34;zipkin&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;collector_endpoint&#34;</span><span class="p">:</span> <span class="s2">&#34;/api/v1/spans&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;trace_id_128bit&#34;</span><span class="p">:</span> <span class="s2">&#34;true&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;shared_span_context&#34;</span><span class="p">:</span> <span class="s2">&#34;false&#34;</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>在https://github.com/zhaohuabing/bookinfo-bookinfo-config-dump/blob/istio1.4.0/productpage-envoy-rev0.json中可以查看该配置文件的完整内容。</p>
+<h2 id="envoy配置分析">Envoy配置分析</h2>
+<h3 id="通过管理接口获取完整配置">通过管理接口获取完整配置</h3>
+<p>从Envoy初始化配置文件中，我们可以大致看到Istio通过Envoy来实现服务发现和流量管理的基本原理。即控制面将xDS server信息通过static resource的方式配置到Envoy的初始化配置文件中，Envoy启动后通过xDS server获取到dynamic resource，包括网格中的service信息及路由规则。</p>
+<p>Envoy配置初始化流程：</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/envoy-config-init.png"
+        data-srcset="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/envoy-config-init.png, https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/envoy-config-init.png 1.5x, https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/envoy-config-init.png 2x"
+        data-sizes="auto"
+        alt="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/envoy-config-init.png"
+        title="img" /></p>
+<ol>
+<li>Pilot-agent根据启动参数和K8S API Server中的配置信息生成Envoy的初始配置文件envoy-rev0.json，该文件告诉Envoy从xDS server中获取动态配置信息，并配置了xDS server的地址信息，即控制面的Pilot。</li>
+<li>Pilot-agent使用envoy-rev0.json启动Envoy进程。</li>
+<li>Envoy根据初始配置获得Pilot地址，采用xDS接口从Pilot获取到Listener，Cluster，Route等d动态配置信息。</li>
+<li>Envoy根据获取到的动态配置启动Listener，并根据Listener的配置，结合Route和Cluster对拦截到的流量进行处理。</li>
+</ol>
+<p>可以看到，Envoy中实际生效的配置是由初始化配置文件中的静态配置和从Pilot获取的动态配置一起组成的。因此只对envoy-rev0 .json进行分析并不能看到Mesh中流量管理的全貌。那么有没有办法可以看到Envoy中实际生效的完整配置呢？答案是可以的，我们可以通过Envoy的管理接口来获取Envoy的完整配置。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="err">kubectl</span> <span class="err">exec</span> <span class="err">-it</span> <span class="err">productpage-v</span><span class="mi">1-6</span><span class="err">d</span><span class="mi">8</span><span class="err">bc</span><span class="mi">58</span><span class="err">dd</span><span class="mi">7</span><span class="err">-ts</span><span class="mi">8</span><span class="err">kw</span> <span class="err">-c</span> <span class="err">istio-proxy</span> <span class="err">curl</span> <span class="err">http://</span><span class="mf">127.0</span><span class="err">.</span><span class="mf">0.1</span><span class="err">:</span><span class="mi">15000</span><span class="err">/config_dump</span> <span class="err">&gt;</span> <span class="err">config_dump</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>该文件内容长达近一万行，本文中就不贴出来了，在https://github.com/zhaohuabing/bookinfo-bookinfo-config-dump/blob/istio1.4.0/productpage-config-dump中可以查看到文件的全部内容。</p>
+<h3 id="envoy配置文件结构">Envoy配置文件结构</h3>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/envoy-config.png"
+        data-srcset="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/envoy-config.png, https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/envoy-config.png 1.5x, https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/envoy-config.png 2x"
+        data-sizes="auto"
+        alt="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/envoy-config.png"
+        title="img" /></p>
+<p>从dump文件中可以看到Envoy中包括下述配置：</p>
+<h4 id="bootstrap">Bootstrap</h4>
+<p>从名字可以大致猜出这是Envoy的初始化配置，打开该节点，可以看到文件中的内容和前一章节中介绍的envoy-rev0.json是一致的，这里不再赘述。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/envoy-config-bootstrap.png"
+        data-srcset="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/envoy-config-bootstrap.png, https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/envoy-config-bootstrap.png 1.5x, https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/envoy-config-bootstrap.png 2x"
+        data-sizes="auto"
+        alt="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/envoy-config-bootstrap.png"
+        title="img" /></p>
+<h4 id="clusters">Clusters</h4>
+<p>在Envoy中，Cluster是一个服务集群，Cluster中包含一个到多个endpoint，每个endpoint都可以提供服务，Envoy根据负载均衡算法将请求发送到这些endpoint中。</p>
+<p>在Productpage的clusters配置中包含static_clusters和dynamic_active_clusters两部分，其中static_clusters是来自于envoy-rev0.json的初始化配置中的prometheus_stats、xDS server和zipkin server信息。dynamic_active_clusters是通过xDS接口从Istio控制面获取的动态服务信息。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/envoy-config-clusters.png"
+        data-srcset="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/envoy-config-clusters.png, https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/envoy-config-clusters.png 1.5x, https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/envoy-config-clusters.png 2x"
+        data-sizes="auto"
+        alt="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/envoy-config-clusters.png"
+        title="img" /></p>
+<p>Dynamic Cluster中有以下几类Cluster：</p>
+<h5 id="outbound-cluster">Outbound Cluster</h5>
+<p>这部分的Cluster占了绝大多数，该类Cluster对应于Envoy所在节点的外部服务。以reviews为例，对于Productpage来说,reviews是一个外部服务，因此其Cluster名称中包含outbound字样。</p>
+<p>从reviews 服务对应的cluster配置中可以看到，其类型为EDS，即表示该Cluster的endpoint来自于动态发现，动态发现中eds_config则指向了ads，最终指向static Resource中配置的xds-grpc cluster,即Pilot的地址。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="p">{</span>
+    <span class="nt">&#34;version_info&#34;</span><span class="p">:</span> <span class="s2">&#34;2019-12-04T03:08:06Z/13&#34;</span><span class="p">,</span>
+    <span class="nt">&#34;cluster&#34;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;outbound|9080||reviews.default.svc.cluster.local&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;EDS&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;eds_cluster_config&#34;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&#34;eds_config&#34;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&#34;ads&#34;</span><span class="p">:</span> <span class="p">{}</span>
+            <span class="p">},</span>
+            <span class="nt">&#34;service_name&#34;</span><span class="p">:</span> <span class="s2">&#34;outbound|9080||reviews.default.svc.cluster.local&#34;</span>
+        <span class="p">},</span>
+        <span class="nt">&#34;connect_timeout&#34;</span><span class="p">:</span> <span class="s2">&#34;1s&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;circuit_breakers&#34;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&#34;thresholds&#34;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="nt">&#34;max_connections&#34;</span><span class="p">:</span> <span class="mi">4294967295</span><span class="p">,</span>
+                    <span class="nt">&#34;max_pending_requests&#34;</span><span class="p">:</span> <span class="mi">4294967295</span><span class="p">,</span>
+                    <span class="nt">&#34;max_requests&#34;</span><span class="p">:</span> <span class="mi">4294967295</span><span class="p">,</span>
+                    <span class="nt">&#34;max_retries&#34;</span><span class="p">:</span> <span class="mi">4294967295</span>
+                <span class="p">}</span>
+            <span class="p">]</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="nt">&#34;last_updated&#34;</span><span class="p">:</span> <span class="s2">&#34;2019-12-04T03:08:22.658Z&#34;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>可以通过Pilot的调试接口获取该Cluster的endpoint：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="err">curl</span> <span class="err">http://</span><span class="mf">10.97</span><span class="err">.</span><span class="mf">222.108</span><span class="err">:</span><span class="mi">15014</span><span class="err">/debug/edsz</span> <span class="err">&gt;</span> <span class="err">pilot_eds_dump</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>导出的文件较长，本文只贴出reviews服务相关的endpoint配置，完整文件参见:https://github.com/zhaohuabing/bookinfo-bookinfo-config-dump/blob/istio1.4.0/pilot_eds_dump</p>
+<p>从下面的文件内容可以看到，reviews cluster配置了3个endpoint地址，是reviews的pod ip。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="p">{</span>
+    <span class="nt">&#34;clusterName&#34;</span><span class="p">:</span> <span class="s2">&#34;outbound|9080||reviews.default.svc.cluster.local&#34;</span><span class="p">,</span>
+    <span class="nt">&#34;endpoints&#34;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="nt">&#34;lbEndpoints&#34;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="nt">&#34;endpoint&#34;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&#34;address&#34;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="nt">&#34;socketAddress&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="nt">&#34;address&#34;</span><span class="p">:</span> <span class="s2">&#34;10.40.0.15&#34;</span><span class="p">,</span>
+                                <span class="nt">&#34;portValue&#34;</span><span class="p">:</span> <span class="mi">9080</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">},</span>
+                    <span class="nt">&#34;metadata&#34;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&#34;filterMetadata&#34;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="nt">&#34;envoy.transport_socket_match&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="nt">&#34;tlsMode&#34;</span><span class="p">:</span> <span class="s2">&#34;istio&#34;</span>
+                            <span class="p">},</span>
+                            <span class="nt">&#34;istio&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="nt">&#34;uid&#34;</span><span class="p">:</span> <span class="s2">&#34;kubernetes://reviews-v1-75b979578c-pw8zs.default&#34;</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">},</span>
+                    <span class="nt">&#34;loadBalancingWeight&#34;</span><span class="p">:</span> <span class="mi">1</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="nt">&#34;endpoint&#34;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&#34;address&#34;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="nt">&#34;socketAddress&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="nt">&#34;address&#34;</span><span class="p">:</span> <span class="s2">&#34;10.40.0.16&#34;</span><span class="p">,</span>
+                                <span class="nt">&#34;portValue&#34;</span><span class="p">:</span> <span class="mi">9080</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">},</span>
+                    <span class="nt">&#34;metadata&#34;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&#34;filterMetadata&#34;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="nt">&#34;envoy.transport_socket_match&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="nt">&#34;tlsMode&#34;</span><span class="p">:</span> <span class="s2">&#34;istio&#34;</span>
+                            <span class="p">},</span>
+                            <span class="nt">&#34;istio&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="nt">&#34;uid&#34;</span><span class="p">:</span> <span class="s2">&#34;kubernetes://reviews-v3-54c6c64795-wbls7.default&#34;</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">},</span>
+                    <span class="nt">&#34;loadBalancingWeight&#34;</span><span class="p">:</span> <span class="mi">1</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="nt">&#34;endpoint&#34;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&#34;address&#34;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="nt">&#34;socketAddress&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="nt">&#34;address&#34;</span><span class="p">:</span> <span class="s2">&#34;10.40.0.17&#34;</span><span class="p">,</span>
+                                <span class="nt">&#34;portValue&#34;</span><span class="p">:</span> <span class="mi">9080</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">},</span>
+                    <span class="nt">&#34;metadata&#34;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&#34;filterMetadata&#34;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="nt">&#34;envoy.transport_socket_match&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="nt">&#34;tlsMode&#34;</span><span class="p">:</span> <span class="s2">&#34;istio&#34;</span>
+                            <span class="p">},</span>
+                            <span class="nt">&#34;istio&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="nt">&#34;uid&#34;</span><span class="p">:</span> <span class="s2">&#34;kubernetes://reviews-v2-597bf96c8f-l2fp8.default&#34;</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">},</span>
+                    <span class="nt">&#34;loadBalancingWeight&#34;</span><span class="p">:</span> <span class="mi">1</span>
+                <span class="p">}</span>
+            <span class="p">],</span>
+            <span class="nt">&#34;loadBalancingWeight&#34;</span><span class="p">:</span> <span class="mi">3</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h5 id="inbound-cluster">Inbound Cluster</h5>
+<p>该类Cluster对应于Envoy所在节点上的服务。如果该服务接收到请求，当然就是一个入站请求。对于Productpage Pod上的Envoy，其对应的Inbound Cluster只有一个，即productpage。该cluster对应的host为127.0.0.1,即环回地址上productpage的监听端口。由于iptable规则中排除了127.0.0.1,入站请求通过该Inbound cluster处理后将跳过Envoy，直接发送给Productpage进程处理。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="p">{</span>
+    <span class="nt">&#34;version_info&#34;</span><span class="p">:</span> <span class="s2">&#34;2019-12-04T03:08:06Z/13&#34;</span><span class="p">,</span>
+    <span class="nt">&#34;cluster&#34;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;inbound|9080|http|productpage.default.svc.cluster.local&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;STATIC&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;connect_timeout&#34;</span><span class="p">:</span> <span class="s2">&#34;1s&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;circuit_breakers&#34;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&#34;thresholds&#34;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="nt">&#34;max_connections&#34;</span><span class="p">:</span> <span class="mi">4294967295</span><span class="p">,</span>
+                    <span class="nt">&#34;max_pending_requests&#34;</span><span class="p">:</span> <span class="mi">4294967295</span><span class="p">,</span>
+                    <span class="nt">&#34;max_requests&#34;</span><span class="p">:</span> <span class="mi">4294967295</span><span class="p">,</span>
+                    <span class="nt">&#34;max_retries&#34;</span><span class="p">:</span> <span class="mi">4294967295</span>
+                <span class="p">}</span>
+            <span class="p">]</span>
+        <span class="p">},</span>
+        <span class="nt">&#34;load_assignment&#34;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&#34;cluster_name&#34;</span><span class="p">:</span> <span class="s2">&#34;inbound|9080|http|productpage.default.svc.cluster.local&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;endpoints&#34;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="nt">&#34;lb_endpoints&#34;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="p">{</span>
+                            <span class="nt">&#34;endpoint&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="nt">&#34;address&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                    <span class="nt">&#34;socket_address&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                        <span class="nt">&#34;address&#34;</span><span class="p">:</span> <span class="s2">&#34;127.0.0.1&#34;</span><span class="p">,</span>
+                                        <span class="nt">&#34;port_value&#34;</span><span class="p">:</span> <span class="mi">9080</span>
+                                    <span class="p">}</span>
+                                <span class="p">}</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">]</span>
+                <span class="p">}</span>
+            <span class="p">]</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="nt">&#34;last_updated&#34;</span><span class="p">:</span> <span class="s2">&#34;2019-12-04T03:08:22.658Z&#34;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h5 id="blackholecluster">BlackHoleCluster</h5>
+<p>这是一个特殊的Cluster，并没有配置后端处理请求的Host。如其名字所暗示的一样，请求进入后将被直接丢弃掉。如果一个请求没有找到其对的目的服务，则被发到cluste。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="p">{</span>
+    <span class="nt">&#34;version_info&#34;</span><span class="p">:</span> <span class="s2">&#34;2019-12-04T03:08:06Z/13&#34;</span><span class="p">,</span>
+    <span class="nt">&#34;cluster&#34;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;BlackHoleCluster&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;STATIC&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;connect_timeout&#34;</span><span class="p">:</span> <span class="s2">&#34;1s&#34;</span>
+    <span class="p">},</span>
+    <span class="nt">&#34;last_updated&#34;</span><span class="p">:</span> <span class="s2">&#34;2019-12-04T03:08:22.658Z&#34;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h5 id="passthroughcluster">PassthroughCluster</h5>
+<p>和BlackHoleCluter相反，发向PassthroughCluster的请求会被直接发送到其请求中要求的原始目地的，Envoy不会对请求进行重新路由。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="p">{</span>
+    <span class="nt">&#34;version_info&#34;</span><span class="p">:</span> <span class="s2">&#34;2019-12-04T03:08:06Z/13&#34;</span><span class="p">,</span>
+    <span class="nt">&#34;cluster&#34;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;PassthroughCluster&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;ORIGINAL_DST&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;connect_timeout&#34;</span><span class="p">:</span> <span class="s2">&#34;1s&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;lb_policy&#34;</span><span class="p">:</span> <span class="s2">&#34;CLUSTER_PROVIDED&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;circuit_breakers&#34;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&#34;thresholds&#34;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="nt">&#34;max_connections&#34;</span><span class="p">:</span> <span class="mi">4294967295</span><span class="p">,</span>
+                    <span class="nt">&#34;max_pending_requests&#34;</span><span class="p">:</span> <span class="mi">4294967295</span><span class="p">,</span>
+                    <span class="nt">&#34;max_requests&#34;</span><span class="p">:</span> <span class="mi">4294967295</span><span class="p">,</span>
+                    <span class="nt">&#34;max_retries&#34;</span><span class="p">:</span> <span class="mi">4294967295</span>
+                <span class="p">}</span>
+            <span class="p">]</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="nt">&#34;last_updated&#34;</span><span class="p">:</span> <span class="s2">&#34;2019-12-04T03:08:22.658Z&#34;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h4 id="listeners">Listeners</h4>
+<p>Envoy采用listener来接收并处理downstream发过来的请求，listener采用了插件式的架构，可以通过配置不同的filter在Listener中插入不同的处理逻辑。Istio就在Envoy中加入了用于policy check和metric report的Mixer filter。</p>
+<p>Listener可以绑定到IP Socket或者Unix Domain Socket上，以接收来自客户端的请求;也可以不绑定，而是接收从其他listener转发来的数据。Istio利用了Envoy listener的这一特点，通过VirtualOutboundListener在一个端口接收所有出向请求，然后再按照请求的端口分别转发给不同的listener分别处理。</p>
+<h5 id="virtualoutbound-listener">VirtualOutbound Listener</h5>
+<p>Envoy创建了一个在15001端口监听的入口监听器。Iptable将Envoy所在Pod的对外请求拦截后发向本地的15001端口，该监听器接收后并不进行业务处理，而是根据请求的目的端口分发给其他监听器处理。该监听器取名为&quot;virtual”（虚拟）监听器也是这个原因。</p>
+<p>Envoy是如何做到按请求的目的端口进行分发的呢？ 从下面VirtualOutbound Listener的配置中可以看到<a href="https://www.envoyproxy.io/docs/envoy/latest/configuration/listeners/listener_filters/original_dst_filter" target="_blank" rel="noopener noreffer">use_original_dest</a>被设置为true,表明监听器将接收到的请求转交给和请求原目的地址关联的listener进行处理。</p>
+<p>如果在Enovy的配置中找不到和请求目的地端口的listener，则将会根据Istio的outboundTrafficPolicy全局配置选项进行处理。存在两种情况：</p>
+<ul>
+<li>如果<a href="https://istio.io/docs/reference/config/istio.mesh.v1alpha1/#MeshConfig-OutboundTrafficPolicy" target="_blank" rel="noopener noreffer">outboundTrafficPolicy</a>设置为ALLOW_ANY：Mesh允许发向任何外部服务的请求，不管该服务是否在Pilot的服务注册表中。在该策略下，Pilot将会在下发给Enovy的VirtualOutbound Listener加入一个upstream cluster为<a href="https://zhaohuabing.com/post/2018-09-25-istio-traffic-management-impl-intro/#passthroughcluster" target="_blank" rel="noopener noreffer">PassthroughCluster</a>的TCP proxy filter，找不到匹配端口listener的请求会被该TCP proxy filter处理，请求将会被发送到其IP头中的原始目的地地址。</li>
+<li>如果<a href="https://istio.io/docs/reference/config/istio.mesh.v1alpha1/#MeshConfig-OutboundTrafficPolicy" target="_blank" rel="noopener noreffer">outboundTrafficPolicy</a>设置为REGISTRY_ONLY：只允许发向Pilot服务注册表中存在的服务的对外请求。在该策略下，Pilot将会在下发给Enovy的VirtualOutbound Listener加入一个upstream cluster为<a href="https://zhaohuabing.com/post/2018-09-25-istio-traffic-management-impl-intro/#blackholecluster" target="_blank" rel="noopener noreffer">BlackHoleCluster</a>的TCP proxy filter，找不到匹配端口listener的请求会被该TCP proxy filter处理，由于BlackHoleCluster中没有配置upstteam host，请求实际上会被丢弃。</li>
+</ul>
+<p>下图是Bookinfo例子中Productpage服务中Enovy Proxy的Virutal Outbound Listener配置，outboundTrafficPolicy配置为ALLOW_ANY，因此Listener的filterchain中第二个filter是一个upstream cluster为PassthroughCluster的TCP proxy filter。注意该filter没有filter_chain_match匹配条件，因此如果进入该listener的请求在配置中找不到对于目的端口的listener进行处理，就会缺省进入该filter进行处理。</p>
+<p>filterchain中的第一个filter为一个upstream cluster为BlackHoleCluster的TCP proxy filter，该filter设置了filter_chain_match匹配条件，只有发向10.40.0.18这个IP的出向请求才会进入该filter处理。从前面<a href="https://zhaohuabing.com/post/2018-09-25-istio-traffic-management-impl-intro/#bookinfo" target="_blank" rel="noopener noreffer">Bookinfo的程序结构图</a>中可以看到，10.40.0.18其实是productpage服务自身的IP地址。该filter的目的是为了防止服务向自己发送请求可能导致的死循环。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/virtualoutbound.png"
+        data-srcset="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/virtualoutbound.png, https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/virtualoutbound.png 1.5x, https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/virtualoutbound.png 2x"
+        data-sizes="auto"
+        alt="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/virtualoutbound.png"
+        title="Virtual Outbound Listener" /></p>
+<p>Virtual Outbound Listener</p>
+<h5 id="outbound-listener">Outbound Listener</h5>
+<p>Envoy为网格中的外部服务按端口创建多个Listener，以用于处理出向请求。</p>
+<p>Productpage Pod中的Envoy创建了多个Outbound Listener</p>
+<ul>
+<li>0.0.0.0_9080 :处理对details,reviews和rating服务的出向请求</li>
+<li>0.0.0.0_9411 :处理对zipkin的出向请求</li>
+<li>0.0.0.0_3000 :处理对grafana的出向请求</li>
+<li>0.0.0.0_15014 :处理对citadel、galley、pilot、(Mixer)policy、(Mixer)telemetry的出向请求</li>
+<li>0.0.0.0_15004 :处理对(Mixer)policy、(Mixer)telemetry的出向请求</li>
+<li>……</li>
+</ul>
+<p>除了9080这个Listener用于处理应用的业务之外，其他listener都是Istio用于处理自身组件之间通信使用的，有的控制面组件如Pilot，Mixer对应多个listener，是因为该组件有多个端口提供服务。</p>
+<p>我们这里主要分析一下9080这个业务端口的Listenrer。和Outbound Listener一样，该Listener同样配置了&quot;bind_to_port”: false属性，因此该listener也没有被绑定到tcp端口上，其接收到的所有请求都转发自15001端口的Virtual listener。</p>
+<p>监听器name为0.0.0.0_9080,推测其含义应为匹配发向任意IP的9080的请求，从<a href="https://zhaohuabing.com/post/2018-09-25-istio-traffic-management-impl-intro/#bookinfo%e7%a8%8b%e5%ba%8f%e7%bb%93%e6%9e%84" target="_blank" rel="noopener noreffer">bookinfo程序结构</a>可以看到该程序中的productpage,revirews,ratings,details四个service都是9080端口，那么Envoy如何区别处理这四个service呢？</p>
+<p>首先需要区分入向（发送给productpage）请求和出向（发送给其他几个服务）请求：</p>
+<ul>
+<li>发给productpage的入向请求，Iptables规则会将其重定向到15006端口的VirtualInbound listener上，因此不会进入0.0.0.0_9080 listener处理。</li>
+<li>从productpage外发给reviews、details和ratings的出向请求，virtualOutbound listener无法找到和其目的IP完全匹配的listener，因此根据通配原则转交给0.0.0.0_9080这个Outbound Listener处理。</li>
+</ul>
+<blockquote>
+<p>备注： 根据业务逻辑，实际上productpage并不会调用ratings服务，但Istio并不知道各个业务之间会如何调用，因此将所有的服务信息都下发到了Envoy中。这样做对Envoy的内存占用和效率有一定影响，如果希望去掉Envoy配置中的无用数据，可以通过<a href="https://istio.io/docs/reference/config/networking/sidecar/" target="_blank" rel="noopener noreffer">sidecar</a>规则对Envoy的ingress和egress service配置进行调整。 由于对应到reviews、details和Ratings三个服务，当0.0.0.0_9080接收到出向请求后，并不能直接发送到一个downstream cluster中，而是需要根据请求目的地进行不同的路由。</p>
+</blockquote>
+<p>下图为productpage服务中导出的0.0.0.0_9080 outbound listener，我们可以看到该listener配置了一个<a href="https://zhaohuabing.com/post/2018-09-25-istio-traffic-management-impl-intro/#routes" target="_blank" rel="noopener noreffer">路由规则9080</a>，在路由规则中再根据不同的请求目的地对请求进行处理。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/outbound.png"
+        data-srcset="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/outbound.png, https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/outbound.png 1.5x, https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/outbound.png 2x"
+        data-sizes="auto"
+        alt="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/outbound.png"
+        title="Outnbound Listener" /></p>
+<p>Outnbound Listener</p>
+<h5 id="virtualinbound-listener">VirtualInbound Listener</h5>
+<p>在较早的版本中，Istio采用同一个VirtualListener在端口15001上同时处理入向和出向的请求。该方案存在一些潜在的问题，例如可能会导致出现死循环，参见<a href="https://github.com/istio/istio/pull/15713" target="_blank" rel="noopener noreffer">这个PR</a>。在1.4中，Istio为Envoy单独创建了一个VirtualInboundListener，在15006端口监听入向请求，原来的15001端口只用于处理出向请求。</p>
+<p>另外一个变化是当VirtualInboundListener接收到请求后，将直接在VirtualInboundListener采用一系列filterChain对入向请求进行处理，而不是像VirtualOutboundListener一样分发给其它独立的Listener进行处理。</p>
+<p>这样修改后，Envoy配置中入向和出向的请求处理流程被完全拆分开，请求处理流程更为清晰，可以避免由于配置导致的一些潜在错误。</p>
+<p>下图是Bookinfo例子中Reviews服务中Enovy Proxy的Virutal Inbound Listener配置。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/virtualinbound.png"
+        data-srcset="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/virtualinbound.png, https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/virtualinbound.png 1.5x, https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/virtualinbound.png 2x"
+        data-sizes="auto"
+        alt="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/virtualinbound.png"
+        title="Virtual Inbound Listener" /></p>
+<p>Virtual Inbound Listener</p>
+<p>该Listener中第三个filterchain用于处理Review服务的入向请求。该filterchain的匹配条件为Review服务的Pod IP和9080端口，配置了一个http_connection_manager filter，http_connection_manager 中又嵌入了istio_auth，Mixer，envoy.router等http filter，经过这些filter进行处理后，请求最终将被转发给&quot;inbound|9080||reviews.default.svc.cluster.local&quot;这个<a href="https://zhaohuabing.com/post/2018-09-25-istio-traffic-management-impl-intro/#inbound-cluster" target="_blank" rel="noopener noreffer">Inbound Cluster</a>，由于该Inbound Cluster中配置的Upstream为127.0.0.1:9080，由于iptable设置中127.0.0.1不会被拦截,该请求将发送到同Pod的Reviews服务的9080端口上进行业务处理。</p>
+<p>VirtualInbound Listener中的第一个filterchain的匹配条件为所有IP，用于缺省处理未在Pilot服务注册表中注册的服务。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/virtualinbound.png"
+        data-srcset="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/virtualinbound.png, https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/virtualinbound.png 1.5x, https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/virtualinbound.png 2x"
+        data-sizes="auto"
+        alt="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/virtualinbound.png"
+        title="Virtual Inbound Listener" /></p>
+<p>Virtual Inbound Listener</p>
+<h4 id="routes">Routes</h4>
+<p>配置Envoy的路由规则。Istio下发的缺省路由规则中对每个端口设置了一个路由规则，根据host来对请求进行路由分发。</p>
+<p>下面是Proudctpage服务中9080的路由配置，从文件中可以看到对应了5个virtual host，分别是details、productpage、ratings、reviews和allow_any，前三个virtual host分别对应到不同服务的<a href="https://zhaohuabing.com/post/2018-09-25-istio-traffic-management-impl-intro/#outbound-cluster" target="_blank" rel="noopener noreffer">outbound cluster</a>。最后一个对应到<a href="https://zhaohuabing.com/post/2018-09-25-istio-traffic-management-impl-intro/#passthroughcluster" target="_blank" rel="noopener noreffer">PassthroughCluster</a>,即当入向的i请求没有找到对应的服务时，也会让其直接通过。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span><span class="lnt">113
+</span><span class="lnt">114
+</span><span class="lnt">115
+</span><span class="lnt">116
+</span><span class="lnt">117
+</span><span class="lnt">118
+</span><span class="lnt">119
+</span><span class="lnt">120
+</span><span class="lnt">121
+</span><span class="lnt">122
+</span><span class="lnt">123
+</span><span class="lnt">124
+</span><span class="lnt">125
+</span><span class="lnt">126
+</span><span class="lnt">127
+</span><span class="lnt">128
+</span><span class="lnt">129
+</span><span class="lnt">130
+</span><span class="lnt">131
+</span><span class="lnt">132
+</span><span class="lnt">133
+</span><span class="lnt">134
+</span><span class="lnt">135
+</span><span class="lnt">136
+</span><span class="lnt">137
+</span><span class="lnt">138
+</span><span class="lnt">139
+</span><span class="lnt">140
+</span><span class="lnt">141
+</span><span class="lnt">142
+</span><span class="lnt">143
+</span><span class="lnt">144
+</span><span class="lnt">145
+</span><span class="lnt">146
+</span><span class="lnt">147
+</span><span class="lnt">148
+</span><span class="lnt">149
+</span><span class="lnt">150
+</span><span class="lnt">151
+</span><span class="lnt">152
+</span><span class="lnt">153
+</span><span class="lnt">154
+</span><span class="lnt">155
+</span><span class="lnt">156
+</span><span class="lnt">157
+</span><span class="lnt">158
+</span><span class="lnt">159
+</span><span class="lnt">160
+</span><span class="lnt">161
+</span><span class="lnt">162
+</span><span class="lnt">163
+</span><span class="lnt">164
+</span><span class="lnt">165
+</span><span class="lnt">166
+</span><span class="lnt">167
+</span><span class="lnt">168
+</span><span class="lnt">169
+</span><span class="lnt">170
+</span><span class="lnt">171
+</span><span class="lnt">172
+</span><span class="lnt">173
+</span><span class="lnt">174
+</span><span class="lnt">175
+</span><span class="lnt">176
+</span><span class="lnt">177
+</span><span class="lnt">178
+</span><span class="lnt">179
+</span><span class="lnt">180
+</span><span class="lnt">181
+</span><span class="lnt">182
+</span><span class="lnt">183
+</span><span class="lnt">184
+</span><span class="lnt">185
+</span><span class="lnt">186
+</span><span class="lnt">187
+</span><span class="lnt">188
+</span><span class="lnt">189
+</span><span class="lnt">190
+</span><span class="lnt">191
+</span><span class="lnt">192
+</span><span class="lnt">193
+</span><span class="lnt">194
+</span><span class="lnt">195
+</span><span class="lnt">196
+</span><span class="lnt">197
+</span><span class="lnt">198
+</span><span class="lnt">199
+</span><span class="lnt">200
+</span><span class="lnt">201
+</span><span class="lnt">202
+</span><span class="lnt">203
+</span><span class="lnt">204
+</span><span class="lnt">205
+</span><span class="lnt">206
+</span><span class="lnt">207
+</span><span class="lnt">208
+</span><span class="lnt">209
+</span><span class="lnt">210
+</span><span class="lnt">211
+</span><span class="lnt">212
+</span><span class="lnt">213
+</span><span class="lnt">214
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="p">{</span>
+    <span class="nt">&#34;version_info&#34;</span><span class="p">:</span> <span class="s2">&#34;2019-12-04T03:08:06Z/13&#34;</span><span class="p">,</span>
+    <span class="nt">&#34;route_config&#34;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;9080&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;virtual_hosts&#34;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;details.default.svc.cluster.local:9080&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;domains&#34;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="s2">&#34;details.default.svc.cluster.local&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;details.default.svc.cluster.local:9080&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;details&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;details:9080&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;details.default.svc.cluster&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;details.default.svc.cluster:9080&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;details.default.svc&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;details.default.svc:9080&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;details.default&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;details.default:9080&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;10.101.41.162&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;10.101.41.162:9080&#34;</span>
+                <span class="p">],</span>
+                <span class="nt">&#34;routes&#34;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">{</span>
+                        <span class="nt">&#34;match&#34;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="nt">&#34;prefix&#34;</span><span class="p">:</span> <span class="s2">&#34;/&#34;</span>
+                        <span class="p">},</span>
+                        <span class="nt">&#34;route&#34;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="nt">&#34;cluster&#34;</span><span class="p">:</span> <span class="s2">&#34;outbound|9080||details.default.svc.cluster.local&#34;</span><span class="p">,</span>
+                            <span class="nt">&#34;timeout&#34;</span><span class="p">:</span> <span class="s2">&#34;0s&#34;</span><span class="p">,</span>
+                            <span class="nt">&#34;retry_policy&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="nt">&#34;retry_on&#34;</span><span class="p">:</span> <span class="s2">&#34;connect-failure,refused-stream,unavailable,cancelled,resource-exhausted,retriable-status-codes&#34;</span><span class="p">,</span>
+                                <span class="nt">&#34;num_retries&#34;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                                <span class="nt">&#34;retry_host_predicate&#34;</span><span class="p">:</span> <span class="p">[</span>
+                                    <span class="p">{</span>
+                                        <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;envoy.retry_host_predicates.previous_hosts&#34;</span>
+                                    <span class="p">}</span>
+                                <span class="p">],</span>
+                                <span class="nt">&#34;host_selection_retry_max_attempts&#34;</span><span class="p">:</span> <span class="s2">&#34;5&#34;</span><span class="p">,</span>
+                                <span class="nt">&#34;retriable_status_codes&#34;</span><span class="p">:</span> <span class="p">[</span>
+                                    <span class="mi">503</span>
+                                <span class="p">]</span>
+                            <span class="p">},</span>
+                            <span class="nt">&#34;max_grpc_timeout&#34;</span><span class="p">:</span> <span class="s2">&#34;0s&#34;</span>
+                        <span class="p">},</span>
+                        <span class="nt">&#34;decorator&#34;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="nt">&#34;operation&#34;</span><span class="p">:</span> <span class="s2">&#34;details.default.svc.cluster.local:9080/*&#34;</span>
+                        <span class="p">},</span>
+                        <span class="nt">&#34;typed_per_filter_config&#34;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="nt">&#34;mixer&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="nt">&#34;@type&#34;</span><span class="p">:</span> <span class="s2">&#34;type.googleapis.com/istio.mixer.v1.config.client.ServiceConfig&#34;</span><span class="p">,</span>
+                                <span class="nt">&#34;disable_check_calls&#34;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+                                <span class="nt">&#34;mixer_attributes&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                    <span class="nt">&#34;attributes&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                        <span class="nt">&#34;destination.service.host&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                            <span class="nt">&#34;string_value&#34;</span><span class="p">:</span> <span class="s2">&#34;details.default.svc.cluster.local&#34;</span>
+                                        <span class="p">},</span>
+                                        <span class="nt">&#34;destination.service.name&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                            <span class="nt">&#34;string_value&#34;</span><span class="p">:</span> <span class="s2">&#34;details&#34;</span>
+                                        <span class="p">},</span>
+                                        <span class="nt">&#34;destination.service.namespace&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                            <span class="nt">&#34;string_value&#34;</span><span class="p">:</span> <span class="s2">&#34;default&#34;</span>
+                                        <span class="p">},</span>
+                                        <span class="nt">&#34;destination.service.uid&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                            <span class="nt">&#34;string_value&#34;</span><span class="p">:</span> <span class="s2">&#34;istio://default/services/details&#34;</span>
+                                        <span class="p">}</span>
+                                    <span class="p">}</span>
+                                <span class="p">},</span>
+                                <span class="nt">&#34;forward_attributes&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                    <span class="nt">&#34;attributes&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                        <span class="nt">&#34;destination.service.host&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                            <span class="nt">&#34;string_value&#34;</span><span class="p">:</span> <span class="s2">&#34;details.default.svc.cluster.local&#34;</span>
+                                        <span class="p">},</span>
+                                        <span class="nt">&#34;destination.service.name&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                            <span class="nt">&#34;string_value&#34;</span><span class="p">:</span> <span class="s2">&#34;details&#34;</span>
+                                        <span class="p">},</span>
+                                        <span class="nt">&#34;destination.service.namespace&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                            <span class="nt">&#34;string_value&#34;</span><span class="p">:</span> <span class="s2">&#34;default&#34;</span>
+                                        <span class="p">},</span>
+                                        <span class="nt">&#34;destination.service.uid&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                            <span class="nt">&#34;string_value&#34;</span><span class="p">:</span> <span class="s2">&#34;istio://default/services/details&#34;</span>
+                                        <span class="p">}</span>
+                                    <span class="p">}</span>
+                                <span class="p">}</span>
+                            <span class="p">}</span>
+                        <span class="p">},</span>
+                        <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;default&#34;</span>
+                    <span class="p">}</span>
+                <span class="p">]</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;productpage.default.svc.cluster.local:9080&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;domains&#34;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="s2">&#34;productpage.default.svc.cluster.local&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;productpage.default.svc.cluster.local:9080&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;productpage&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;productpage:9080&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;productpage.default.svc.cluster&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;productpage.default.svc.cluster:9080&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;productpage.default.svc&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;productpage.default.svc:9080&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;productpage.default&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;productpage.default:9080&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;10.100.240.212&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;10.100.240.212:9080&#34;</span>
+                <span class="p">],</span>
+                <span class="nt">&#34;routes&#34;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">{</span>
+                        <span class="nt">&#34;match&#34;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="nt">&#34;prefix&#34;</span><span class="p">:</span> <span class="s2">&#34;/&#34;</span>
+                        <span class="p">},</span>
+                        <span class="nt">&#34;route&#34;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="nt">&#34;cluster&#34;</span><span class="p">:</span> <span class="s2">&#34;outbound|9080||productpage.default.svc.cluster.local&#34;</span>
+													
+													<span class="err">......</span>
+                        <span class="p">}</span>
+                <span class="err">]</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;ratings.default.svc.cluster.local:9080&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;domains&#34;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="s2">&#34;ratings.default.svc.cluster.local&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;ratings.default.svc.cluster.local:9080&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;ratings&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;ratings:9080&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;ratings.default.svc.cluster&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;ratings.default.svc.cluster:9080&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;ratings.default.svc&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;ratings.default.svc:9080&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;ratings.default&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;ratings.default:9080&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;10.101.170.120&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;10.101.170.120:9080&#34;</span>
+                <span class="p">],</span>
+                <span class="nt">&#34;routes&#34;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">{</span>
+                        <span class="nt">&#34;match&#34;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="nt">&#34;prefix&#34;</span><span class="p">:</span> <span class="s2">&#34;/&#34;</span>
+                        <span class="p">},</span>
+                        <span class="nt">&#34;route&#34;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="nt">&#34;cluster&#34;</span><span class="p">:</span> <span class="s2">&#34;outbound|9080||ratings.default.svc.cluster.local&#34;</span><span class="p">,</span>
+                            													
+													<span class="err">......</span>
+                        <span class="p">}</span>
+                <span class="err">]</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;reviews.default.svc.cluster.local:9080&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;domains&#34;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="s2">&#34;reviews.default.svc.cluster.local&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;reviews.default.svc.cluster.local:9080&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;reviews&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;reviews:9080&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;reviews.default.svc.cluster&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;reviews.default.svc.cluster:9080&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;reviews.default.svc&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;reviews.default.svc:9080&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;reviews.default&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;reviews.default:9080&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;10.102.108.56&#34;</span><span class="p">,</span>
+                    <span class="s2">&#34;10.102.108.56:9080&#34;</span>
+                <span class="p">],</span>
+                <span class="nt">&#34;routes&#34;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">{</span>
+                        <span class="nt">&#34;match&#34;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="nt">&#34;prefix&#34;</span><span class="p">:</span> <span class="s2">&#34;/&#34;</span>
+                        <span class="p">},</span>
+                        <span class="nt">&#34;route&#34;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="nt">&#34;cluster&#34;</span><span class="p">:</span> <span class="s2">&#34;outbound|9080||reviews.default.svc.cluster.local&#34;</span><span class="p">,</span>
+                            													
+													<span class="err">......</span>
+                        <span class="p">}</span>
+                <span class="err">]</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;allow_any&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;domains&#34;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="s2">&#34;*&#34;</span>
+                <span class="p">],</span>
+                <span class="nt">&#34;routes&#34;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">{</span>
+                        <span class="nt">&#34;match&#34;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="nt">&#34;prefix&#34;</span><span class="p">:</span> <span class="s2">&#34;/&#34;</span>
+                        <span class="p">},</span>
+                        <span class="nt">&#34;route&#34;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="nt">&#34;cluster&#34;</span><span class="p">:</span> <span class="s2">&#34;PassthroughCluster&#34;</span>
+                        <span class="p">},</span>
+                        <span class="nt">&#34;typed_per_filter_config&#34;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="nt">&#34;mixer&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="nt">&#34;@type&#34;</span><span class="p">:</span> <span class="s2">&#34;type.googleapis.com/istio.mixer.v1.config.client.ServiceConfig&#34;</span><span class="p">,</span>
+                                <span class="nt">&#34;disable_check_calls&#34;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+                                <span class="nt">&#34;mixer_attributes&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                    <span class="nt">&#34;attributes&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                        <span class="nt">&#34;destination.service.name&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                            <span class="nt">&#34;string_value&#34;</span><span class="p">:</span> <span class="s2">&#34;PassthroughCluster&#34;</span>
+                                        <span class="p">}</span>
+                                    <span class="p">}</span>
+                                <span class="p">},</span>
+                                <span class="nt">&#34;forward_attributes&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                    <span class="nt">&#34;attributes&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                        <span class="nt">&#34;destination.service.name&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                            <span class="nt">&#34;string_value&#34;</span><span class="p">:</span> <span class="s2">&#34;PassthroughCluster&#34;</span>
+                                        <span class="p">}</span>
+                                    <span class="p">}</span>
+                                <span class="p">}</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">}</span>
+                <span class="p">]</span>
+            <span class="p">}</span>
+        <span class="p">],</span>
+        <span class="nt">&#34;validate_clusters&#34;</span><span class="p">:</span> <span class="kc">false</span>
+    <span class="p">},</span>
+    <span class="s2">&#34;last_updated&#34;</span><span class="err">:</span> <span class="s2">&#34;2019-12-04T03:08:22.935Z&#34;</span>
+<span class="err">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="bookinfo端到端调用分析">Bookinfo端到端调用分析</h2>
+<p>通过前面章节对Envoy配置文件的分析，我们了解到Istio控制面如何将服务和路由信息通过xDS接口下发到数据面中；并介绍了Envoy上生成的各种配置数据的结构，包括listener,cluster,route和endpoint。</p>
+<p>下面我们来分析一个端到端的调用请求，通过调用请求的流程把这些配置串连起来，以从全局上理解Istio控制面的流量控制能力是如何在数据面的Envoy上实现的。</p>
+<p>下图描述了一个Productpage服务调用Reviews服务的请求流程：</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/envoy-traffic-route.png"
+        data-srcset="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/envoy-traffic-route.png, https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/envoy-traffic-route.png 1.5x, https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/envoy-traffic-route.png 2x"
+        data-sizes="auto"
+        alt="https://zhaohuabing.com/img/2019-12-05-istio-traffic-management-impl-intro/envoy-traffic-route.png"
+        title="Virtual Inbound Listener" /></p>
+<p>Virtual Inbound Listener</p>
+<ol>
+<li>Productpage发起对Reviews服务的调用：<code>http://reviews:9080/reviews/0</code> 。</li>
+<li>请求被Productpage Pod的iptable规则拦截，重定向到本地的15001端口。</li>
+<li>在15001端口上监听的Envoy Virtual Outbound Listener收到了该请求。</li>
+<li>请求被Virtual Outbound Listener根据原目标IP（通配）和端口（9080）转发到0.0.0.0_9080这个 outbound listener。</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="p">{</span>
+    <span class="nt">&#34;version_info&#34;</span><span class="p">:</span> <span class="s2">&#34;2019-12-04T03:08:06Z/13&#34;</span><span class="p">,</span>
+    <span class="nt">&#34;listener&#34;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;virtualOutbound&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;address&#34;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&#34;socket_address&#34;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&#34;address&#34;</span><span class="p">:</span> <span class="s2">&#34;0.0.0.0&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;port_value&#34;</span><span class="p">:</span> <span class="mi">15001</span>
+            <span class="p">}</span>
+        <span class="p">},</span>
+        <span class="err">......</span>
+
+         <span class="nt">&#34;use_original_dst&#34;</span><span class="p">:</span> <span class="kc">true</span> <span class="err">//请求转发给和原始目的IP</span><span class="p">:</span><span class="err">Port匹配的listener</span>
+    <span class="p">},</span>
+    <span class="nt">&#34;last_updated&#34;</span><span class="p">:</span> <span class="s2">&#34;2019-12-04T03:08:22.919Z&#34;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><ol>
+<li>根据0.0.0.0_9080 listener的http_connection_manager filter配置,该请求采用“9080” route进行分发。</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"> <span class="p">{</span>
+    <span class="nt">&#34;version_info&#34;</span><span class="p">:</span> <span class="s2">&#34;2019-12-04T03:08:06Z/13&#34;</span><span class="p">,</span>
+    <span class="nt">&#34;listener&#34;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;0.0.0.0_9080&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;address&#34;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&#34;socket_address&#34;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&#34;address&#34;</span><span class="p">:</span> <span class="s2">&#34;0.0.0.0&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;port_value&#34;</span><span class="p">:</span> <span class="mi">9080</span>
+            <span class="p">}</span>
+        <span class="p">},</span>
+        <span class="nt">&#34;filter_chains&#34;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="nt">&#34;filters&#34;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">{</span>
+                        <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;envoy.http_connection_manager&#34;</span><span class="p">,</span>
+                        <span class="nt">&#34;typed_config&#34;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="nt">&#34;@type&#34;</span><span class="p">:</span> <span class="s2">&#34;type.googleapis.com/envoy.config.filter.network.http_connection_manager.v2.HttpConnectionManager&#34;</span><span class="p">,</span>
+                            <span class="nt">&#34;stat_prefix&#34;</span><span class="p">:</span> <span class="s2">&#34;outbound_0.0.0.0_9080&#34;</span><span class="p">,</span>
+                            <span class="nt">&#34;http_filters&#34;</span><span class="p">:</span> <span class="p">[</span>
+                                <span class="p">{</span>
+                                    <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;mixer&#34;</span><span class="p">,</span>
+                                    <span class="err">......</span>
+                                <span class="p">},</span>
+                                <span class="p">{</span>
+                                    <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;envoy.cors&#34;</span>
+                                <span class="p">},</span>
+                                <span class="p">{</span>
+                                    <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;envoy.fault&#34;</span>
+                                <span class="p">},</span>
+                                <span class="p">{</span>
+                                    <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;envoy.router&#34;</span>
+                                <span class="p">}</span>
+                            <span class="p">],</span>
+                            <span class="err">......</span>
+                            
+                            <span class="nt">&#34;rds&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="nt">&#34;config_source&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                    <span class="nt">&#34;ads&#34;</span><span class="p">:</span> <span class="p">{}</span>
+                                <span class="p">},</span>
+                                <span class="nt">&#34;route_config_name&#34;</span><span class="p">:</span> <span class="s2">&#34;9080&#34;</span> <span class="err">//采用“</span><span class="mi">9080</span><span class="err">”</span> <span class="err">route进行分发</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">}</span>
+                <span class="p">]</span>
+            <span class="p">}</span>
+        <span class="p">],</span>
+        <span class="nt">&#34;deprecated_v1&#34;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&#34;bind_to_port&#34;</span><span class="p">:</span> <span class="kc">false</span>
+        <span class="p">},</span>
+        <span class="nt">&#34;listener_filters_timeout&#34;</span><span class="p">:</span> <span class="s2">&#34;0.100s&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;traffic_direction&#34;</span><span class="p">:</span> <span class="s2">&#34;OUTBOUND&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;continue_on_listener_filters_timeout&#34;</span><span class="p">:</span> <span class="kc">true</span>
+    <span class="p">},</span>
+    <span class="nt">&#34;last_updated&#34;</span><span class="p">:</span> <span class="s2">&#34;2019-12-04T03:08:22.822Z&#34;</span>
+<span class="p">}</span>   
+</code></pre></td></tr></table>
+</div>
+</div><ol>
+<li>“9080”这个route的配置中，host name为reviews:9080的请求对应的cluster为outbound|9080||reviews.default.svc.cluster.local</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span><span class="lnt">82
+</span><span class="lnt">83
+</span><span class="lnt">84
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="p">{</span>
+    <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;reviews.default.svc.cluster.local:9080&#34;</span><span class="p">,</span>
+    <span class="nt">&#34;domains&#34;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">&#34;reviews.default.svc.cluster.local&#34;</span><span class="p">,</span>
+        <span class="s2">&#34;reviews.default.svc.cluster.local:9080&#34;</span><span class="p">,</span>
+        <span class="s2">&#34;reviews&#34;</span><span class="p">,</span>
+        <span class="s2">&#34;reviews:9080&#34;</span><span class="p">,</span>
+        <span class="s2">&#34;reviews.default.svc.cluster&#34;</span><span class="p">,</span>
+        <span class="s2">&#34;reviews.default.svc.cluster:9080&#34;</span><span class="p">,</span>
+        <span class="s2">&#34;reviews.default.svc&#34;</span><span class="p">,</span>
+        <span class="s2">&#34;reviews.default.svc:9080&#34;</span><span class="p">,</span>
+        <span class="s2">&#34;reviews.default&#34;</span><span class="p">,</span>
+        <span class="s2">&#34;reviews.default:9080&#34;</span><span class="p">,</span>
+        <span class="s2">&#34;10.102.108.56&#34;</span><span class="p">,</span>
+        <span class="s2">&#34;10.102.108.56:9080&#34;</span>
+    <span class="p">],</span>
+    <span class="nt">&#34;routes&#34;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="nt">&#34;match&#34;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&#34;prefix&#34;</span><span class="p">:</span> <span class="s2">&#34;/&#34;</span>
+            <span class="p">},</span>
+            <span class="nt">&#34;route&#34;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&#34;cluster&#34;</span><span class="p">:</span> <span class="s2">&#34;outbound|9080||reviews.default.svc.cluster.local&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;timeout&#34;</span><span class="p">:</span> <span class="s2">&#34;0s&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;retry_policy&#34;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&#34;retry_on&#34;</span><span class="p">:</span> <span class="s2">&#34;connect-failure,refused-stream,unavailable,cancelled,resource-exhausted,retriable-status-codes&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;num_retries&#34;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="nt">&#34;retry_host_predicate&#34;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="p">{</span>
+                            <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;envoy.retry_host_predicates.previous_hosts&#34;</span>
+                        <span class="p">}</span>
+                    <span class="p">],</span>
+                    <span class="nt">&#34;host_selection_retry_max_attempts&#34;</span><span class="p">:</span> <span class="s2">&#34;5&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;retriable_status_codes&#34;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="mi">503</span>
+                    <span class="p">]</span>
+                <span class="p">},</span>
+                <span class="nt">&#34;max_grpc_timeout&#34;</span><span class="p">:</span> <span class="s2">&#34;0s&#34;</span>
+            <span class="p">},</span>
+            <span class="nt">&#34;decorator&#34;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&#34;operation&#34;</span><span class="p">:</span> <span class="s2">&#34;reviews.default.svc.cluster.local:9080/*&#34;</span>
+            <span class="p">},</span>
+            <span class="nt">&#34;typed_per_filter_config&#34;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&#34;mixer&#34;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&#34;@type&#34;</span><span class="p">:</span> <span class="s2">&#34;type.googleapis.com/istio.mixer.v1.config.client.ServiceConfig&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;disable_check_calls&#34;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+                    <span class="nt">&#34;mixer_attributes&#34;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&#34;attributes&#34;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="nt">&#34;destination.service.host&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="nt">&#34;string_value&#34;</span><span class="p">:</span> <span class="s2">&#34;reviews.default.svc.cluster.local&#34;</span>
+                            <span class="p">},</span>
+                            <span class="nt">&#34;destination.service.name&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="nt">&#34;string_value&#34;</span><span class="p">:</span> <span class="s2">&#34;reviews&#34;</span>
+                            <span class="p">},</span>
+                            <span class="nt">&#34;destination.service.namespace&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="nt">&#34;string_value&#34;</span><span class="p">:</span> <span class="s2">&#34;default&#34;</span>
+                            <span class="p">},</span>
+                            <span class="nt">&#34;destination.service.uid&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="nt">&#34;string_value&#34;</span><span class="p">:</span> <span class="s2">&#34;istio://default/services/reviews&#34;</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">},</span>
+                    <span class="nt">&#34;forward_attributes&#34;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&#34;attributes&#34;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="nt">&#34;destination.service.host&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="nt">&#34;string_value&#34;</span><span class="p">:</span> <span class="s2">&#34;reviews.default.svc.cluster.local&#34;</span>
+                            <span class="p">},</span>
+                            <span class="nt">&#34;destination.service.name&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="nt">&#34;string_value&#34;</span><span class="p">:</span> <span class="s2">&#34;reviews&#34;</span>
+                            <span class="p">},</span>
+                            <span class="nt">&#34;destination.service.namespace&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="nt">&#34;string_value&#34;</span><span class="p">:</span> <span class="s2">&#34;default&#34;</span>
+                            <span class="p">},</span>
+                            <span class="nt">&#34;destination.service.uid&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="nt">&#34;string_value&#34;</span><span class="p">:</span> <span class="s2">&#34;istio://default/services/reviews&#34;</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;default&#34;</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><ol>
+<li>outbound|9080||reviews.default.svc.cluster.local cluster为动态资源，通过eds查询得到该cluster中有3个endpoint。</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="p">{</span>
+    <span class="nt">&#34;clusterName&#34;</span><span class="p">:</span> <span class="s2">&#34;outbound|9080||reviews.default.svc.cluster.local&#34;</span><span class="p">,</span>
+    <span class="nt">&#34;endpoints&#34;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="nt">&#34;lbEndpoints&#34;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="nt">&#34;endpoint&#34;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&#34;address&#34;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="nt">&#34;socketAddress&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="nt">&#34;address&#34;</span><span class="p">:</span> <span class="s2">&#34;10.40.0.15&#34;</span><span class="p">,</span>
+                                <span class="nt">&#34;portValue&#34;</span><span class="p">:</span> <span class="mi">9080</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">},</span>
+                    <span class="nt">&#34;metadata&#34;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&#34;filterMetadata&#34;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="nt">&#34;envoy.transport_socket_match&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="nt">&#34;tlsMode&#34;</span><span class="p">:</span> <span class="s2">&#34;istio&#34;</span>
+                            <span class="p">},</span>
+                            <span class="nt">&#34;istio&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="nt">&#34;uid&#34;</span><span class="p">:</span> <span class="s2">&#34;kubernetes://reviews-v1-75b979578c-pw8zs.default&#34;</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">},</span>
+                    <span class="nt">&#34;loadBalancingWeight&#34;</span><span class="p">:</span> <span class="mi">1</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="nt">&#34;endpoint&#34;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&#34;address&#34;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="nt">&#34;socketAddress&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="nt">&#34;address&#34;</span><span class="p">:</span> <span class="s2">&#34;10.40.0.16&#34;</span><span class="p">,</span>
+                                <span class="nt">&#34;portValue&#34;</span><span class="p">:</span> <span class="mi">9080</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">},</span>
+                    <span class="nt">&#34;metadata&#34;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&#34;filterMetadata&#34;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="nt">&#34;envoy.transport_socket_match&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="nt">&#34;tlsMode&#34;</span><span class="p">:</span> <span class="s2">&#34;istio&#34;</span>
+                            <span class="p">},</span>
+                            <span class="nt">&#34;istio&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="nt">&#34;uid&#34;</span><span class="p">:</span> <span class="s2">&#34;kubernetes://reviews-v3-54c6c64795-wbls7.default&#34;</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">},</span>
+                    <span class="nt">&#34;loadBalancingWeight&#34;</span><span class="p">:</span> <span class="mi">1</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="nt">&#34;endpoint&#34;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&#34;address&#34;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="nt">&#34;socketAddress&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="nt">&#34;address&#34;</span><span class="p">:</span> <span class="s2">&#34;10.40.0.17&#34;</span><span class="p">,</span>
+                                <span class="nt">&#34;portValue&#34;</span><span class="p">:</span> <span class="mi">9080</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">},</span>
+                    <span class="nt">&#34;metadata&#34;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&#34;filterMetadata&#34;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="nt">&#34;envoy.transport_socket_match&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="nt">&#34;tlsMode&#34;</span><span class="p">:</span> <span class="s2">&#34;istio&#34;</span>
+                            <span class="p">},</span>
+                            <span class="nt">&#34;istio&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="nt">&#34;uid&#34;</span><span class="p">:</span> <span class="s2">&#34;kubernetes://reviews-v2-597bf96c8f-l2fp8.default&#34;</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">},</span>
+                    <span class="nt">&#34;loadBalancingWeight&#34;</span><span class="p">:</span> <span class="mi">1</span>
+                <span class="p">}</span>
+            <span class="p">],</span>
+            <span class="nt">&#34;loadBalancingWeight&#34;</span><span class="p">:</span> <span class="mi">3</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><ol>
+<li>请求被转发到其中一个endpoint 10.40.0.15，即Reviews-v1所在的Pod。</li>
+<li>然后该请求被iptable规则拦截，重定向到本地的15006端口。</li>
+<li>在15006端口上监听的Envoy Virtual Inbound Listener收到了该请求。</li>
+<li>根据匹配条件，请求被Virtual Inbound Listener内部配置的Http connection manager filter处理，该filter设置的路由配置为将其发送给inbound|9080|http|reviews.default.svc.cluster.local这个inbound cluster。</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="p">{</span>
+    <span class="nt">&#34;version_info&#34;</span><span class="p">:</span> <span class="s2">&#34;2019-12-04T03:07:44Z/12&#34;</span><span class="p">,</span>
+    <span class="nt">&#34;listener&#34;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;virtualInbound&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;address&#34;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&#34;socket_address&#34;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&#34;address&#34;</span><span class="p">:</span> <span class="s2">&#34;0.0.0.0&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;port_value&#34;</span><span class="p">:</span> <span class="mi">15006</span>
+            <span class="p">}</span>
+        <span class="p">},</span>
+        <span class="nt">&#34;filter_chains&#34;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="err">......</span>
+            <span class="p">{</span>
+                <span class="nt">&#34;filter_chain_match&#34;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&#34;prefix_ranges&#34;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="p">{</span>
+                            <span class="nt">&#34;address_prefix&#34;</span><span class="p">:</span> <span class="s2">&#34;10.40.0.15&#34;</span><span class="p">,</span>
+                            <span class="nt">&#34;prefix_len&#34;</span><span class="p">:</span> <span class="mi">32</span>
+                        <span class="p">}</span>
+                    <span class="p">],</span>
+                    <span class="nt">&#34;destination_port&#34;</span><span class="p">:</span> <span class="mi">9080</span>
+                <span class="p">},</span>
+                <span class="nt">&#34;filters&#34;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">{</span>
+                        <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;envoy.http_connection_manager&#34;</span><span class="p">,</span>
+                        <span class="nt">&#34;typed_config&#34;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="nt">&#34;@type&#34;</span><span class="p">:</span> <span class="s2">&#34;type.googleapis.com/envoy.config.filter.network.http_connection_manager.v2.HttpConnectionManager&#34;</span><span class="p">,</span>
+                            <span class="nt">&#34;stat_prefix&#34;</span><span class="p">:</span> <span class="s2">&#34;inbound_10.40.0.15_9080&#34;</span><span class="p">,</span>
+                            <span class="nt">&#34;http_filters&#34;</span><span class="p">:</span> <span class="p">[</span>
+                                <span class="p">{</span>
+                                    <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;istio_authn&#34;</span><span class="p">,</span>
+                                    <span class="err">......</span>
+                                <span class="p">},</span>
+                                <span class="p">{</span>
+                                    <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;mixer&#34;</span><span class="p">,</span>
+                                    <span class="err">......</span>
+                                <span class="p">},</span>
+                                <span class="p">{</span>
+                                    <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;envoy.cors&#34;</span>
+                                <span class="p">},</span>
+                                <span class="p">{</span>
+                                    <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;envoy.fault&#34;</span>
+                                <span class="p">},</span>
+                                <span class="p">{</span>
+                                    <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;envoy.router&#34;</span>
+                                <span class="p">}</span>
+                            <span class="p">],</span>
+                            <span class="err">......</span>
+                            <span class="nt">&#34;route_config&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;inbound|9080|http|reviews.default.svc.cluster.local&#34;</span><span class="p">,</span>
+                                <span class="nt">&#34;virtual_hosts&#34;</span><span class="p">:</span> <span class="p">[</span>
+                                    <span class="p">{</span>
+                                        <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;inbound|http|9080&#34;</span><span class="p">,</span>
+                                        <span class="nt">&#34;domains&#34;</span><span class="p">:</span> <span class="p">[</span>
+                                            <span class="s2">&#34;*&#34;</span>
+                                        <span class="p">],</span>
+                                        <span class="nt">&#34;routes&#34;</span><span class="p">:</span> <span class="p">[</span>
+                                            <span class="p">{</span>
+                                                <span class="nt">&#34;match&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                                    <span class="nt">&#34;prefix&#34;</span><span class="p">:</span> <span class="s2">&#34;/&#34;</span>
+                                                <span class="p">},</span>
+                                                <span class="err">......</span>
+                                                <span class="nt">&#34;route&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                                    <span class="nt">&#34;timeout&#34;</span><span class="p">:</span> <span class="s2">&#34;0s&#34;</span><span class="p">,</span>
+                                                    <span class="nt">&#34;max_grpc_timeout&#34;</span><span class="p">:</span> <span class="s2">&#34;0s&#34;</span><span class="p">,</span>
+                                                    <span class="nt">&#34;cluster&#34;</span><span class="p">:</span> <span class="s2">&#34;inbound|9080|http|reviews.default.svc.cluster.local&#34;</span> <span class="err">//对应的inbound</span> <span class="err">cluster</span>
+                                                <span class="p">}</span>
+                                            <span class="p">}</span>
+                                        <span class="p">]</span>
+                                    <span class="p">}</span>
+                                <span class="p">],</span>
+                                <span class="nt">&#34;validate_clusters&#34;</span><span class="p">:</span> <span class="kc">false</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">}</span>
+                <span class="p">],</span>
+                <span class="err">......</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><ol>
+<li>inbound|9080|http|reviews.default.svc.cluster.local cluster配置的host为127.0.0.1：9080。</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="p">{</span>
+    <span class="nt">&#34;version_info&#34;</span><span class="p">:</span> <span class="s2">&#34;2019-12-04T03:08:06Z/13&#34;</span><span class="p">,</span>
+    <span class="nt">&#34;cluster&#34;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;inbound|9080|http|productpage.default.svc.cluster.local&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;STATIC&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;connect_timeout&#34;</span><span class="p">:</span> <span class="s2">&#34;1s&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;circuit_breakers&#34;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&#34;thresholds&#34;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="nt">&#34;max_connections&#34;</span><span class="p">:</span> <span class="mi">4294967295</span><span class="p">,</span>
+                    <span class="nt">&#34;max_pending_requests&#34;</span><span class="p">:</span> <span class="mi">4294967295</span><span class="p">,</span>
+                    <span class="nt">&#34;max_requests&#34;</span><span class="p">:</span> <span class="mi">4294967295</span><span class="p">,</span>
+                    <span class="nt">&#34;max_retries&#34;</span><span class="p">:</span> <span class="mi">4294967295</span>
+                <span class="p">}</span>
+            <span class="p">]</span>
+        <span class="p">},</span>
+        <span class="nt">&#34;load_assignment&#34;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&#34;cluster_name&#34;</span><span class="p">:</span> <span class="s2">&#34;inbound|9080|http|productpage.default.svc.cluster.local&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;endpoints&#34;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="nt">&#34;lb_endpoints&#34;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="p">{</span>
+                            <span class="nt">&#34;endpoint&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="nt">&#34;address&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                    <span class="nt">&#34;socket_address&#34;</span><span class="p">:</span> <span class="p">{</span>
+                                        <span class="nt">&#34;address&#34;</span><span class="p">:</span> <span class="s2">&#34;127.0.0.1&#34;</span><span class="p">,</span> <span class="err">//cluster配置的endpoint地址</span>
+                                        <span class="nt">&#34;port_value&#34;</span><span class="p">:</span> <span class="mi">9080</span>
+                                    <span class="p">}</span>
+                                <span class="p">}</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">]</span>
+                <span class="p">}</span>
+            <span class="p">]</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="nt">&#34;last_updated&#34;</span><span class="p">:</span> <span class="s2">&#34;2019-12-04T03:08:22.658Z&#34;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><ol>
+<li>请求被转发到127.0.0.1：9080，即Reviews服务进行业务处理。</li>
+</ol>
+<p>上述调用流程涉及的完整Envoy配置文件参见该github repository：https://github.com/zhaohuabing/bookinfo-bookinfo-config-dump/tree/istio1.4.0</p>
+<h1 id="小结">小结</h1>
+<p>本文介绍了Istio流量管理相关组件，Istio控制面和数据面之间的标准接口，以及Istio下发到Envoy的完整配置数据的结构和内容。然后通过Bookinfo示例程序的一个端到端调用分析了Envoy是如何实现服务网格中服务发现和路由转发的，希望能帮助大家透过概念更进一步深入理解Istio流量管理的实现机制。</p>
+<h1 id="参考资料">参考资料</h1>
+<ol>
+<li><a href="https://istio.io/docs/concepts/traffic-management/#pilot-and-envoy" target="_blank" rel="noopener noreffer">Istio Traffic Managment Concept</a></li>
+<li><a href="https://github.com/envoyproxy/data-plane-api/blob/master/API_OVERVIEW.md" target="_blank" rel="noopener noreffer">Data Plane API</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources" target="_blank" rel="noopener noreffer">kubernetes Custom Resource</a></li>
+<li><a href="https://github.com/istio/old_pilot_repo/blob/master/doc/design.md" target="_blank" rel="noopener noreffer">Istio Pilot Design Overview</a></li>
+<li><a href="https://www.envoyproxy.io/docs/envoy/latest/configuration/overview/v2_overview" target="_blank" rel="noopener noreffer">Envoy V2 API Overview</a></li>
+<li><a href="https://github.com/envoyproxy/data-plane-api/tree/master/envoy/api/v2" target="_blank" rel="noopener noreffer">Data Plane API Protocol Buffer Definition</a></li>
+<li><a href="https://www.envoyproxy.io/docs/envoy/latest/api-docs/xds_protocol" target="_blank" rel="noopener noreffer">xDS REST and gRPC protocol</a></li>
+<li><a href="https://github.com/istio/istio/tree/master/pilot/pkg/proxy/envoy/v2" target="_blank" rel="noopener noreffer">Pilot Debug interface</a></li>
+<li><a href="https://zhaohuabing.com/2018/05/23/istio-auto-injection-with-webhook/" target="_blank" rel="noopener noreffer">Istio Sidecar自动注入原理</a></li>
+</ol>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>更新于 212111-08-2151</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/zhaohuabin_traffic/index.md" target="_blank">阅读原始文档</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://zhengtianchi.github.io/zhaohuabin_traffic/" data-title="istio - 流量走向详解" data-hashtags="istio,envoy"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://zhengtianchi.github.io/zhaohuabin_traffic/" data-hashtag="istio"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Hacker News" data-sharer="hackernews" data-url="https://zhengtianchi.github.io/zhaohuabin_traffic/" data-title="istio - 流量走向详解"><i class="fab fa-hacker-news fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://zhengtianchi.github.io/zhaohuabin_traffic/" data-title="istio - 流量走向详解"><i data-svg-src="https://cdn.jsdelivr.net/npm/simple-icons@2.14.0/icons/line.svg"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://zhengtianchi.github.io/zhaohuabin_traffic/" data-title="istio - 流量走向详解" data-image="/images/medium_istio.png" data-ralateuid="xxxx"><i class="fab fa-weibo fa-fw"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/istio/">istio</a>,&nbsp;<a href="/tags/envoy/">envoy</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/envoy_1/" class="prev" rel="prev" title="Envoy入门介绍"><i class="fas fa-angle-left fa-fw"></i>Envoy入门介绍</a>
+            <a href="/%E5%A4%9A%E4%BA%91/" class="next" rel="next" title="istio - 多集群管控入门">istio - 多集群管控入门<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"><div id="valine" class="comment"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://valine.js.org/">Valine</a>.
+            </noscript></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.87.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/dillonzq/LoveIt" target="_blank" rel="noopener noreffer" title="LoveIt 0.2.10"><i class="far fa-kiss-wink-heart fa-fw"></i> LoveIt</a>
+                </div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2021</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">xxxx</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/valine/valine.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/css/lightgallery.min.css"><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/algoliasearch@4.2.0/dist/algoliasearch-lite.umd.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lazysizes@5.2.2/lazysizes.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/js/lightgallery.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lg-thumbnail.js@1.2.0/dist/lg-thumbnail.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lg-zoom.js@1.2.0/dist/lg-zoom.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sharer.js@0.4.0/sharer.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{"valine":{"appId":"QGzwQXOqs5JOhN4RGPOkR2mR-MdYXbMMI","appKey":"WBmoGyJtbqUswvfLh6L8iEBr","avatar":"mp","el":"#valine","emojiCDN":"https://cdn.jsdelivr.net/npm/emoji-datasource-google@5.0.1/img/google/64/","emojiMaps":{"100":"1f4af.png","alien":"1f47d.png","anger":"1f4a2.png","angry":"1f620.png","anguished":"1f627.png","astonished":"1f632.png","black_heart":"1f5a4.png","blue_heart":"1f499.png","blush":"1f60a.png","bomb":"1f4a3.png","boom":"1f4a5.png","broken_heart":"1f494.png","brown_heart":"1f90e.png","clown_face":"1f921.png","cold_face":"1f976.png","cold_sweat":"1f630.png","confounded":"1f616.png","confused":"1f615.png","cry":"1f622.png","crying_cat_face":"1f63f.png","cupid":"1f498.png","dash":"1f4a8.png","disappointed":"1f61e.png","disappointed_relieved":"1f625.png","dizzy":"1f4ab.png","dizzy_face":"1f635.png","drooling_face":"1f924.png","exploding_head":"1f92f.png","expressionless":"1f611.png","face_vomiting":"1f92e.png","face_with_cowboy_hat":"1f920.png","face_with_hand_over_mouth":"1f92d.png","face_with_head_bandage":"1f915.png","face_with_monocle":"1f9d0.png","face_with_raised_eyebrow":"1f928.png","face_with_rolling_eyes":"1f644.png","face_with_symbols_on_mouth":"1f92c.png","face_with_thermometer":"1f912.png","fearful":"1f628.png","flushed":"1f633.png","frowning":"1f626.png","ghost":"1f47b.png","gift_heart":"1f49d.png","green_heart":"1f49a.png","grimacing":"1f62c.png","grin":"1f601.png","grinning":"1f600.png","hankey":"1f4a9.png","hear_no_evil":"1f649.png","heart":"2764-fe0f.png","heart_decoration":"1f49f.png","heart_eyes":"1f60d.png","heart_eyes_cat":"1f63b.png","heartbeat":"1f493.png","heartpulse":"1f497.png","heavy_heart_exclamation_mark_ornament":"2763-fe0f.png","hole":"1f573-fe0f.png","hot_face":"1f975.png","hugging_face":"1f917.png","hushed":"1f62f.png","imp":"1f47f.png","innocent":"1f607.png","japanese_goblin":"1f47a.png","japanese_ogre":"1f479.png","joy":"1f602.png","joy_cat":"1f639.png","kiss":"1f48b.png","kissing":"1f617.png","kissing_cat":"1f63d.png","kissing_closed_eyes":"1f61a.png","kissing_heart":"1f618.png","kissing_smiling_eyes":"1f619.png","laughing":"1f606.png","left_speech_bubble":"1f5e8-fe0f.png","love_letter":"1f48c.png","lying_face":"1f925.png","mask":"1f637.png","money_mouth_face":"1f911.png","nauseated_face":"1f922.png","nerd_face":"1f913.png","neutral_face":"1f610.png","no_mouth":"1f636.png","open_mouth":"1f62e.png","orange_heart":"1f9e1.png","partying_face":"1f973.png","pensive":"1f614.png","persevere":"1f623.png","pleading_face":"1f97a.png","pouting_cat":"1f63e.png","purple_heart":"1f49c.png","rage":"1f621.png","relaxed":"263a-fe0f.png","relieved":"1f60c.png","revolving_hearts":"1f49e.png","right_anger_bubble":"1f5ef-fe0f.png","robot_face":"1f916.png","rolling_on_the_floor_laughing":"1f923.png","scream":"1f631.png","scream_cat":"1f640.png","see_no_evil":"1f648.png","shushing_face":"1f92b.png","skull":"1f480.png","skull_and_crossbones":"2620-fe0f.png","sleeping":"1f634.png","sleepy":"1f62a.png","slightly_frowning_face":"1f641.png","slightly_smiling_face":"1f642.png","smile":"1f604.png","smile_cat":"1f638.png","smiley":"1f603.png","smiley_cat":"1f63a.png","smiling_face_with_3_hearts":"1f970.png","smiling_imp":"1f608.png","smirk":"1f60f.png","smirk_cat":"1f63c.png","sneezing_face":"1f927.png","sob":"1f62d.png","space_invader":"1f47e.png","sparkling_heart":"1f496.png","speak_no_evil":"1f64a.png","speech_balloon":"1f4ac.png","star-struck":"1f929.png","stuck_out_tongue":"1f61b.png","stuck_out_tongue_closed_eyes":"1f61d.png","stuck_out_tongue_winking_eye":"1f61c.png","sunglasses":"1f60e.png","sweat":"1f613.png","sweat_drops":"1f4a6.png","sweat_smile":"1f605.png","thinking_face":"1f914.png","thought_balloon":"1f4ad.png","tired_face":"1f62b.png","triumph":"1f624.png","two_hearts":"1f495.png","unamused":"1f612.png","upside_down_face":"1f643.png","weary":"1f629.png","white_frowning_face":"2639-fe0f.png","white_heart":"1f90d.png","wink":"1f609.png","woozy_face":"1f974.png","worried":"1f61f.png","yawning_face":"1f971.png","yellow_heart":"1f49b.png","yum":"1f60b.png","zany_face":"1f92a.png","zipper_mouth_face":"1f910.png","zzz":"1f4a4.png"},"enableQQ":false,"highlight":true,"lang":"zh-cn","pageSize":10,"placeholder":"你的评论 ...","recordIP":true,"serverURLs":"https://leancloud.hugoloveit.com","visitor":true}},"lightGallery":{"actualSize":false,"exThumbImage":"data-thumbnail","hideBarsDelay":2000,"selector":".lightgallery","speed":400,"thumbContHeight":80,"thumbWidth":80,"thumbnail":true},"search":{"algoliaAppID":"PASDMWALPK","algoliaIndex":"index.zh-cn","algoliaSearchKey":"b42948e51daaa93df92381c8e2ac0f93","highlightTag":"em","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50,"type":"algolia"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>

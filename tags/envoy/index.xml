@@ -1,0 +1,23 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>envoy - 标签 - 卷王郑天驰</title>
+        <link>https://zhengtianchi.github.io/tags/envoy/</link>
+        <description>envoy - 标签 - 卷王郑天驰</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Sun, 21 Nov 2021 18:51:58 &#43;0800</lastBuildDate><atom:link href="https://zhengtianchi.github.io/tags/envoy/" rel="self" type="application/rss+xml" /><item>
+    <title>istio - 流量走向详解</title>
+    <link>https://zhengtianchi.github.io/zhaohuabin_traffic/</link>
+    <pubDate>Sun, 21 Nov 2021 18:51:58 &#43;0800</pubDate>
+    <author>作者</author>
+    <guid>https://zhengtianchi.github.io/zhaohuabin_traffic/</guid>
+    <description><![CDATA[<div class="featured-image">
+                <img src="/images/medium_istio.png" referrerpolicy="no-referrer">
+            </div>istio 流量走向详解 前言 Istio作为一个service mesh开源项目,其中最重要的功能就是对网格中微服务之间的流量进行管理,包括服务发现,请求]]></description>
+</item><item>
+    <title>Envoy入门介绍</title>
+    <link>https://zhengtianchi.github.io/envoy_1/</link>
+    <pubDate>Sun, 05 Sep 2021 10:29:40 &#43;0800</pubDate>
+    <author>作者</author>
+    <guid>https://zhengtianchi.github.io/envoy_1/</guid>
+    <description><![CDATA[介绍¶ Envoy 是一个面向服务架构的 L7 代理和通信总线而设计的，这个项目诞生是出于以下目标： 对于应用程序而言，网络应该是透明的，当发生网络和应用程序故]]></description>
+</item></channel>
+</rss>

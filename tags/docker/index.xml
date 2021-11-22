@@ -1,0 +1,34 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>docker - 标签 - 卷王郑天驰</title>
+        <link>https://zhengtianchi.github.io/tags/docker/</link>
+        <description>docker - 标签 - 卷王郑天驰</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Sun, 21 Nov 2021 18:51:58 &#43;0800</lastBuildDate><atom:link href="https://zhengtianchi.github.io/tags/docker/" rel="self" type="application/rss+xml" /><item>
+    <title>docker - Dockerfile</title>
+    <link>https://zhengtianchi.github.io/docker_dockerbuilder/</link>
+    <pubDate>Sun, 21 Nov 2021 18:51:58 &#43;0800</pubDate>
+    <author>作者</author>
+    <guid>https://zhengtianchi.github.io/docker_dockerbuilder/</guid>
+    <description><![CDATA[<div class="featured-image">
+                <img src="/images/docker1.jpeg" referrerpolicy="no-referrer">
+            </div>[TOC] 一 使用 Dockerfile 定制镜像 镜像的定制实际上就是定制每一层所添加的配置、文件。如果我们可以把每一层修改、安装、构建、操作的命令都写入一个脚本，用这个脚]]></description>
+</item><item>
+    <title>docker - 代理</title>
+    <link>https://zhengtianchi.github.io/docker_proxy/</link>
+    <pubDate>Sun, 21 Nov 2021 18:51:58 &#43;0800</pubDate>
+    <author>作者</author>
+    <guid>https://zhengtianchi.github.io/docker_proxy/</guid>
+    <description><![CDATA[<div class="featured-image">
+                <img src="/images/docker-cover.png" referrerpolicy="no-referrer">
+            </div>docker三种网络代理模式 有时因为网络原因，比如公司NAT，或其它啥的，需要使用代理。 Docker的代理配置，略显复杂，因为有三种场景。 但]]></description>
+</item><item>
+    <title>docker - 常用指令</title>
+    <link>https://zhengtianchi.github.io/docker_cmd/</link>
+    <pubDate>Sun, 21 Nov 2021 18:51:58 &#43;0800</pubDate>
+    <author>作者</author>
+    <guid>https://zhengtianchi.github.io/docker_cmd/</guid>
+    <description><![CDATA[<div class="featured-image">
+                <img src="/images/docker-bg.png" referrerpolicy="no-referrer">
+            </div>docker 常用指令 验证是否安装成功 1 2 3 $ docker version # 查看docker版本 # 或者 $ docker info # 查看docker系统的信息 启动docker 1 $ systemctl start docker 查看docke]]></description>
+</item></channel>
+</rss>
