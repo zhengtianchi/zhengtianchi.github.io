@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>calico - 网络流通以及抓包实战 - 卷王郑天驰</title><meta name="Description" content="calico 网络是怎么流通的，抓包如何，一点点带你走进 calico."><meta property="og:title" content="calico - 网络流通以及抓包实战" />
+<meta property="og:description" content="calico 网络是怎么流通的，抓包如何，一点点带你走进 calico." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://zhengtianchi.github.io/%E4%B8%80%E6%96%87%E6%98%8E%E7%99%BDcalico%E7%9A%84ipip%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%BC%8F/" /><meta property="og:image" content="https://zhengtianchi.github.io/logo.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-11-21T18:51:58+08:00" />
+<meta property="article:modified_time" content="2021-11-21T18:51:58+08:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://zhengtianchi.github.io/logo.png"/>
+
+<meta name="twitter:title" content="calico - 网络流通以及抓包实战"/>
+<meta name="twitter:description" content="calico 网络是怎么流通的，抓包如何，一点点带你走进 calico."/>
+<meta name="application-name" content="ztc">
+<meta name="apple-mobile-web-app-title" content="ztc"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://zhengtianchi.github.io/%E4%B8%80%E6%96%87%E6%98%8E%E7%99%BDcalico%E7%9A%84ipip%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%BC%8F/" /><link rel="prev" href="https://zhengtianchi.github.io/docker_dockerbuilder/" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "calico - 网络流通以及抓包实战",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/zhengtianchi.github.io\/%E4%B8%80%E6%96%87%E6%98%8E%E7%99%BDcalico%E7%9A%84ipip%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%BC%8F\/"
+        },"image": ["https:\/\/zhengtianchi.github.io\/images\/Apple-Devices-Preview.png"],"genre": "posts","keywords": "kubernetes, calico","wordcount":  3859 ,
+        "url": "https:\/\/zhengtianchi.github.io\/%E4%B8%80%E6%96%87%E6%98%8E%E7%99%BDcalico%E7%9A%84ipip%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%BC%8F\/","datePublished": "2021-11-21T18:51:58+08:00","dateModified": "2021-11-21T18:51:58+08:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
+            "@type": "Organization",
+            "name": "xxxx","logo": "https:\/\/zhengtianchi.github.io\/images\/avatar.png"},"author": {
+                "@type": "Person",
+                "name": "郑天驰"
+            },"description": "calico 网络是怎么流通的，抓包如何，一点点带你走进 calico."
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="卷王郑天驰"><span class="header-title-pre"><i class='far fa-kiss-wink-heart fa-fw'></i></span>卷王郑天驰</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 所有文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/categories/documentation/"> 文档 </a><a class="menu-item" href="/about/"> 关于 </a><a class="menu-item" href="https://github.com/zhengtianchi/" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="卷王郑天驰"><span class="header-title-pre"><i class='far fa-kiss-wink-heart fa-fw'></i></span>卷王郑天驰</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">所有文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/categories/documentation/" title="">文档</a><a class="menu-item" href="/about/" title="">关于</a><a class="menu-item" href="https://github.com/zhengtianchi/" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content always-active" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">calico - 网络流通以及抓包实战</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="https://zhengtianchi.github.io" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>郑天驰</a></span>&nbsp;<span class="post-category">收录于 <a href="/categories/calico/"><i class="far fa-folder fa-fw"></i>calico</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="212111-08-2151">212111-08-2151</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 3859 字&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 8 分钟&nbsp;<span id="/%E4%B8%80%E6%96%87%E6%98%8E%E7%99%BDcalico%E7%9A%84ipip%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%BC%8F/" class="leancloud_visitors" data-flag-title="calico - 网络流通以及抓包实战">
+                        <i class="far fa-eye fa-fw"></i>&nbsp;<span class=leancloud-visitors-count></span>&nbsp;次阅读
+                    </span>&nbsp;</div>
+        </div><div class="featured-image"><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/2019-07-30-dockercalico.jpeg"
+        data-srcset="/images/2019-07-30-dockercalico.jpeg, /images/2019-07-30-dockercalico.jpeg 1.5x, /images/2019-07-30-dockercalico.jpeg 2x"
+        data-sizes="auto"
+        alt="/images/2019-07-30-dockercalico.jpeg"
+        title="calico 网络是怎么流通的，抓包如何，一点点带你走进 calico." /></div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#前言">前言</a></li>
+        <li><a href="#一calico介绍">一、calico介绍</a></li>
+        <li><a href="#二calico架构及核心组件">二、calico架构及核心组件</a>
+          <ul>
+            <li><a href="#calico核心组件">calico核心组件：</a></li>
+          </ul>
+        </li>
+        <li><a href="#三calico工作原理">三、calico工作原理</a></li>
+        <li><a href="#四calico的两种网络方式">四、calico的两种网络方式</a></li>
+        <li><a href="#1ipip">1)IPIP</a></li>
+        <li><a href="#2bgp">2)BGP</a></li>
+        <li><a href="#五ipip网络模式分析">五、IPIP网络模式分析</a></li>
+        <li><a href="#六抓包分析">六、抓包分析</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><h3 id="前言">前言</h3>
+<p>本文主要分析k8s中网络组件calico的 <code>IPIP网络模式</code>。旨在理解IPIP网络模式下产生的<code>calixxxx</code>，<code>tunl0</code>等设备以及跨节点网络通信方式。可能看着有点枯燥，但是请花几分钟时间坚持看完，如果看到后面忘了前面，请反复看两遍，这几分钟时间一定你会花的很值。</p>
+<h3 id="一calico介绍">一、calico介绍</h3>
+<p>Calico是<code>Kubernetes</code>生态系统中另一种流行的网络选择。虽然<code>Flannel</code>被公认为是最简单的选择，但<code>Calico</code>以其性能、灵活性而闻名。<code>Calico</code>的功能更为全面，不仅提供主机和pod之间的网络连接，还涉及网络安全和管理。<code>Calico CNI</code>插件在CNI框架内封装了Calico的功能。</p>
+<p>Calico是一个基于<code>BGP</code>的<strong>纯三层</strong>的网络方案，与OpenStack、Kubernetes、AWS、GCE等云平台都能够良好地集成。Calico在每个计算节点(every node)都利用Linux Kernel实现了一个高效的<code>虚拟路由器vRouter</code>来负责数据转发。每个<code>vRouter</code>都通过<code>BGP协议</code>把在本节点上运行的容器的<strong>路由信息</strong>向整个Calico网络<strong>广播</strong>，并自动设置到达其他节点的路由转发规则。Calico保证所有容器之间的数据流量都是通过IP路由的方式完成互联互通的。Calico节点组网时可以直接利用数据中心的网络结构(L2或者L3)，不需要额外的NAT、隧道或者Overlay Network，没有额外的封包解包，能够节约CPU运算，提高网络效率。</p>
+<p>此外，Calico基于iptables还提供了丰富的网络策略，实现了Kubernetes的<code>Network Policy</code>策略，提供容器间网络可达性限制的功能。</p>
+<p>**calico官网：**<a href="https://www.projectcalico.org/" target="_blank" rel="noopener noreffer">https://www.projectcalico.org/</a></p>
+<h3 id="二calico架构及核心组件">二、calico架构及核心组件</h3>
+<p>架构图如下：</p>
+<p><a href="https://s3.51cto.com/oss/202105/06/1f7efa8b5fa9aae52a55d33a35350472.png-wh_600x-s_3459497392.png" target="_blank" rel="noopener noreffer"><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://s3.51cto.com/oss/202105/06/1f7efa8b5fa9aae52a55d33a35350472.png-wh_600x-s_3459497392.png"
+        data-srcset="https://s3.51cto.com/oss/202105/06/1f7efa8b5fa9aae52a55d33a35350472.png-wh_600x-s_3459497392.png, https://s3.51cto.com/oss/202105/06/1f7efa8b5fa9aae52a55d33a35350472.png-wh_600x-s_3459497392.png 1.5x, https://s3.51cto.com/oss/202105/06/1f7efa8b5fa9aae52a55d33a35350472.png-wh_600x-s_3459497392.png 2x"
+        data-sizes="auto"
+        alt="https://s3.51cto.com/oss/202105/06/1f7efa8b5fa9aae52a55d33a35350472.png-wh_600x-s_3459497392.png"
+        title="img" /></a></p>
+<h4 id="calico核心组件">calico核心组件：</h4>
+<ul>
+<li><strong>Felix (菲利克斯)</strong>：运行在每个需要运行<code>workload</code>的节点上的<code>agent进程</code>。主要负责配置路由及 ACLs(访问控制列表) 等信息来确保 endpoint 的连通状态，保证跨主机容器的网络互通;</li>
+<li><strong>etcd</strong>：强一致性、高可用的键值存储，持久存储calico数据的存储管理系统。主要负责网络元数据一致性，确保Calico网络状态的准确性;</li>
+<li><strong>BGP Client(BIRD)</strong>：读取Felix设置的内核路由状态，在数据中心分发状态。</li>
+<li><strong>BGP Route Reflector(BIRD)</strong>：BGP路由反射器，在较大规模部署时使用。如果仅使用<code>BGP Client</code>形成mesh全网互联就会导致规模限制，因为所有<code>BGP client</code>节点之间两两互联，需要建立N^2个连接，拓扑也会变得复杂。因此使用<code>reflector</code>来负责client之间的连接，防止节点两两相连。</li>
+</ul>
+<h3 id="三calico工作原理">三、calico工作原理</h3>
+<p>​		Calico把每个操作系统的协议栈认为是一个路由器，然后把所有的容器认为是连在这个路由器上的网络终端，在路由器之间跑标准的路由协议——BGP的协议，然后让它们自己去学习这个网络拓扑该如何转发。所以Calico方案其实是一个纯三层的方案，也就是说让每台机器的协议栈的三层去确保两个容器，跨主机容器之间的三层连通性。</p>
+<h3 id="四calico的两种网络方式">四、calico的两种网络方式</h3>
+<h3 id="1ipip">1)IPIP</h3>
+<p>​       把 IP 层封装到 IP 层的一个<code> tunnel</code>。它的作用其实基本上就相当于一个基于IP层的网桥!一般来说，普通的网桥是基于mac层的，根本不需 IP，而这个 <code>ipip</code> 则是通过两端的路由做一个<code> tunnel</code>，把两个本来不通的网络通过点对点连接起来。ipip 的源代码在内核 <code>net/ipv4/ipip.c</code> 中可以找到。</p>
+<h3 id="2bgp">2)BGP</h3>
+<p>边界网关协议<code>(Border Gateway Protocol, BGP)</code>是互联网上一个核心的去中心化自治路由协议。它通过维护IP路由表或‘前缀’表来实现自治系统(AS)之间的可达性，属于矢量路由协议。<code>BGP</code>不使用传统的内部网关协议(IGP)的指标，而使用基于路径、网络策略或规则集来决定路由。因此，它更适合被称为矢量性协议，而不是路由协议。</p>
+<h3 id="五ipip网络模式分析">五、IPIP网络模式分析</h3>
+<p>由于个人环境中使用的是IPIP模式，因此接下来这里分析一下这种模式。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># kubectl get po -o wide -n paas | grep hello </span>
+
+demo-hello-perf-d84bffcb8-7fxqj   1/1     Running   <span class="m">0</span>          9d      10.20.105.215   node2.perf  &lt;none&gt;           &lt;none&gt; 
+demo-hello-sit-6d5c9f44bc-ncpql   1/1     Running   <span class="m">0</span>          9d      10.20.42.31     node1.sit   &lt;none&gt;           &lt;none&gt; 
+</code></pre></td></tr></table>
+</div>
+</div><p>进行ping测试</p>
+<p>这里在<code>demo-hello-perf</code>这个pod中<code>ping demo-hello-sit</code>这个pod。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">root@demo-hello-perf-d84bffcb8-7fxqj:/# ping 10.20.42.31 
+
+PING 10.20.42.31 <span class="o">(</span>10.20.42.31<span class="o">)</span> 56<span class="o">(</span>84<span class="o">)</span> bytes of data. 
+<span class="m">64</span> bytes from 10.20.42.31: <span class="nv">icmp_seq</span><span class="o">=</span><span class="m">1</span> <span class="nv">ttl</span><span class="o">=</span><span class="m">62</span> <span class="nv">time</span><span class="o">=</span>5.60 ms 
+<span class="m">64</span> bytes from 10.20.42.31: <span class="nv">icmp_seq</span><span class="o">=</span><span class="m">2</span> <span class="nv">ttl</span><span class="o">=</span><span class="m">62</span> <span class="nv">time</span><span class="o">=</span>1.66 ms 
+<span class="m">64</span> bytes from 10.20.42.31: <span class="nv">icmp_seq</span><span class="o">=</span><span class="m">3</span> <span class="nv">ttl</span><span class="o">=</span><span class="m">62</span> <span class="nv">time</span><span class="o">=</span>1.79 ms 
+^C 
+--- 10.20.42.31 ping statistics --- 
+<span class="m">3</span> packets transmitted, <span class="m">3</span> received, 0% packet loss, <span class="nb">time</span> 6ms 
+rtt min/avg/max/mdev <span class="o">=</span> 1.662/3.015/5.595/1.825 ms 
+</code></pre></td></tr></table>
+</div>
+</div><p>进入<code>pod demo-hello-perf</code>中查看这个pod中的路由信息</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">root@demo-hello-perf-d84bffcb8-7fxqj:/# route -n 
+
+Kernel IP routing table 
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface 
+0.0.0.0         169.254.1.1     0.0.0.0         UG    <span class="m">0</span>      <span class="m">0</span>        <span class="m">0</span> eth0 
+169.254.1.1     0.0.0.0         255.255.255.255 UH    <span class="m">0</span>      <span class="m">0</span>        <span class="m">0</span> eth0 
+</code></pre></td></tr></table>
+</div>
+</div><p>根据路由信息，ping 10.20.42.31，会匹配到第一条。</p>
+<p>**第一条路由的意思是：**去往任何网段的数据包都发往网关<code>169.254.1.1</code>，然后从<code>eth0网卡</code>发送出去。</p>
+<p><code>demo-hello-perf</code>所在的<code>node node2.perf </code>宿主机上路由信息如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># node2</span>
+<span class="c1"># route -n </span>
+
+Kernel IP routing table 
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface 
+0.0.0.0         172.16.36.1     0.0.0.0         UG    <span class="m">100</span>    <span class="m">0</span>        <span class="m">0</span> eth0 
+10.20.42.0      172.16.35.4     255.255.255.192 UG    <span class="m">0</span>      <span class="m">0</span>        <span class="m">0</span> tunl0 
+10.20.105.196   0.0.0.0         255.255.255.255 UH    <span class="m">0</span>      <span class="m">0</span>        <span class="m">0</span> cali4bb1efe70a2 
+169.254.169.254 172.16.36.2     255.255.255.255 UGH   <span class="m">100</span>    <span class="m">0</span>        <span class="m">0</span> eth0 
+172.16.36.0     0.0.0.0         255.255.255.0   U     <span class="m">100</span>    <span class="m">0</span>        <span class="m">0</span> eth0 
+172.17.0.0      0.0.0.0         255.255.0.0     U     <span class="m">0</span>      <span class="m">0</span>        <span class="m">0</span> docker0 
+</code></pre></td></tr></table>
+</div>
+</div><p>可以看到一条<code>Destination</code>为 <code>10.20.42.0</code>的路由。</p>
+<p>该路由的意思是：去往<code>10.20.42.0/26</code>的网段的数据包都发往网关<code>172.16.35.4</code>(其实 这个 ip 就是 对端 node 的 ip)。因为<code>demo-hello-perf</code>的pod在<code>172.16.36.5</code>上，<code>demo-hello-sit</code>的pod在<code>172.16.35.4</code>上。所以数据包就通过设备<code>tunl0</code>发往到node节点上。</p>
+<p><code>demo-hello-sit</code>所在的<code>node node1.sit</code> 宿主机上路由信息如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># node1</span>
+<span class="c1"># route -n </span>
+Kernel IP routing table 
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface 
+0.0.0.0         172.16.35.1     0.0.0.0         UG    <span class="m">100</span>    <span class="m">0</span>        <span class="m">0</span> eth0 
+10.20.15.64     172.16.36.4     255.255.255.192 UG    <span class="m">0</span>      <span class="m">0</span>        <span class="m">0</span> tunl0 
+10.20.42.31     0.0.0.0         255.255.255.255 UH    <span class="m">0</span>      <span class="m">0</span>        <span class="m">0</span> cali04736ec14ce 
+10.20.105.192   172.16.36.5     255.255.255.192 UG    <span class="m">0</span>      <span class="m">0</span>        <span class="m">0</span> tunl0 
+</code></pre></td></tr></table>
+</div>
+</div><p>当node节点网卡收到数据包之后，发现发往的目的ip为<code>10.20.42.31</code>，于是匹配到<code>Destination</code>为<code>10.20.42.31</code>的路由。</p>
+<p>该路由的意思是：<code>10.20.42.31</code>是本机直连设备，去往设备的数据包发往<code>cali04736ec14ce</code></p>
+<p><strong>为什么这么奇怪会有一个名为<code>cali04736ec14ce</code>的设备呢?这是个啥玩意儿呢?</strong></p>
+<p>其实这个设备就是<code>veth pair</code>的一端。在创建<code>demo-hello-sit</code> 时<code>calico</code>会给<code>demo-hello-sit</code>创建一个<code>veth pair</code>设备。一端是<code>demo-hello-sit</code> 的网卡，另一端就是我们看到的<code>cali04736ec14ce</code></p>
+<p>接着验证一下。我们进入<code>demo-hello-sit</code> 的pod，查看到 4 号设备后面的编号是：<code>122964</code></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">root@demo-hello-sit--6d5c9f44bc-ncpql:/# ip a 
+1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu <span class="m">65536</span> qdisc noqueue state UNKNOWN group default qlen <span class="m">1000</span> 
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00 
+    inet 127.0.0.1/8 scope host lo 
+       valid_lft forever preferred_lft forever 
+2: tunl0@NONE: &lt;NOARP&gt; mtu <span class="m">1480</span> qdisc noop state DOWN group default qlen <span class="m">1000</span> 
+    link/ipip 0.0.0.0 brd 0.0.0.0 
+4: eth0@if122964: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu <span class="m">1380</span> qdisc noqueue state UP group default  
+    link/ether 9a:7d:b2:26:9b:17 brd ff:ff:ff:ff:ff:ff link-netnsid <span class="m">0</span> 
+    inet 10.20.42.31/32 brd 10.20.42.31 scope global eth0    <span class="c1"># 这个 ip 就是 pod ip </span>
+       valid_lft forever preferred_lft forever 
+</code></pre></td></tr></table>
+</div>
+</div><p>然后我们登录到<code>demo-hello-sit</code>这个pod所在的宿主机查看</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># node1 宿主机</span>
+
+<span class="c1"># ip a | grep -A 5 &#34;cali04736ec14ce&#34; </span>
+122964: cali04736ec14ce@if4: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu <span class="m">1380</span> qdisc noqueue state UP group default  
+    link/ether ee:ee:ee:ee:ee:ee brd ff:ff:ff:ff:ff:ff link-netnsid <span class="m">16</span> 
+    inet6 fe80::ecee:eeff:feee:eeee/64 scope link  
+       valid_lft forever preferred_lft forever 
+120918: calidd1cafcd275@if4: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu <span class="m">1380</span> qdisc noqueue state UP group default  
+    link/ether ee:ee:ee:ee:ee:ee brd ff:ff:ff:ff:ff:ff link-netnsid <span class="m">2</span> 
+</code></pre></td></tr></table>
+</div>
+</div><p>发现<code>pod demo-hello-sit</code>中 的另一端设备编号和这里在node上看到的<code>cali04736ec14ce</code>编号<code>122964</code>是一样的</p>
+<p>所以，node上的路由，发送<code>cali04736ec14ce</code>网卡设备的数据其实就是发送到了<code>demo-hello-sit</code>的这个pod中去了。到这里ping包就到了目的地。</p>
+<p>注意看 <code>demo-hello-sit</code>这个pod所在的宿主机的路由，有一条 <code>Destination</code>为<code>10.20.105.192</code>的路由</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># node1</span>
+<span class="c1"># route -n </span>
+Kernel IP routing table 
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface 
+... 
+0.0.0.0         172.16.35.1     0.0.0.0         UG    <span class="m">100</span>    <span class="m">0</span>        <span class="m">0</span> eth0 
+10.20.105.192   172.16.36.5     255.255.255.192 UG    <span class="m">0</span>      <span class="m">0</span>        <span class="m">0</span> tunl0 
+... 
+</code></pre></td></tr></table>
+</div>
+</div><p>再查看一下<code>demo-hello-sit</code>的pod中路由信息，和<code>demo-hello-perf</code>的pod中是一样的。</p>
+<p>所以综合上述例子来看，IPIP的网络模式就是将IP网络封装了一层。特点就是所有pod的数据流量都从隧道tunl0发送，并且<code>tunl0</code>这里增加了一层传输层的封包操作。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/img/image-20211124192743157.png"
+        data-srcset="/images/img/image-20211124192743157.png, /images/img/image-20211124192743157.png 1.5x, /images/img/image-20211124192743157.png 2x"
+        data-sizes="auto"
+        alt="/images/img/image-20211124192743157.png"
+        title="image-20211124192743157" /></p>
+<h3 id="六抓包分析">六、抓包分析</h3>
+<p>这里我使用了<code>httpbin</code> 服务和 <code>sleep</code> 服务来演示抓包过程</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/img/image-20211125104231815.png"
+        data-srcset="/images/img/image-20211125104231815.png, /images/img/image-20211125104231815.png 1.5x, /images/img/image-20211125104231815.png 2x"
+        data-sizes="auto"
+        alt="/images/img/image-20211125104231815.png"
+        title="image-20211125104231815" /></p>
+<p>在  <code>node1 sleep</code>这个 pod 中去 <code>curl</code> <code>node2 httpbin</code> 服务，接着在 <code>httpbin</code> 所在<code>node2</code> 上<code>tcpdump</code>抓包</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 先在 nodes2 上 启动抓包</span>
+$ tcpdump  -i ens160 -nn -w httpbin_ens160.cap 
+tcpdump: listening on eth0, link-type EN10MB <span class="o">(</span>Ethernet<span class="o">)</span>, capture size <span class="m">262144</span> bytes 
+</code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 然后在 node1 上发起 curl 请求</span>
+$ kubectl <span class="nb">exec</span> sleep-76c9b748f4-p964r  -c sleep -n zhangji -- curl httpbin.httpbin:8000/headers
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+<span class="m">100</span>   <span class="m">565</span>  <span class="m">100</span>   <span class="m">565</span>    <span class="m">0</span>     <span class="m">0</span>   137k      <span class="m">0</span> --:--:-- --:--:-- --:--:--  137k
+<span class="o">{</span>
+  <span class="s2">&#34;headers&#34;</span>: <span class="o">{</span>
+    <span class="s2">&#34;Accept&#34;</span>: <span class="s2">&#34;*/*&#34;</span>, 
+    <span class="s2">&#34;Content-Length&#34;</span>: <span class="s2">&#34;0&#34;</span>, 
+    <span class="s2">&#34;Host&#34;</span>: <span class="s2">&#34;httpbin.httpbin:8000&#34;</span>, 
+    <span class="s2">&#34;User-Agent&#34;</span>: <span class="s2">&#34;curl/7.76.1-DEV&#34;</span>, 
+    <span class="s2">&#34;X-B3-Parentspanid&#34;</span>: <span class="s2">&#34;365864bb263d7b45&#34;</span>, 
+    <span class="s2">&#34;X-B3-Sampled&#34;</span>: <span class="s2">&#34;0&#34;</span>, 
+    <span class="s2">&#34;X-B3-Spanid&#34;</span>: <span class="s2">&#34;65ee1633796944f9&#34;</span>, 
+    <span class="s2">&#34;X-B3-Traceid&#34;</span>: <span class="s2">&#34;a36a2e412ab0d22b365864bb263d7b45&#34;</span>, 
+    <span class="s2">&#34;X-Envoy-Attempt-Count&#34;</span>: <span class="s2">&#34;1&#34;</span>, 
+    <span class="s2">&#34;X-Forwarded-Client-Cert&#34;</span>: <span class="s2">&#34;By=spiffe://cluster.local/ns/httpbin/sa/httpbin;Hash=cdd5655c5735fa86c8ad8636fdd91027fa288a2c31b6cb18d7feae0d563b009f;Subject=\&#34;\&#34;;URI=spiffe://cluster.local/ns/zhangji/sa/default&#34;</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>结束抓包后下载<code>httpbin_ens160.cap</code>到本地<code>wireshark</code>进行抓包分析</p>
+<p>能看到该数据包一共5层，其中<code>IP(Internet Protocol)</code>所在的网络层有两个，分别是pod之间的网络和主机之间的网络封装。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/img/image-20211125103214188.png"
+        data-srcset="/images/img/image-20211125103214188.png, /images/img/image-20211125103214188.png 1.5x, /images/img/image-20211125103214188.png 2x"
+        data-sizes="auto"
+        alt="/images/img/image-20211125103214188.png"
+        title="image-20211125103214188" /></p>
+<p>红色框选的是两个pod所在的宿主机，黄色框选的是两个pod的ip，<code>src</code>表示发起ping操作的pod所在的宿主机ip以及发起<code>curl</code>操作的pod的ip，<code>dst</code>表示被<code>curl</code>的pod所在的宿主机ip及被<code>curl</code>的pod的ip</p>
+<p>封包顺序如下所示：</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/img/image-20211125105310728.png"
+        data-srcset="/images/img/image-20211125105310728.png, /images/img/image-20211125105310728.png 1.5x, /images/img/image-20211125105310728.png 2x"
+        data-sizes="auto"
+        alt="/images/img/image-20211125105310728.png"
+        title="image-20211125105310728" /></p>
+<p>可以看到每个数据报文共有两个IP网络层,内层是Pod容器之间的IP网络报文,外层是宿主机节点的网络报文(2个node节点)。之所以要这样做是因为<code>tunl0</code>是一个隧道端点设备，在数据到达时要加上一层封装，便于发送到对端隧道设备中。</p>
+<p>两层封包的具体内容如下：</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/img/image-20211125105723878.png"
+        data-srcset="/images/img/image-20211125105723878.png, /images/img/image-20211125105723878.png 1.5x, /images/img/image-20211125105723878.png 2x"
+        data-sizes="auto"
+        alt="/images/img/image-20211125105723878.png"
+        title="image-20211125105723878" /></p>
+<p>Pod间的通信经由IPIP的三层隧道转发,相比较VxLAN的二层隧道来说，IPIP隧道的开销较小，但其安全性也更差一些。</p>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>更新于 212111-08-2151</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/%E4%B8%80%E6%96%87%E6%98%8E%E7%99%BDcalico%E7%9A%84ipip%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%BC%8F/index.md" target="_blank">阅读原始文档</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://zhengtianchi.github.io/%E4%B8%80%E6%96%87%E6%98%8E%E7%99%BDcalico%E7%9A%84ipip%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%BC%8F/" data-title="calico - 网络流通以及抓包实战" data-hashtags="kubernetes,calico"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://zhengtianchi.github.io/%E4%B8%80%E6%96%87%E6%98%8E%E7%99%BDcalico%E7%9A%84ipip%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%BC%8F/" data-hashtag="kubernetes"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Hacker News" data-sharer="hackernews" data-url="https://zhengtianchi.github.io/%E4%B8%80%E6%96%87%E6%98%8E%E7%99%BDcalico%E7%9A%84ipip%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%BC%8F/" data-title="calico - 网络流通以及抓包实战"><i class="fab fa-hacker-news fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://zhengtianchi.github.io/%E4%B8%80%E6%96%87%E6%98%8E%E7%99%BDcalico%E7%9A%84ipip%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%BC%8F/" data-title="calico - 网络流通以及抓包实战"><i data-svg-src="https://cdn.jsdelivr.net/npm/simple-icons@2.14.0/icons/line.svg"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://zhengtianchi.github.io/%E4%B8%80%E6%96%87%E6%98%8E%E7%99%BDcalico%E7%9A%84ipip%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%BC%8F/" data-title="calico - 网络流通以及抓包实战" data-image="/images/2019-07-30-dockercalico.jpeg" data-ralateuid="xxxx"><i class="fab fa-weibo fa-fw"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/kubernetes/">kubernetes</a>,&nbsp;<a href="/tags/calico/">calico</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/docker_dockerbuilder/" class="prev" rel="prev" title="docker - Dockerfile"><i class="fas fa-angle-left fa-fw"></i>docker - Dockerfile</a></div>
+</div>
+<div id="comments"><div id="valine" class="comment"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://valine.js.org/">Valine</a>.
+            </noscript></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.87.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/dillonzq/LoveIt" target="_blank" rel="noopener noreffer" title="LoveIt 0.2.10"><i class="far fa-kiss-wink-heart fa-fw"></i> LoveIt</a>
+                </div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2021</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">xxxx</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/valine/valine.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/css/lightgallery.min.css"><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/algoliasearch@4.2.0/dist/algoliasearch-lite.umd.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lazysizes@5.2.2/lazysizes.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/js/lightgallery.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lg-thumbnail.js@1.2.0/dist/lg-thumbnail.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lg-zoom.js@1.2.0/dist/lg-zoom.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sharer.js@0.4.0/sharer.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{"valine":{"appId":"QGzwQXOqs5JOhN4RGPOkR2mR-MdYXbMMI","appKey":"WBmoGyJtbqUswvfLh6L8iEBr","avatar":"mp","el":"#valine","emojiCDN":"https://cdn.jsdelivr.net/npm/emoji-datasource-google@5.0.1/img/google/64/","emojiMaps":{"100":"1f4af.png","alien":"1f47d.png","anger":"1f4a2.png","angry":"1f620.png","anguished":"1f627.png","astonished":"1f632.png","black_heart":"1f5a4.png","blue_heart":"1f499.png","blush":"1f60a.png","bomb":"1f4a3.png","boom":"1f4a5.png","broken_heart":"1f494.png","brown_heart":"1f90e.png","clown_face":"1f921.png","cold_face":"1f976.png","cold_sweat":"1f630.png","confounded":"1f616.png","confused":"1f615.png","cry":"1f622.png","crying_cat_face":"1f63f.png","cupid":"1f498.png","dash":"1f4a8.png","disappointed":"1f61e.png","disappointed_relieved":"1f625.png","dizzy":"1f4ab.png","dizzy_face":"1f635.png","drooling_face":"1f924.png","exploding_head":"1f92f.png","expressionless":"1f611.png","face_vomiting":"1f92e.png","face_with_cowboy_hat":"1f920.png","face_with_hand_over_mouth":"1f92d.png","face_with_head_bandage":"1f915.png","face_with_monocle":"1f9d0.png","face_with_raised_eyebrow":"1f928.png","face_with_rolling_eyes":"1f644.png","face_with_symbols_on_mouth":"1f92c.png","face_with_thermometer":"1f912.png","fearful":"1f628.png","flushed":"1f633.png","frowning":"1f626.png","ghost":"1f47b.png","gift_heart":"1f49d.png","green_heart":"1f49a.png","grimacing":"1f62c.png","grin":"1f601.png","grinning":"1f600.png","hankey":"1f4a9.png","hear_no_evil":"1f649.png","heart":"2764-fe0f.png","heart_decoration":"1f49f.png","heart_eyes":"1f60d.png","heart_eyes_cat":"1f63b.png","heartbeat":"1f493.png","heartpulse":"1f497.png","heavy_heart_exclamation_mark_ornament":"2763-fe0f.png","hole":"1f573-fe0f.png","hot_face":"1f975.png","hugging_face":"1f917.png","hushed":"1f62f.png","imp":"1f47f.png","innocent":"1f607.png","japanese_goblin":"1f47a.png","japanese_ogre":"1f479.png","joy":"1f602.png","joy_cat":"1f639.png","kiss":"1f48b.png","kissing":"1f617.png","kissing_cat":"1f63d.png","kissing_closed_eyes":"1f61a.png","kissing_heart":"1f618.png","kissing_smiling_eyes":"1f619.png","laughing":"1f606.png","left_speech_bubble":"1f5e8-fe0f.png","love_letter":"1f48c.png","lying_face":"1f925.png","mask":"1f637.png","money_mouth_face":"1f911.png","nauseated_face":"1f922.png","nerd_face":"1f913.png","neutral_face":"1f610.png","no_mouth":"1f636.png","open_mouth":"1f62e.png","orange_heart":"1f9e1.png","partying_face":"1f973.png","pensive":"1f614.png","persevere":"1f623.png","pleading_face":"1f97a.png","pouting_cat":"1f63e.png","purple_heart":"1f49c.png","rage":"1f621.png","relaxed":"263a-fe0f.png","relieved":"1f60c.png","revolving_hearts":"1f49e.png","right_anger_bubble":"1f5ef-fe0f.png","robot_face":"1f916.png","rolling_on_the_floor_laughing":"1f923.png","scream":"1f631.png","scream_cat":"1f640.png","see_no_evil":"1f648.png","shushing_face":"1f92b.png","skull":"1f480.png","skull_and_crossbones":"2620-fe0f.png","sleeping":"1f634.png","sleepy":"1f62a.png","slightly_frowning_face":"1f641.png","slightly_smiling_face":"1f642.png","smile":"1f604.png","smile_cat":"1f638.png","smiley":"1f603.png","smiley_cat":"1f63a.png","smiling_face_with_3_hearts":"1f970.png","smiling_imp":"1f608.png","smirk":"1f60f.png","smirk_cat":"1f63c.png","sneezing_face":"1f927.png","sob":"1f62d.png","space_invader":"1f47e.png","sparkling_heart":"1f496.png","speak_no_evil":"1f64a.png","speech_balloon":"1f4ac.png","star-struck":"1f929.png","stuck_out_tongue":"1f61b.png","stuck_out_tongue_closed_eyes":"1f61d.png","stuck_out_tongue_winking_eye":"1f61c.png","sunglasses":"1f60e.png","sweat":"1f613.png","sweat_drops":"1f4a6.png","sweat_smile":"1f605.png","thinking_face":"1f914.png","thought_balloon":"1f4ad.png","tired_face":"1f62b.png","triumph":"1f624.png","two_hearts":"1f495.png","unamused":"1f612.png","upside_down_face":"1f643.png","weary":"1f629.png","white_frowning_face":"2639-fe0f.png","white_heart":"1f90d.png","wink":"1f609.png","woozy_face":"1f974.png","worried":"1f61f.png","yawning_face":"1f971.png","yellow_heart":"1f49b.png","yum":"1f60b.png","zany_face":"1f92a.png","zipper_mouth_face":"1f910.png","zzz":"1f4a4.png"},"enableQQ":false,"highlight":true,"lang":"zh-cn","pageSize":10,"placeholder":"你的评论 ...","recordIP":true,"serverURLs":"https://leancloud.hugoloveit.com","visitor":true}},"lightGallery":{"actualSize":false,"exThumbImage":"data-thumbnail","hideBarsDelay":2000,"selector":".lightgallery","speed":400,"thumbContHeight":80,"thumbWidth":80,"thumbnail":true},"search":{"algoliaAppID":"PASDMWALPK","algoliaIndex":"index.zh-cn","algoliaSearchKey":"b42948e51daaa93df92381c8e2ac0f93","highlightTag":"em","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50,"type":"algolia"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>
