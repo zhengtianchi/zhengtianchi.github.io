@@ -9,7 +9,7 @@ Envoy 是由 Lyft 开源的一款高性能数据和服务代理软件，后被�
 
 首先解释什么是 Envoy。Envoy 社区的定义是：Envoy 是一个开源的边缘与服务代理，专为云原生应用而设计。此处只需要抓住最核心的词--代理。
 
-[![1.png](http://dockone.io/uploads/article/20201104/91807bb81503a6a3f0142acedf3fd205.png)](http://dockone.io/uploads/article/20201104/91807bb81503a6a3f0142acedf3fd205.png)
+![1.png](/images/img/91807bb81503a6a3f0142acedf3fd205.png)
 
 
 代理，本质属性就是做两件事：第一，代替客户端向服务端发送请求，第二，代理服务端向客户端提供服务。前者隐藏客户端，后者隐藏服务端。在开端代理软件领域，比较著名有 HA Proxy 以及 Nginx，而 Envoy 则是该领域的的一个后起之秀。作为为云原生而设计的高性能网络代理，它具备以下的优点：
@@ -34,8 +34,7 @@ Envoy 具备很多优点，但它核心的概念却很少，只有四个。基�
 
 以上的四个概念或者说资源类型，构成了 Envoy 架构最核心的骨架。此外，Envoy 将请求的来源方向称之为下游（Downstream），而请求转发的去向称之为上游（Upstream）。
 
-[![2.png](http://dockone.io/uploads/article/20201104/a2e7534797d87b25379398a9239b5268.png)](http://dockone.io/uploads/article/20201104/a2e7534797d87b25379398a9239b5268.png)
-
+![2.png](/images/img/a2e7534797d87b25379398a9239b5268.png)
 
 总结来说：Downstream 请求自 Listener 进入 Envoy，流经 Filter 被解析、修改、记录然后根据 Route 选择 Cluster 将其发送给 Upstream 服务。
 
@@ -62,7 +61,7 @@ xDS 全称是 x Discovery Service，x 表示某种资源。在 Envoy 当中，�
 
 大部分情况下，如果要做 Envoy 相关的工作，LDS/CDS/RDS/EDS 四种 DS 协议是必须了解的。
 
-[![3.png](http://dockone.io/uploads/article/20201104/13de777e5b034e614e9f483f4031314d.png)](http://dockone.io/uploads/article/20201104/13de777e5b034e614e9f483f4031314d.png)
+![3.png](/images/img/13de777e5b034e614e9f483f4031314d.png)
 
 
 目前 Envoy 支持 gRPC 服务、Restful 接口以及磁盘文件三种不同类型的 xDS 数据源。以最经典的gRPC 为例，Envoy 会定义了一个流式的 gPRC Service，xDS 服务提供方只需要实现对应的 gRPC Service。然后在需要配置更新时，向 gRPC 流推送配置数据即可。Envoy 侧会接受配置数据，然后加载更新。
@@ -73,7 +72,7 @@ Restful xDS 就是由 Envoy 开放一个 Post 接口由配置的提供方去调�
 
 下图是一个相对实际的例子。当使用 Isito Pilot 作为 xDS Server 时，如何利用 xDS 来动态更新 Envoy 配置。一般情况下，是用户修改了 K8s 集群中的一些 CRD 资源亦或者注册中心有配置更新才会触发配置更新；之后 Pilot watch 到相关变化变更将相关变化抽象成各种 Envoy 中对应的资源，如 Listener、Cluster，然后通过各个 xDS 将对应资源推送到 Envoy。
 
-[![4.png](http://dockone.io/uploads/article/20201104/ff991f8b549b6d8d97d772d002958862.png)](http://dockone.io/uploads/article/20201104/ff991f8b549b6d8d97d772d002958862.png)
+![4.png](/images/img/ff991f8b549b6d8d97d772d002958862.png)
 
 
 
@@ -94,18 +93,18 @@ Restful xDS 就是由 Envoy 开放一个 Post 接口由配置的提供方去调�
 
 下图是一个相对完整的 Envoy 插件链执行流程图。原本应该还有所谓的 encoder/decoder 层级的，它们才是真正负责协议解析的组件。但是在目前实现当中，encoder/decoder 一般都是嵌在 Network Filter 中作为某个 Network Filter 的一部分，所以这里干脆简化掉了。
 
-[![5.png](http://dockone.io/uploads/article/20201104/19dda7ebe9816ef92d9e21bea41ad4ff.png)](http://dockone.io/uploads/article/20201104/19dda7ebe9816ef92d9e21bea41ad4ff.png)
+![5.png](/images/img/19dda7ebe9816ef92d9e21bea41ad4ff.png)
 
 
 Envoy 可扩展性方面还有最后一个问题：功能更新和升级带来的运维成本。Envoy 是使用 C++ 来实现的。每实现一个新的功能性的 Filter，无论是复杂的 L4 Network Filter，还是相对简单的 L7 HTTP Filter，都需要重新构建整个 Envoy。相比于配置的动态化，Envoy 功能上似乎没那么动态化。
 
 为了解决这个问题，Envoy 社区提出了基于 WASM 的 Filter 扩展机制。WASM 是一种前端的技术，最初设计是用于加速 JS 脚本以及将 C++ 等语言带到 WEB 上。Envoy 内置了 WASM 虚拟机，开发者可以将自己的功能扩展使用如 C++、Go 、AS 等各种语言开发，然后编译成 WASM 字节码文件。之后，Envoy 动态的加载文件就可以实现功能的增强。
 
-[![6.png](http://dockone.io/uploads/article/20201104/7a38f6f08a07300e87adccf6638c26e3.png)](http://dockone.io/uploads/article/20201104/7a38f6f08a07300e87adccf6638c26e3.png)
+![6.png](/images/img/7a38f6f08a07300e87adccf6638c26e3.png)
 
 
 
-[![7.png](http://dockone.io/uploads/article/20201104/34d7352c56c9c3b05786b5aeacb47b0d.png)](http://dockone.io/uploads/article/20201104/34d7352c56c9c3b05786b5aeacb47b0d.png)
+![7.png](/images/img/34d7352c56c9c3b05786b5aeacb47b0d.png)
 
 
 此外，Envoy 社区也提供了 Lua Filter，可以让 Envoy 通过动态的下发一个 Lua 脚本来实现功能扩展。举例来说，用户可以使用 Lua 来编写一段 Lua 逻辑，只要实现 envoy_on_request 和 envoy_on_response 两个函数，然后将 Lua 脚本通过 xDS 动态的下发给 Envoy，Envoy 在处理请求的过程中，就会执行对应的 Lua 脚本代码。
@@ -148,7 +147,7 @@ xDS 协议、可扩展性、可观察性，这是我个人认为的在 Envoy 之
 
 Envoy 在网易轻舟实践中的整体架构如下。当然，图中简化了很多细节，只留下了核心的一些模块。
 
-[![8.png](http://dockone.io/uploads/article/20201104/be1b4cbde2ac2c1a4528baeb4deb41c1.png)](http://dockone.io/uploads/article/20201104/be1b4cbde2ac2c1a4528baeb4deb41c1.png)
+![8.png](/images/img/be1b4cbde2ac2c1a4528baeb4deb41c1.png)
 
 
 Envoy 会作为 API 网关以及服务网格数据面，承接整个微服务集群中东西向和南北向的流量，实现微服务集群的全流量接管。
@@ -195,14 +194,14 @@ API 网关是整个微服务集群的流量入口，主要用于解决微服务�
 
 比上文概览图详细一些的轻舟 API 网关架构简图如下所示。在控制面：控制台作为操作的入口，通过 API Plane 操作 K8s 或者 Pilot。Pilot 发现服务和配置并抽象成 xDS 协议约定的数据推动给 Envoy。在数据面：Envoy 接收来自控制面的配置数据并利用可扩展的各种 Filter 完成流量的治理。这里不过多展开，接下来分别介绍轻舟 API 网关对于前述五个要点的实践。
 
-[![9.png](http://dockone.io/uploads/article/20201104/7f8b1b8599bf2b3b48e9e59d57519fc5.png)](http://dockone.io/uploads/article/20201104/7f8b1b8599bf2b3b48e9e59d57519fc5.png)
+![9.png](/images/img/7f8b1b8599bf2b3b48e9e59d57519fc5.png)
 
 
 **性能**
 
 在性能方面，Envoy 本身就是保障，在都使用最简配置的情况下，它的性能与 Nginx 相差仿佛，比 HA Proxy 要稍差一些。根据实际测试结果，一个 8C8G 的轻舟 API 网关，在容器网络下，可以达到 8w+ QPS，而物理网络下，可以达到 10w+ QPS。
 
-[![10.png](http://dockone.io/uploads/article/20201104/31e7b1aae957d54cbf68c91ccac34e47.png)](http://dockone.io/uploads/article/20201104/31e7b1aae957d54cbf68c91ccac34e47.png)
+![10.png](/images/img/31e7b1aae957d54cbf68c91ccac34e47.png)
 
 
 在 Envoy API 网关性能保障方面，有三个小的 Tips 分享一下：
@@ -222,7 +221,7 @@ API 网关是整个微服务集群的流量入口，主要用于解决微服务�
 
 而分布式跟踪，Envoy 原生支持了 Zipkin、OpenTracing、LightStep 等多种分布式跟踪系统，可以直接对接。而我们自己开发了 SkyWalking 的 Tracing 支持，还在持续的优化之中，而且也准备贡献给社区。
 
-[![11.png](http://dockone.io/uploads/article/20201104/9dbef9d678e2c51262af68f5fe89fe62.png)](http://dockone.io/uploads/article/20201104/9dbef9d678e2c51262af68f5fe89fe62.png)
+![11.png](/images/img/9dbef9d678e2c51262af68f5fe89fe62.png)
 
 
 **治理能力**
@@ -250,11 +249,11 @@ API 网关是整个微服务集群的流量入口，主要用于解决微服务�
 
 控制台主要负责两方面的工作：第一，将指标、监控、APM 数据聚合并做可视化展示，帮助开发人员快速定位问题；辅助团队了解流量动态；第二，简化各个功能模块使用、通过封装对外暴露友好、易操作的交互页面。尽可能减少直接 CRD/配置文件操作，降低风险。
 
-[![12.png](http://dockone.io/uploads/article/20201104/740c549421146576f3e410c994a0241e.png)](http://dockone.io/uploads/article/20201104/740c549421146576f3e410c994a0241e.png)
+![12.png](/images/img/740c549421146576f3e410c994a0241e.png)
 
 
 
-[![13.png](http://dockone.io/uploads/article/20201104/f6ab40047dc223d3027ce698c6c6aed4.png)](http://dockone.io/uploads/article/20201104/f6ab40047dc223d3027ce698c6c6aed4.png)
+![13.png](/images/img/f6ab40047dc223d3027ce698c6c6aed4.png)
 
 
 前面提到的四项能力都是 API 网关的基础能力。但最终网关好不好用，一般都取决于控制台。这其实就需要产品去思考如何设计API 网关的问题了。个人暂时还没有突破到这个领域，没有什么特别的经验分享，只是要说明，对 API 网关来说，一个对用户和开发者友好的控制台很重要。
@@ -269,12 +268,12 @@ API 网关是整个微服务集群的流量入口，主要用于解决微服务�
 
 所以业界又提出了一个全新的架构：为每一个业务进程启动一个 Sidecar 进程，它来代理业务进程的所有进出流量，并且将服务发现、流量治理、监控、安全等一系列必须但是又业务本身无关的功能剥离出来下沉到 Sidecar 中。
 
-[![14.png](http://dockone.io/uploads/article/20201104/b4b2014a11c3dd41d9a0ebcdb9946fa8.png)](http://dockone.io/uploads/article/20201104/b4b2014a11c3dd41d9a0ebcdb9946fa8.png)
+![14.png](/images/img/b4b2014a11c3dd41d9a0ebcdb9946fa8.png)
 
 
 下图是一个很简单直观的 Sidecar 工作原理图。当业务进程作为服务提供方时，会由 Envoy 作为反向代理，流量先到 Envoy 再到业务本身。当业务进程作为客户端希望调用其他服务时，Envoy Sidecar 会作为正向代理，流量也要经过 Envoy 流转。一系列的流量的治理功能就可以从 SDK 剥离到独立的 Sidecar 进程中。
 
-[![15.png](http://dockone.io/uploads/article/20201104/e71016e9c072b58074427f1733d06485.png)](http://dockone.io/uploads/article/20201104/e71016e9c072b58074427f1733d06485.png)
+![15.png](/images/img/e71016e9c072b58074427f1733d06485.png)
 
 
 至于流量拦截的过程，一般通过修改 IP Tables 实现，对业务可以做到无感知。当然，也可以做到由业务进程直接向 Sidecar 某个特定端口发送请求的方式来让 Envoy 拦截流量，这样做可以减少 IP Tables 的开销，但是 Sidecar 就没有办法做到透明。
@@ -291,12 +290,12 @@ API 网关是整个微服务集群的流量入口，主要用于解决微服务�
 
 在多协议治理能力方面，再次需要提到 Envoy 提供的丰富的可扩展性，它的 L4/L7 Filter 扩展机制。前面在网关部分，主要利用的其实是 Envoy 的 L7 扩展能力，大部分的 Filter 开发都是针对 HTTP 协议，在 Envoy 提供的 HCM 基座之上扩展 HTTP Filter。
 
-[![16.png](http://dockone.io/uploads/article/20201104/8dd02dd43e6eee430d6bd9eb447673cc.png)](http://dockone.io/uploads/article/20201104/8dd02dd43e6eee430d6bd9eb447673cc.png)
+![16.png](/images/img/8dd02dd43e6eee430d6bd9eb447673cc.png)
 
 
 而 L4 Filter 则允许开发者扩展新的基座，实现多协议治理能力的增强。而且新开发的 L4 Filter 之上，同样可以构建对应协议的 L7 Filter。
 
-[![17.png](http://dockone.io/uploads/article/20201104/ad52061920e8e5431ecd1a7ba772eba1.png)](http://dockone.io/uploads/article/20201104/ad52061920e8e5431ecd1a7ba772eba1.png)
+![17.png](/images/img/ad52061920e8e5431ecd1a7ba772eba1.png)
 
 
 现在社区已经提供了大量的 L4 Filter。几乎涵盖的大部分的常用的协议，诸如 Dubbo、Thrift、Redis、RocketMQ等等。但是相比于 HTTP 协议的 HCM，它们的能力还比较孱弱，所以具体实践之中，必须对它们做增强。目前，轻舟主要针对 Thrift、Dubbo 和 Redis 做了优化和扩展，包括可观察性增强、动态 RDS 支持、七层治理能力等等。
