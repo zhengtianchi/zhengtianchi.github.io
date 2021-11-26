@@ -64,5 +64,12 @@
     <author>作者</author>
     <guid>https://zhengtianchi.github.io/envoy_1/</guid>
     <description><![CDATA[介绍¶ Envoy 是一个面向服务架构的 L7 代理和通信总线而设计的，这个项目诞生是出于以下目标： 对于应用程序而言，网络应该是透明的，当发生网络和应用程序故]]></description>
+</item><item>
+    <title></title>
+    <link>https://zhengtianchi.github.io/%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/</link>
+    <pubDate>Mon, 01 Jan 0001 00:00:00 &#43;0000</pubDate>
+    <author>作者</author>
+    <guid>https://zhengtianchi.github.io/%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/</guid>
+    <description><![CDATA[istio 问题排查 ⚠️ 用例部署的 yaml 会在文末给出 前言 问题排查分类如下： istio CR 错误的配置如何排查 如何使用 istioctl 检测和防止错误的资源配置 如何使用 istioctl 检查 envoy 配置 如何]]></description>
 </item></channel>
 </rss>

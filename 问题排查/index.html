@@ -1,0 +1,1900 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title> - 卷王郑天驰</title><meta name="Description" content="杭州奋斗逼，云原生卷王，兰溪土狗"><meta property="og:title" content="" />
+<meta property="og:description" content="istio 问题排查 ⚠️ 用例部署的 yaml 会在文末给出 前言 问题排查分类如下： istio CR 错误的配置如何排查 如何使用 istioctl 检测和防止错误的资源配置 如何使用 istioctl 检查 envoy 配置 如何" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://zhengtianchi.github.io/%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/" /><meta property="og:image" content="https://zhengtianchi.github.io/logo.png"/><meta property="article:section" content="posts" />
+
+
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://zhengtianchi.github.io/logo.png"/>
+
+<meta name="twitter:title" content=""/>
+<meta name="twitter:description" content="istio 问题排查 ⚠️ 用例部署的 yaml 会在文末给出 前言 问题排查分类如下： istio CR 错误的配置如何排查 如何使用 istioctl 检测和防止错误的资源配置 如何使用 istioctl 检查 envoy 配置 如何"/>
+<meta name="application-name" content="ztc">
+<meta name="apple-mobile-web-app-title" content="ztc"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://zhengtianchi.github.io/%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/" /><link rel="next" href="https://zhengtianchi.github.io/envoy_1/" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/zhengtianchi.github.io\/%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5\/"
+        },"image": ["https:\/\/zhengtianchi.github.io\/images\/Apple-Devices-Preview.png"],"genre": "posts","wordcount":  8962 ,
+        "url": "https:\/\/zhengtianchi.github.io\/%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5\/","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
+            "@type": "Organization",
+            "name": "xxxx","logo": "https:\/\/zhengtianchi.github.io\/images\/avatar.png"},"author": {
+                "@type": "Person",
+                "name": "xxxx"
+            },"description": ""
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="卷王郑天驰"><span class="header-title-pre"><i class='far fa-kiss-wink-heart fa-fw'></i></span>卷王郑天驰</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 所有文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/categories/documentation/"> 文档 </a><a class="menu-item" href="/about/"> 关于 </a><a class="menu-item" href="https://github.com/zhengtianchi/" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="卷王郑天驰"><span class="header-title-pre"><i class='far fa-kiss-wink-heart fa-fw'></i></span>卷王郑天驰</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">所有文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/categories/documentation/" title="">文档</a><a class="menu-item" href="/about/" title="">关于</a><a class="menu-item" href="https://github.com/zhengtianchi/" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX"></h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>xxxx</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="1011-08-10">1011-08-10</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 8962 字&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 18 分钟&nbsp;<span id="/%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/" class="leancloud_visitors" data-flag-title="">
+                        <i class="far fa-eye fa-fw"></i>&nbsp;<span class=leancloud-visitors-count></span>&nbsp;次阅读
+                    </span>&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#前言">前言</a></li>
+    <li><a href="#最常见的问题数据面-misconfigured">最常见的问题：数据面 misconfigured</a></li>
+    <li><a href="#数据面和控制面配置同步问题">数据面和控制面配置同步问题</a>
+      <ul>
+        <li><a href="#istioctl-proxy-status">istioctl proxy-status</a></li>
+      </ul>
+    </li>
+    <li><a href="#可视化问题排查-kiali">可视化问题排查 kiali</a></li>
+    <li><a href="#使用-istioctl-发现错误配置">使用 istioctl 发现错误配置</a>
+      <ul>
+        <li><a href="#istioctl-analyze-可以分析-yaml-和-namespace">istioctl analyze (可以分析 yaml 和 namespace)</a></li>
+        <li><a href="#istioctl-describe-workload-specific-的配置分析">istioctl describe (workload-specific 的配置分析)</a></li>
+      </ul>
+    </li>
+    <li><a href="#通过拉取-envoy-配置查找错误配置">通过拉取 envoy 配置查找错误配置</a>
+      <ul>
+        <li><a href="#envoy-dashboard">envoy dashboard</a></li>
+        <li><a href="#istioctl-proxy-config">istioctl proxy-config</a>
+          <ul>
+            <li><a href="#查询-envoy-listener-配置">查询 envoy listener 配置</a></li>
+            <li><a href="#查询-envoy-route-配置">查询 envoy Route 配置</a></li>
+            <li><a href="#查询-envoy-clutsers-配置">查询 envoy Clutsers 配置</a></li>
+            <li><a href="#查询-envoy-cluster-endpoints">查询 envoy cluster endpoints</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#使用日志查找问题">使用日志查找问题</a>
+      <ul>
+        <li>
+          <ul>
+            <li><a href="#日志等级">日志等级</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#通过抓包查找问题">通过抓包查找问题</a>
+      <ul>
+        <li><a href="#installing-krew-ksniff-and-wireshark">Installing Krew, Ksniff, and Wireshark</a></li>
+        <li><a href="#inspecting-network-traffic">Inspecting network traffic</a></li>
+      </ul>
+    </li>
+    <li><a href="#总结">总结</a></li>
+    <li><a href="#附录">附录</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><h1 id="istio-问题排查">istio 问题排查</h1>
+<p>⚠️ 用例部署的 yaml 会在文末给出</p>
+<h2 id="前言">前言</h2>
+<p>问题排查分类如下：</p>
+<ul>
+<li><code>istio CR</code> 错误的配置如何排查</li>
+<li>如何使用 <code>istioctl</code> 检测和防止错误的资源配置</li>
+<li>如何使用 <code>istioctl</code> 检查 <code>envoy</code> 配置</li>
+<li>如何理解 <code>envoy</code> 的日志以帮助了解<code>envoy</code>的行为</li>
+<li>利用收集的遥测技术深入了解应用程序</li>
+</ul>
+<p>istio可以有效地帮助你了解网络通讯，诸如：超时、重试和断路等服务弹性功能，以便应用程序能够自动响应网络问题，但是，如果 <code>envoy</code>本身的意外行为会发生什么呢？</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/img/image-20211125133145806.png"
+        data-srcset="/images/img/image-20211125133145806.png, /images/img/image-20211125133145806.png 1.5x, /images/img/image-20211125133145806.png 2x"
+        data-sizes="auto"
+        alt="/images/img/image-20211125133145806.png"
+        title="image-20211125133145806" /></p>
+<p>上图中展示了<code>istio</code>中路由请求参与的组件：</p>
+<ul>
+<li><code>istiod</code> 确保数据面同步到所期望的状态</li>
+<li><code>Ingress Gateway</code> 允许流量进入集群的入口网关</li>
+<li><code>istio-proxy</code>提供访问控制并处理从 <code>downstream</code>到 <code>Application</code>的流量</li>
+<li><code>Application</code> 服务于请求的应用程序本身。应用程序可能会请求另一个服务，继续连接到另一个 <code>UpStream</code>服务</li>
+</ul>
+<p>当检查 <code>istio</code>中问题的时候，可能会与上述组件中的任意组件有关。调试每个组件可能会花费大量的时间。因此，本文将讲述如何使用一些useful工具通过检查<code>proxy</code>及其相关<code>config</code>来排除一些问题与错误。</p>
+<h2 id="最常见的问题数据面-misconfigured">最常见的问题：数据面 misconfigured</h2>
+<p>istio 中 有许多的<code>CR</code>，诸如：<code>VirtualService</code>、<code>DestinationRule</code> 等等。这些资源会被转换成<code>Envoy</code>配置并应用于数据面中。如果在应用新资源后，数据面的行为和我们预期的不一致，最常见的问题就是我们可能错误地配置了数据面。</p>
+<p>为了展示如何在 <code>misconfigured</code>数据面后解决故障，我们将设置如下：使用 <code>Gateway</code>资源允许流量通过istio入口网关和<code>VirtualService</code> 将 <code>20%</code> 请求路由到 <code>subset catalog vesion-v1</code> 其余 <code>80%</code> 的请求路由到<code>subset catalog version-v2</code>，如下图所示。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">$  kubectl apply -f ./catalog.yaml                 <span class="c1"># yaml 放在文末给出</span>
+$  kubectl apply -f ./catalog-deployment-v2.yaml   <span class="c1"># yaml 放在文末给出</span>
+$  kubectl apply -f ./catalog-gateway.yaml         <span class="c1"># 创建 Gateway 来配置入口网关以允许 HTTP 流量</span>
+$  kubectl apply -f ./catalog-virtualservice-subsets-v1-v2.yaml <span class="c1"># 创建 VirtualService 将流量路由到 catalog</span>
+</code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="c"># catalog-gateway.yaml</span><span class="w">
+</span><span class="w"></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">networking.istio.io/v1alpha3</span><span class="w">
+</span><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">Gateway</span><span class="w">
+</span><span class="w"></span><span class="nt">metadata</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">catalog-gateway</span><span class="w">
+</span><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l">istioinaction</span><span class="w">
+</span><span class="w"></span><span class="nt">spec</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">selector</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span><span class="nt">istio</span><span class="p">:</span><span class="w"> </span><span class="l">ingressgateway</span><span class="w">
+</span><span class="w">  </span><span class="nt">servers</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">hosts</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span>- <span class="s2">&#34;catalog.istioinaction.io&#34;</span><span class="w">
+</span><span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="m">80</span><span class="w">
+</span><span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">http</span><span class="w">
+</span><span class="w">      </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l">HTTP</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="c"># catalog-virtualservice-subsets-v1-v2.yaml</span><span class="w">
+</span><span class="w"></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">networking.istio.io/v1alpha3</span><span class="w">
+</span><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">VirtualService</span><span class="w">
+</span><span class="w"></span><span class="nt">metadata</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">catalog-v1-v2</span><span class="w">
+</span><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l">istioinaction</span><span class="w">
+</span><span class="w"></span><span class="nt">spec</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">hosts</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="s2">&#34;catalog.istioinaction.io&#34;</span><span class="w">
+</span><span class="w">  </span><span class="nt">gateways</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="s2">&#34;catalog-gateway&#34;</span><span class="w">
+</span><span class="w">  </span><span class="nt">http</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">route</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span>- <span class="nt">destination</span><span class="p">:</span><span class="w">
+</span><span class="w">        </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l">catalog.istioinaction.svc.cluster.local</span><span class="w">
+</span><span class="w">        </span><span class="nt">subset</span><span class="p">:</span><span class="w"> </span><span class="l">version-v1</span><span class="w">
+</span><span class="w">        </span><span class="nt">port</span><span class="p">:</span><span class="w">
+</span><span class="w">          </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="m">80</span><span class="w">
+</span><span class="w">      </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="m">20</span><span class="w">
+</span><span class="w">    </span>- <span class="nt">destination</span><span class="p">:</span><span class="w">
+</span><span class="w">        </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l">catalog.istioinaction.svc.cluster.local</span><span class="w">
+</span><span class="w">        </span><span class="nt">subset</span><span class="p">:</span><span class="w"> </span><span class="l">version-v2</span><span class="w">
+</span><span class="w">        </span><span class="nt">port</span><span class="p">:</span><span class="w">
+</span><span class="w">          </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="m">80</span><span class="w">
+</span><span class="w">      </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="m">80</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/img/image-20211125135137695.png"
+        data-srcset="/images/img/image-20211125135137695.png, /images/img/image-20211125135137695.png 1.5x, /images/img/image-20211125135137695.png 2x"
+        data-sizes="auto"
+        alt="/images/img/image-20211125135137695.png"
+        title="image-20211125135137695" /></p>
+<p>但是，你会发现<code> subset</code> 并没有定义，那么 <code>subset</code>是在哪里定义的呢？ 答案：在 <code>DestinationRule</code>中</p>
+<p>因为上述并没有通过 <code>DestinationRule</code>定义 <code>subset</code>，入口网关就没有针对 <code>version-v1</code>和 <code>version-v2</code>子集的集群定义，因此按照上述的部署模式下，所有的请求都会失败。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 创建好资源后，打开一个新的终端并执行一个持续运行的测试来生成“catalog”workload的流量。</span>
+
+$  ./bin/query-catalog.sh get-items-cont
+<span class="c1"># curl -s -H &#34;Host: catalog.istioinaction.io&#34;</span>
+<span class="c1">#-w &#34;\nStatus Code %{http_code}&#34; localhost/items</span>
+
+Status Code <span class="m">000</span>
+<span class="c1"># infinite loop CTRL-C to terminate</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>在输出中，我们看到由于缺少子集，响应代码是“503 Service Unavailable”。</p>
+<p><strong>如何修复❓</strong> 配置上 <code>DestinationRule</code> 即可</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nn">---</span><span class="w">
+</span><span class="w"></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">networking.istio.io/v1alpha3</span><span class="w">
+</span><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">DestinationRule</span><span class="w">
+</span><span class="w"></span><span class="nt">metadata</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">catalog</span><span class="w">
+</span><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l">istioinaction</span><span class="w">
+</span><span class="w"></span><span class="nt">spec</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l">catalog.istioinaction.svc.cluster.local</span><span class="w">
+</span><span class="w">  </span><span class="nt">subsets</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">version-v1</span><span class="w">
+</span><span class="w">    </span><span class="nt">labels</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l">v1</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">version-v2</span><span class="w">
+</span><span class="w">    </span><span class="nt">labels</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l">v2</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><h2 id="数据面和控制面配置同步问题">数据面和控制面配置同步问题</h2>
+<p>在与控制面发生同步之前，环境（<code>services、endpoints、health</code>）以及配置的更改不会立即反馈到 数据面。</p>
+<p>控制面会将特定服务的每个 <code>endpoint IP</code> 发送到数据面（就是<code>service</code>每个 <code>POD IP</code>），如果这些 <code>endpoints</code>中任何一个变得不健康，<code>kubernetes</code>需要一段时间来识别并标记 <code>pod unhealth</code>。在某一时刻，控制面也会识别出这一点（控制面通过 api-server 实现 <code>service</code> 和 <code>endpoint</code> 的配置发现和更新），并将 <code>endpoint</code>从数据面中删除。由此让数据面和控制面保持一致。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/img/image-20211125141841747.png"
+        data-srcset="/images/img/image-20211125141841747.png, /images/img/image-20211125141841747.png 1.5x, /images/img/image-20211125141841747.png 2x"
+        data-sizes="auto"
+        alt="/images/img/image-20211125141841747.png"
+        title="image-20211125141841747" /></p>
+<p>​       对于工作负载和事件数量增加的较大集群，数据平面同步所需的时间会按比例增加。我之后会单独起一篇文章阐述如何“优化控制平面的性能”。</p>
+<h3 id="istioctl-proxy-status">istioctl proxy-status</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 让我们检查数据平面是否与最新配置同步</span>
+$ istioctl proxy-status
+
+NAME                                      CDS      LDS      RDS
+catalog.&lt;...&gt;.istioinaction               SYNCED   SYNCED   SYNCED
+catalog.&lt;...&gt;.istioinaction               SYNCED   SYNCED   SYNCED
+catalog.&lt;...&gt;.istioinaction               SYNCED   SYNCED   SYNCED
+istio-egressgateway.&lt;...&gt;.istio-system    SYNCED   SYNCED   NOT SENT
+istio-ingressgateway.&lt;...&gt;.istio-system   SYNCED   SYNCED   SYNCED
+</code></pre></td></tr></table>
+</div>
+</div><p>输出列出了所有 <code>workload</code> 的每个 <code>xDS API</code> 的同步状态 。有如下状态：</p>
+<ul>
+<li>SYNCED : Envoy已经确认了控制平面发送的最后一个配置。</li>
+<li>NOT SENT : 控制面没有发送任何东西给 Envoy。这通常是因为控制平面没有什么可发送的。例如<code>RDS</code>的<code>istio-egressgateway</code>。(出口网关不会在服务网格内路由请求，因此不需要路由配置)</li>
+<li>STALE : <code>istiod</code> 控制平面已经发送了一个更新，但它没有被确认。这表示以下情况之一: 控制平面过载; envoy 与控制平面之间缺乏或失去连接; 或者可能是Istio本身的一个bug。</li>
+</ul>
+<h2 id="可视化问题排查-kiali">可视化问题排查 kiali</h2>
+<p>使用 Kiali 可以快速发现配置错误的服务。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">$ istioctl dashboard kiali
+http://localhost:20001/kiali
+</code></pre></td></tr></table>
+</div>
+</div><p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/img/image-20211125144020411.png"
+        data-srcset="/images/img/image-20211125144020411.png, /images/img/image-20211125144020411.png 1.5x, /images/img/image-20211125144020411.png 2x"
+        data-sizes="auto"
+        alt="/images/img/image-20211125144020411.png"
+        title="image-20211125144020411" /></p>
+<p>这里我以外文原文的图做演示：</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/img/image-20211125144222922.png"
+        data-srcset="/images/img/image-20211125144222922.png, /images/img/image-20211125144222922.png 1.5x, /images/img/image-20211125144222922.png 2x"
+        data-sizes="auto"
+        alt="/images/img/image-20211125144222922.png"
+        title="image-20211125144222922" /></p>
+<p>仪表板在<code>istioinaction</code>名称空间中显示一个警告。单击它会将您重定向到<code>Istio Config</code>视图，该视图列出了在所选名称空间中应用的所有Istio配置。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/img/image-20211125144325175.png"
+        data-srcset="/images/img/image-20211125144325175.png, /images/img/image-20211125144325175.png 1.5x, /images/img/image-20211125144325175.png 2x"
+        data-sizes="auto"
+        alt="/images/img/image-20211125144325175.png"
+        title="image-20211125144325175" /></p>
+<p>提示了 <code>Virtualservice</code> 有问题，点击后，所有Istio配置都被列出，并伴随着错误配置的通知，就像<code>catalog-v1-v2 `` VirtualService </code>的情况一样。单击警告图标会将您重定向到<code>virtualService</code>的<code>YAML</code>视图，在该视图中，嵌入式编辑器突出显示了配置错误的部分。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/img/image-20211125144636436.png"
+        data-srcset="/images/img/image-20211125144636436.png, /images/img/image-20211125144636436.png 1.5x, /images/img/image-20211125144636436.png 2x"
+        data-sizes="auto"
+        alt="/images/img/image-20211125144636436.png"
+        title="image-20211125144636436" /></p>
+<p>将鼠标悬停在警告图标上，会显示警告消息“KIA1107子集未找到”。有关此警告的更多信息，请查看Kiali文档的<a href="https://kiali.io/documentation/latest/validations/" target="_blank" rel="noopener noreffer">Kiali validation</a> (<a href="https://kiali.io/documentation/latest/validations/" target="_blank" rel="noopener noreffer">https://kiali.io/documentation/latest/validations/</a>)页面。此页面提供了已识别错误的描述、严重性和解决方案。例如，下面是我们面临的“KIA1107” <code>warning</code>部分:</p>
+<ul>
+<li>
+<p>修正指向不存在的子集的路由。它可能是修复子集名称中的拼写错误，或者在<code>DestinationRule </code>中定义缺失的子集。</p>
+</li>
+<li>
+<p>该描述帮助我们识别并修复问题，因为它正确地指出了哪些配置错误。在这种情况下，子集是缺失的，我们应该创建一个<code>DestinationRule </code>来定义它们。</p>
+</li>
+</ul>
+<h2 id="使用-istioctl-发现错误配置">使用 istioctl 发现错误配置</h2>
+<p>最有用的两个指令：</p>
+<ul>
+<li><code>istioctl analyze</code></li>
+<li><code>istioctl describe</code></li>
+</ul>
+<h3 id="istioctl-analyze-可以分析-yaml-和-namespace">istioctl analyze (可以分析 yaml 和 namespace)</h3>
+<p><code>istioctl analyze </code>命令是一个强大的分析Istio配置的诊断工具。它可以在已经遇到问题的集群上运行，甚至可以在将这些问题应用到集群之前验证配置，以便首先防止错误配置资源.</p>
+<p>“analyze”命令运行一组分析器，其中每个分析器都专门用于检测特定的一组问题。</p>
+<p>让我们 <code>analyze</code>下 <code>istioinaction</code> namespace :</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">$  istioctl analyze -n istioinaction
+
+Error <span class="o">[</span>IST0101<span class="o">]</span> <span class="o">(</span>VirtualService catalog-v1-v2.istioinaction<span class="o">)</span> Referenced
+  host+subset in destinationrule not found:
+  <span class="s2">&#34;catalog.istioinaction.svc.cluster.local+version-v1&#34;</span>
+Error <span class="o">[</span>IST0101<span class="o">]</span> <span class="o">(</span>VirtualService catalog-v1-v2.istioinaction<span class="o">)</span> Referenced
+  host+subset in destinationrule not found:
+  <span class="s2">&#34;catalog.istioinaction.svc.cluster.local+version-v2&#34;</span>
+Error: Analyzers found issues when analyzing namespace: istioinaction.
+
+See https://istio.io/v1.10/docs/reference/config/analysis <span class="k">for</span> more
+  information about causes and resolutions.
+</code></pre></td></tr></table>
+</div>
+</div><p>输出显示没有找到子集，除了错误消息<code>Referenced host+subset in destinationrule not found</code>外，它还给我们提供了错误代码“IST0101”，我们可以在Istio的<a href="https://istio.io/latest/docs/reference/config/analysis/" target="_blank" rel="noopener noreffer">文档</a> (<a href="https://istio.io/latest/docs/reference/config/analysis/" target="_blank" rel="noopener noreffer">https://istio.io/latest/docs/reference/config/analysis/</a>)中找到关于这个问题的更多细节。</p>
+<h3 id="istioctl-describe-workload-specific-的配置分析">istioctl describe (workload-specific 的配置分析)</h3>
+<p><code>describe</code>命令用于描述特定于工作负载的配置。它分析直接或间接影响一个工作负载的Istio配置并打印摘要。这个摘要回答了关于工作负载的问题，例如:它是服务网格的一部分吗?应用于它的虚拟服务和目标规则是什么?它是否需要相互验证的请求等。</p>
+<p>选择任何<code>catalog</code>工作负载的名称，并执行下面的描述命令:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">$ istioctl x describe pod catalog-68666d4988-vqhmb
+
+Pod: catalog-68666d4988-q6w42
+   Pod Ports: <span class="m">3000</span> <span class="o">(</span>catalog<span class="o">)</span>, <span class="m">15090</span> <span class="o">(</span>istio-proxy<span class="o">)</span>
+---------------
+Service: catalog
+   Port: http 80/HTTP targets pod port <span class="m">3000</span>
+
+Exposed on Ingress Gateway http://13.91.21.16
+VirtualService: catalog-v1-v2
+  WARNING: No destinations match pod subsets <span class="o">(</span>checked <span class="m">1</span> HTTP routes<span class="o">)</span>
+
+    Warning: Route to subset version-v1 but NO DESTINATION RULE defining
+    subsets!
+
+    Warning: Route to subset version-v2 but NO DESTINATION RULE defining
+    subsets!
+</code></pre></td></tr></table>
+</div>
+</div><p><code>description</code>命令的输出显示警告消息<code>Route to subset version-v1 but NO DESTINATION RULE defining subset</code>。这意味着路由是为不存在的子集配置的。为了完整起见，如果正确配置了工作负载，将显示<code>istioctl describe </code>输出如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">Pod: catalog-68666d4988-q6w42
+   Pod Ports: <span class="m">3000</span> <span class="o">(</span>catalog<span class="o">)</span>, <span class="m">15090</span> <span class="o">(</span>istio-proxy<span class="o">)</span>
+---------------
+Service: catalog
+   Port: http 80/HTTP targets pod port <span class="m">3000</span>
+DestinationRule: catalog <span class="k">for</span> <span class="s2">&#34;catalog.istioinaction.svc.cluster.local&#34;</span>
+   Matching subsets: version-v1
+      <span class="o">(</span>Non-matching subsets version-v2<span class="o">)</span>
+   No Traffic Policy
+
+Exposed on Ingress Gateway http://
+VirtualService: catalog-v1-v2
+   Weight 20%
+</code></pre></td></tr></table>
+</div>
+</div><p><code>analyze</code>和<code>describe</code>子命令都有助于识别配置中的常见错误，通常足以提出修复建议。对于这些命令无法解决的问题，或者对于如何解决这些问题没有提供足够的指导，您需要深入挖掘!这就是我们下一节要做的。</p>
+<h2 id="通过拉取-envoy-配置查找错误配置">通过拉取 envoy 配置查找错误配置</h2>
+<p>当前面提到的一些自动分析器达不到要求时，可以使用手动调查 envoy 配置的方式查找问题。</p>
+<h3 id="envoy-dashboard">envoy dashboard</h3>
+<p>envoy 的 dashboard 公开envoy 配置和其他功能，以修改 envoy 的某些方面比如提高日志记录级别。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">$ istioctl dashboard envoy deploy/catalog -n istioinaction
+
+http://localhost:15000
+</code></pre></td></tr></table>
+</div>
+</div><p>我们将使用<code>config_dump</code>在代理中打印当前加载的Envoy配置</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/7.envoy-admin-dashboard.png"
+        data-srcset="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/7.envoy-admin-dashboard.png, https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/7.envoy-admin-dashboard.png 1.5x, https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/7.envoy-admin-dashboard.png 2x"
+        data-sizes="auto"
+        alt="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/7.envoy-admin-dashboard.png"
+        title="7.envoy admin dashboard" /></p>
+<p>⚠️ config_dump 出来的结果 数据量非常大</p>
+<p>以为，<code>istioctl </code>提供了将输出过滤成更小块的工具，这有助于提高可读性和理解性。那就是 <code>istioctl proxy-config</code></p>
+<h3 id="istioctl-proxy-config">istioctl proxy-config</h3>
+<p><code>istioctl proxy-config </code>命令使我们能够基于<code>Envoy xDS api</code>检索和过滤工作负载的代理配置，其中每个子命令都被适当命名为:</p>
+<ul>
+<li><strong>cluster</strong> -获取集群配置</li>
+<li><strong>endpoint</strong> -获取端点配置</li>
+<li><strong>listener</strong> -检索侦听器配置</li>
+<li><strong>route</strong> -获取路由配置信息</li>
+<li><strong>secret</strong> -获取秘密配置</li>
+</ul>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/img/image-20211125160336175.png"
+        data-srcset="/images/img/image-20211125160336175.png, /images/img/image-20211125160336175.png 1.5x, /images/img/image-20211125160336175.png 2x"
+        data-sizes="auto"
+        alt="/images/img/image-20211125160336175.png"
+        title="image-20211125160336175" /></p>
+<ol>
+<li><code>Envoy Listeners</code>定义一个网络配置，例如<code>IP Address</code>和<code>Port</code>，它允许<code>downstream</code>流量进入<code>envoy</code>。为允许的连接创建<code>HTTP Filter chain</code>。链中最重要的过滤器是路由器过滤器，它执行高级路由任务。</li>
+<li><code>Envoy Routes</code>是一组将<code>virtual hots</code>匹配到集群的规则。路由按列出的顺序处理。第一个匹配的用于将流量路由到工作负载集群。路由可以静态配置，但Istio使用路由发现服务动态配置。</li>
+<li><code>Envoy Clusters</code>是一组集群，其中每个集群都有一组指向类似工作负载的<code>endpoints</code>。<code>subsets</code>用于在集群中进一步划分工作负载，从而支持细粒度的流量管理。</li>
+<li><code>Envoy Endpoints</code>是一组<code>endpoints</code>，它们代表服务请求的工作负载的IP地址。</li>
+</ol>
+<h4 id="查询-envoy-listener-配置">查询 envoy listener 配置</h4>
+<p>​       首先确保允许到达本地主机端口80上的入口网关的流量进入集群。如前所述，接收流量是envoy监听器(<code>Envoy Listeners</code>)的职责，它们在Istio中使用<code>Gateway</code>资源配置。让我们查询一下网关的监听器配置，并验证流量是否被80端口所允许:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 查询ingress pod的侦听器配置</span>
+
+$  istioctl proxy-config listeners deploy/istio-ingressgateway -n istio-system
+
+ADDRESS PORT  MATCH DESTINATION
+0.0.0.0 <span class="m">8080</span>  ALL   Route: http.80         <span class="c1"># 在 8080 端口上配置了 listener，流量根据该侦听器名为“http.80”的路由进行路由</span>
+0.0.0.0 <span class="m">15021</span> ALL   Inline Route: /healthz/ready*
+0.0.0.0 <span class="m">15090</span> ALL   Inline Route: /stats/prometheus*
+</code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># Ports of the istio-ingressgateway service printed in yaml format</span>
+
+$  kubectl -n istio-system get svc istio-ingressgateway -o yaml <span class="se">\
+</span><span class="se"></span><span class="p">|</span> grep <span class="s2">&#34;ports:&#34;</span> -A <span class="m">10</span>
+  ports:
+  - name: status-port
+    nodePort: <span class="m">30618</span>
+    port: <span class="m">15021</span>
+    protocol: TCP
+    targetPort: <span class="m">15021</span>
+  - name: http2
+    nodePort: <span class="m">32589</span>
+    port: <span class="m">80</span>       <span class="c1"># Traffic in port 80 targets pods on port 8080</span>
+    protocol: TCP       <span class="p">|</span>
+    targetPort: <span class="m">8080</span> &lt;--+
+</code></pre></td></tr></table>
+</div>
+</div><p>因此，我们验证了流量到达端口 8080 并且存在一个侦听器以允许它进入入口网关。 此外，我们看到此侦听器的路由是由路由“http.80”完成的，这是我们的下一个检查点。</p>
+<h4 id="查询-envoy-route-配置">查询 envoy Route 配置</h4>
+<p>envoy Route 配置定义了一组规则，这些规则决定将通信路由到哪个集群。Istio使用<code>VirtualService </code>资源配置envoy Routes，同时，<code>clusters</code>要么自动发现，要么使用<code>DestinationRule </code>资源定义。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 要找出“http.80”路由的流量路由到哪些集群，让我们查询其配置：</span>
+
+$  istioctl pc routes deploy/istio-ingressgateway -n istio-system --name http.80
+
+NOTE: This output only contains routes loaded via RDS.
+NAME        DOMAINS                          MATCH                 VIRTUAL SERVICE
+http.80     *                                /productpage          bookinfo.default
+http.80     *                                /static*              bookinfo.default
+http.80     *                                /login                bookinfo.default
+http.80     *                                /logout               bookinfo.default
+http.80     *                                /api/v1/products*     bookinfo.default
+http.80     bookinfo.10.20.144.36.nip.io     /*                    productpage.bookinfo
+http.80     catalog.istioinaction.io         /*                    catalog.istioinaction
+
+<span class="c1"># 其 URL 与路径前缀 `/*` 匹配的 host `catalog.istioinaction.io` 的流量被路由到 catalog `VirtualService`，该 catalog 服务 位于 `istioinaction` 命名空间中的 `catalog` service 中。</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>当路由配置以 JSON 格式打印时，会显示有关 <code>catalog.istioinaction</code> <code>VirtualService</code> 后面的集群的详细信息：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 打印路由配置</span>
+
+$  istioctl pc routes deploy/istio-ingressgateway -n istio-system <span class="se">\
+</span><span class="se"></span>      --name http.80 -o json
+
+&lt;ommitted&gt;
+<span class="s2">&#34;routes&#34;</span>: <span class="o">[</span>
+  <span class="o">{</span>
+    <span class="s2">&#34;match&#34;</span>: <span class="o">{</span>
+      <span class="s2">&#34;prefix&#34;</span>: <span class="s2">&#34;/&#34;</span>    <span class="c1"># Route rule that has to match</span>
+    <span class="o">}</span>,
+    <span class="s2">&#34;route&#34;</span>: <span class="o">{</span>
+      <span class="s2">&#34;weightedClusters&#34;</span>: <span class="o">{</span>
+         <span class="s2">&#34;clusters&#34;</span>: <span class="o">[</span>     <span class="c1"># Clusters to which traffic is routed when the rule is matched</span>
+            <span class="o">{</span>
+            <span class="s2">&#34;name&#34;</span>: <span class="s2">&#34;outbound|80|version-v2|catalog.istioinaction.svc.cluster.local&#34;</span>,
+            <span class="s2">&#34;weight&#34;</span>: <span class="m">80</span>
+            <span class="o">}</span>,
+            <span class="o">{</span>
+            <span class="s2">&#34;name&#34;</span>: <span class="s2">&#34;outbound|80|version-v1|catalog.istioinaction.svc.cluster.local&#34;</span>,
+            <span class="s2">&#34;weight&#34;</span>: <span class="m">20</span>
+            <span class="o">}</span>
+         <span class="o">]</span>
+      <span class="o">}</span>,
+&lt;ommitted&gt;
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>由输出可知，路由匹配时，两个<code>clusters</code>接收流量，分别为:</p>
+<ul>
+<li><code>outbound|80|version-v2|catalog.istioinaction.svc.cluster.local</code></li>
+<li><code>outbound|80|version-v1|catalog.istioinaction.svc.cluster.local</code></li>
+</ul>
+<p>让我们研究每个管道分离部分的含义，并研究如何将工作负载作为成员分配给这些集群。</p>
+<h4 id="查询-envoy-clutsers-配置">查询 envoy Clutsers 配置</h4>
+<p><code>Envoy Clusters</code>配置定义了请求可以路由到的后端服务。 跨实例或端点的集群负载平衡。 这些端点（通常是 IP 地址）代表为最终用户流量提供服务的各个工作负载实例。</p>
+<p>使用 <code>istioctl</code> 我们可以查询入口网关知道的集群，但是，有很多集群，因为每个后端可路由服务都配置了一个集群。</p>
+<p>我们可以使用以下 <code>istioctl proxy-config clusters</code> 配合 <code>flags</code>: <code>direction</code>、<code>fqdn</code>、<code>port</code> 和 <code>subset</code>打印我们感兴趣的集群.</p>
+<p>所有<code>flags</code>的信息都包含在我们在前面部分检索到的集群名称中：</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/9.cluster-components.png"
+        data-srcset="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/9.cluster-components.png, https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/9.cluster-components.png 1.5x, https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/9.cluster-components.png 2x"
+        data-sizes="auto"
+        alt="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/9.cluster-components.png"
+        title="9.cluster components" /></p>
+<p>让我们查询其中一个集群，例如配置了入口网关的 <code>version-v1</code>子集的集群。 我们可以通过在查询中指定所有集群属性。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">$  istioctl proxy-config clusters <span class="se">\
+</span><span class="se"></span>     deploy/istio-ingressgateway.istio-system <span class="se">\
+</span><span class="se"></span>     --fqdn catalog.istioinaction.svc.cluster.local  <span class="se">\
+</span><span class="se"></span>     --port <span class="m">80</span> <span class="se">\
+</span><span class="se"></span>     --subset version-v1
+
+SERVICE FQDN   PORT   SUBSET   DIRECTION   TYPE   DESTINATION RULE
+</code></pre></td></tr></table>
+</div>
+</div><p>会发现，子集<code>version-v1</code>没有集群!  如果没有这些子集的集群，请求将失败，因为 virtual service 路由到了不存在的集群。</p>
+<p>显然，这是一个配置错误的情况，我们可以通过创建一个定义这些子集的集群的<code>DestinationRule</code>来解决这个问题。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="c"># catalog-destinationrule-v1-v2.yaml</span><span class="w">
+</span><span class="w"></span><span class="nn">---</span><span class="w">
+</span><span class="w"></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">networking.istio.io/v1alpha3</span><span class="w">
+</span><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">DestinationRule</span><span class="w">
+</span><span class="w"></span><span class="nt">metadata</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">catalog</span><span class="w">
+</span><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l">istioinaction</span><span class="w">
+</span><span class="w"></span><span class="nt">spec</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l">catalog.istioinaction.svc.cluster.local</span><span class="w">
+</span><span class="w">  </span><span class="nt">subsets</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">version-v1</span><span class="w">
+</span><span class="w">    </span><span class="nt">labels</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l">v1</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">version-v2</span><span class="w">
+</span><span class="w">    </span><span class="nt">labels</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l">v2</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>但是在将它应用到集群之前，让我们使用 <code>istioctl analysis</code> 子命令来验证此配置：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 分析目标规则应用于网格时的影响</span>
+
+istioctl analyze ./catalog-destinationrule-v1-v2.yaml <span class="se">\
+</span><span class="se"></span>    -n istioinaction
+
+✔ No validation issues found when analyzing ch10/catalog-destinationrule-v1-v2.yaml.
+
+<span class="c1"># 在模拟应用资源的影响时，输出显示集群中没有验证错误。 这意味着应用目标规则会修复集群配置。 让我们这样做吧！</span>
+
+$  kubectl apply -f ./catalog-destinationrule-v1-v2.yaml
+
+destinationrule.networking.istio.io/catalog created
+</code></pre></td></tr></table>
+</div>
+</div><p>再次查询：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">$  istioctl pc clusters deploy/istio-ingressgateway -n istio-system --fqdn catalog.istioinaction.svc.cluster.local --port <span class="m">80</span>
+
+SERVICE FQDN        PORT  SUBSET      DIRECTION  TYPE  DESTINATION RULE
+catalog.&lt;...&gt;.local <span class="m">80</span>    -           outbound   EDS   catalog.&lt;...&gt;
+catalog.&lt;...&gt;.local <span class="m">80</span>    version-v1  outbound   EDS   catalog.&lt;...&gt;
+catalog.&lt;...&gt;.local <span class="m">80</span>    version-v2  outbound   EDS   catalog.&lt;...&gt;
+</code></pre></td></tr></table>
+</div>
+</div><p>如果想看更详细的信息，可以通过如下指令查看：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">$  istioctl pc clusters deploy/istio-ingressgateway -n istio-system <span class="se">\
+</span><span class="se"></span>--fqdn catalog.istioinaction.svc.cluster.local --port <span class="m">80</span> <span class="se">\
+</span><span class="se"></span>--subset version-v1 -o json
+
+<span class="c1"># Output is truncated</span>
+<span class="s2">&#34;name&#34;</span>: <span class="s2">&#34;outbound|80|version-v1|catalog.istioinaction.svc.cluster.local&#34;</span>,
+<span class="s2">&#34;type&#34;</span>: <span class="s2">&#34;EDS&#34;</span>,
+<span class="s2">&#34;edsClusterConfig&#34;</span>: <span class="o">{</span>
+    <span class="s2">&#34;edsConfig&#34;</span>: <span class="o">{</span>
+        <span class="s2">&#34;ads&#34;</span>: <span class="o">{}</span>,
+        <span class="s2">&#34;resourceApiVersion&#34;</span>: <span class="s2">&#34;V3&#34;</span>
+    <span class="o">}</span>,
+    <span class="s2">&#34;serviceName&#34;</span>: <span class="s2">&#34;outbound|80|version-v1|catalog.istioinaction.svc.cluster.local&#34;</span>
+<span class="o">}</span>,
+
+
+<span class="c1"># 输出显示&#39; edsClusterConfig &#39;被配置为使用聚合发现服务来查询端点</span>
+<span class="c1"># 服务名&#39; outbound|80|version-v1|catalog. istioaction .svc.cluster。local &#39;被用作从ADS查询的端点的过滤器。</span>
+</code></pre></td></tr></table>
+</div>
+</div><h4 id="查询-envoy-cluster-endpoints">查询 envoy cluster endpoints</h4>
+<p>现在我们知道<code>envoy proxy</code>被配置为使用服务名查询ADS，我们可以使用这个信息手动查询入口网关中这个集群的<code>endpoints</code>，使用<code>istioctl proxy-config endpoint</code>命令:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">$ istioctl pc endpoints deploy/istio-ingressgateway -n istio-system <span class="se">\
+</span><span class="se"></span>--cluster <span class="s2">&#34;outbound|80|version-v1|catalog.istioinaction.svc.cluster.local&#34;</span>
+
+ENDPOINT         STATUS   OUTLIER CHECK  CLUSTER
+10.1.0.60:3000   HEALTHY  OK             outbound<span class="p">|</span>80<span class="p">|</span>version-v1<span class="p">|</span>catalog...
+</code></pre></td></tr></table>
+</div>
+</div><p>输出列出了这个集群后面的唯一工作负载的端点。让我们使用这个IP查询pod，并验证其背后是否有实际的工作负载。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">$ kubectl get pods -n istioinaction <span class="se">\
+</span><span class="se"></span>    --field-selector status.podIP<span class="o">=</span>10.1.0.60
+
+NAME                       READY   STATUS    RESTARTS   AGE
+catalog-5b56677c4c-v7hkj   2/2     Running   <span class="m">0</span>          3h47m
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="使用日志查找问题">使用日志查找问题</h2>
+<p>对于基于微服务的应用程序，服务代理生成的日志和指标有助于解决许多问题，如发现导致性能瓶颈的服务、识别经常失败的端点、检测性能下降等。我们将使用Envoy访问日志和度量来排除应用程序弹性问题。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 首先，更新我们的服务，以解决我们可以解决的问题。</span>
+
+<span class="c1"># 设置超时的间歇慢工作负载，目录工作负载可以配置为间歇性地返回慢响应，使用以下脚本:</span>
+
+$ ./query-catalog.sh delayed-responses
+
+<span class="nv">blowups</span><span class="o">=[</span>object Object<span class="o">]</span>
+
+------------------------------------------------------------------------------------------------------
+
+<span class="c1"># 现在让我们继续并将catalog-v1-v2 VirtualService配置为当请求需要超过半秒才能得到服务时超时:</span>
+
+$  kubectl patch vs catalog-v1-v2 -n istioinaction --type json <span class="se">\
+</span><span class="se"></span>      -p <span class="s1">&#39;[{&#34;op&#34;: &#34;add&#34;, &#34;path&#34;: &#34;/spec/http/0/timeout&#34;, &#34;value&#34;: &#34;0.5s&#34;}]&#39;</span>
+
+<span class="c1"># 配置的可视化结果如下所示：</span>
+</code></pre></td></tr></table>
+</div>
+</div><p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/img/image-20211126103702917.png"
+        data-srcset="/images/img/image-20211126103702917.png, /images/img/image-20211126103702917.png 1.5x, /images/img/image-20211126103702917.png 2x"
+        data-sizes="auto"
+        alt="/images/img/image-20211126103702917.png"
+        title="image-20211126103702917" /></p>
+<p>让我们在一个单独的终端中生成到“目录”工作负载的连续通信。这将产生我们在接下来的章节中所需要的日志和遥测技术。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">$  ./bin/query-catalog.sh get-items-cont
+</code></pre></td></tr></table>
+</div>
+</div><p>在连续触发的请求中，我们看到一些请求被路由到较慢的工作负载，结果那些请求以超时结束。输出如下:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">upstream request timeout
+Status Code <span class="m">504</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>状态码“504网关超时”是我们可以用来查询Envoy访问日志的一条信息。</p>
+<p>Envoy访问日志记录了Envoy代理处理的所有请求，这有助于调试和排除故障。默认情况下，Istio将代理配置为使用<code>TEXT</code>格式的日志。这是简明但难以阅读，如下所示:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 只查询和打印状态码为504的日志</span>
+
+$ kubectl -n istio-system logs deploy/istio-ingressgateway <span class="se">\
+</span><span class="se"></span> <span class="p">|</span> grep <span class="m">504</span>
+
+<span class="c1"># output is truncated to a single failing request</span>
+<span class="o">[</span>2020-08-22T16:20:20.049Z<span class="o">]</span> <span class="s2">&#34;GET /items HTTP/1.1&#34;</span> <span class="m">504</span> UT <span class="s2">&#34;-&#34;</span> <span class="s2">&#34;-&#34;</span> <span class="m">0</span> <span class="m">24</span>
+<span class="m">501</span> - <span class="s2">&#34;192.168.65.3&#34;</span> <span class="s2">&#34;curl/7.64.1&#34;</span> <span class="s2">&#34;6f780bed-9996-9c95-a899-a5e293cd9fe4&#34;</span>
+<span class="s2">&#34;catalog.istioinaction.io&#34;</span> <span class="s2">&#34;10.1.0.68:3000&#34;</span>
+outbound<span class="p">|</span>80<span class="p">|</span>version-v2<span class="p">|</span>catalog.istioinaction.svc.cluster.local
+10.1.0.69:34488 10.1.0.69:8080 192.168.65.3:55962 - -
+</code></pre></td></tr></table>
+</div>
+</div><p>为了易于读取日志，将服务代理配置为使用<code>JSON</code>格式：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 服务代理访问日志是可配置的，默认情况下，只有Istio的“demo”安装配置文件将访问日志打印到标准输出。如果您正在使用任何其他配置文件，那么您需要设置以下属性&#39; meshConfig.accessLogFile=&#34;/dev/stdout&#34; &#39;在Istio安装过程中。如下所示:</span>
+
+$ istioctl install --set meshConfig.accessLogFile<span class="o">=</span><span class="s2">&#34;/dev/stdout&#34;</span> --set meshConfig.accessLogEncoding<span class="o">=</span><span class="s2">&#34;JSON&#34;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>上述的部署方式是对整个网格日志做了修改，如果要对特定的<code>workload</code>启动访问日志记录，可以使用<code>EnvoyFilter</code>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">networking.istio.io/v1alpha3</span><span class="w">
+</span><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">EnvoyFilter</span><span class="w">
+</span><span class="w"></span><span class="nt">metadata</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">webapp-access-logging</span><span class="w">
+</span><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l">istioinaction</span><span class="w">
+</span><span class="w"></span><span class="nt">spec</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">workloadSelector</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span><span class="nt">labels</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l">webapp  </span><span class="w"> </span><span class="c"># 这个配置允许对“webapp”工作负载进行访问日志记录</span><span class="w">
+</span><span class="w">  </span><span class="nt">configPatches</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">applyTo</span><span class="p">:</span><span class="w"> </span><span class="l">NETWORK_FILTER</span><span class="w">
+</span><span class="w">    </span><span class="nt">match</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span><span class="nt">context</span><span class="p">:</span><span class="w"> </span><span class="l">ANY</span><span class="w">
+</span><span class="w">      </span><span class="nt">listener</span><span class="p">:</span><span class="w">
+</span><span class="w">        </span><span class="nt">filterChain</span><span class="p">:</span><span class="w">
+</span><span class="w">          </span><span class="nt">filter</span><span class="p">:</span><span class="w">
+</span><span class="w">            </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;envoy.filters.network.http_connection_manager&#34;</span><span class="w">
+</span><span class="w">    </span><span class="nt">patch</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span><span class="nt">operation</span><span class="p">:</span><span class="w"> </span><span class="l">MERGE</span><span class="w">
+</span><span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w">
+</span><span class="w">        </span><span class="nt">typed_config</span><span class="p">:</span><span class="w">
+</span><span class="w">          </span><span class="nt">&#34;@type&#34;: </span><span class="s2">&#34;type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager&#34;</span><span class="w">
+</span><span class="w">          </span><span class="nt">access_log</span><span class="p">:</span><span class="w">
+</span><span class="w">          </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">envoy.access_loggers.file</span><span class="w">
+</span><span class="w">            </span><span class="nt">typed_config</span><span class="p">:</span><span class="w">
+</span><span class="w">              </span><span class="nt">&#34;@type&#34;: </span><span class="s2">&#34;type.googleapis.com/envoy.extensions.access_loggers.file.v3.FileAccessLog&#34;</span><span class="w">
+</span><span class="w">              </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/dev/stdout</span><span class="w">
+</span><span class="w">              </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;[%START_TIME%] \&#34;%REQ(:METHOD)% %REQ(X-ENVOY-ORIGINAL-PATH?:PATH)% %PROTOCOL%\&#34; %RESPONSE_CODE% %RESPONSE_FLAGS% \&#34;%UPSTREAM_TRANSPORT_FAILURE_REASON%\&#34; %BYTES_RECEIVED% %BYTES_SENT% %DURATION% %RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)% \&#34;%REQ(X-FORWARDED-FOR)%\&#34; \&#34;%REQ(USER-AGENT)%\&#34; \&#34;%REQ(X-REQUEST-ID)%\&#34; \&#34;%REQ(:AUTHORITY)%\&#34; \&#34;%UPSTREAM_HOST%\&#34; %UPSTREAM_CLUSTER% %UPSTREAM_LOCAL_ADDRESS% %DOWNSTREAM_LOCAL_ADDRESS% %DOWNSTREAM_REMOTE_ADDRESS% %REQUESTED_SERVER_NAME% %ROUTE_NAME%\n&#34;</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>Istio安装更新后，我们可以再次查询访问日志，这一次考虑到它是<code>JSON</code>，我们可以将输出管道到<strong>jq</strong>，以提高可读性。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 查询最近的日志并使用jq格式化它</span>
+
+$ kubectl -n istio-system logs deploy/istio-ingressgateway <span class="se">\
+</span><span class="se"></span><span class="p">|</span> grep <span class="m">504</span> <span class="p">|</span> tail -n <span class="m">1</span> <span class="p">|</span> jq
+<span class="o">{</span>
+  <span class="s2">&#34;user_agent&#34;</span>:<span class="s2">&#34;curl/7.64.1&#34;</span>,
+  <span class="s2">&#34;Response_code&#34;</span>:<span class="s2">&#34;504&#34;</span>,
+  <span class="s2">&#34;response_flags&#34;</span>:<span class="s2">&#34;UT&#34;</span>,       <span class="c1"># Envoy response flag   &#39;UT&#39;表示“上游请求超时”</span>
+  <span class="s2">&#34;start_time&#34;</span>:<span class="s2">&#34;2020-08-22T16:35:27.125Z&#34;</span>,
+  <span class="s2">&#34;method&#34;</span>:<span class="s2">&#34;GET&#34;</span>,
+  <span class="s2">&#34;request_id&#34;</span>:<span class="s2">&#34;e65a3ea0-60dd-9f9c-8ef5-42611138ba07&#34;</span>,
+  <span class="s2">&#34;upstream_host&#34;</span>:<span class="s2">&#34;10.1.0.68:3000&#34;</span>, <span class="c1"># Upstream host receiving the request  表示处理请求的工作负载的实际IP地址</span>
+  <span class="s2">&#34;x_forwarded_for&#34;</span>:<span class="s2">&#34;192.168.65.3&#34;</span>,
+  <span class="s2">&#34;requested_server_name&#34;</span>:<span class="s2">&#34;-&#34;</span>,
+  <span class="s2">&#34;bytes_received&#34;</span>:<span class="s2">&#34;0&#34;</span>,
+  <span class="s2">&#34;istio_policy_status&#34;</span>:<span class="s2">&#34;-&#34;</span>,
+  <span class="s2">&#34;bytes_sent&#34;</span>:<span class="s2">&#34;24&#34;</span>,
+  <span class="s2">&#34;upstream_cluster&#34;</span>:
+    <span class="s2">&#34;outbound|80|version-v2|catalog.istioinaction.svc.cluster.local&#34;</span>,
+  <span class="s2">&#34;downstream_remote_address&#34;</span>:<span class="s2">&#34;192.168.65.3:41260&#34;</span>,
+  <span class="s2">&#34;authority&#34;</span>:<span class="s2">&#34;catalog.istioinaction.io&#34;</span>,
+  <span class="s2">&#34;path&#34;</span>:<span class="s2">&#34;/items&#34;</span>,
+  <span class="s2">&#34;protocol&#34;</span>:<span class="s2">&#34;HTTP/1.1&#34;</span>,
+  <span class="s2">&#34;upstream_service_time&#34;</span>:<span class="s2">&#34;-&#34;</span>,
+  <span class="s2">&#34;upstream_local_address&#34;</span>:<span class="s2">&#34;10.1.0.69:48016&#34;</span>,
+  <span class="s2">&#34;duration&#34;</span>:<span class="s2">&#34;503&#34;</span>,   <span class="c1"># Exceeding duration of 500 milliseconds</span>
+  <span class="s2">&#34;upstream_transport_failure_reason&#34;</span>:<span class="s2">&#34;-&#34;</span>,
+  <span class="s2">&#34;route_name&#34;</span>:<span class="s2">&#34;-&#34;</span>,
+  <span class="s2">&#34;downstream_local_address&#34;</span>:<span class="s2">&#34;10.1.0.69:8080&#34;</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>将<code>response_flags</code>UT与此请求关联是很重要的，因为它使我们能够区分超时决策是由代理而不是应用程序做出的。您将经常面对的一些响应标志是:</p>
+<ul>
+<li>UH:没有正常的上游，即集群没有工作负载</li>
+<li>NR:未配置路由</li>
+<li>UC:上行连接终止</li>
+<li>DC:下行连接端子</li>
+</ul>
+<p>The entire list can be found in the Envoy <a href="https://www.envoyproxy.io/docs/envoy/latest/configuration/observability/access_log/usage" target="_blank" rel="noopener noreffer">documentation</a> (<a href="https://www.envoyproxy.io/docs/envoy/latest/configuration/observability/access_log/usage%29" target="_blank" rel="noopener noreffer">https://www.envoyproxy.io/docs/envoy/latest/configuration/observability/access_log/usage)</a>.</p>
+<p><code>upstream_host</code>可以帮助我们找到有问题的<code>POD</code></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 记录下 对应的 POD，以供后面使用</span>
+$  <span class="nv">SLOW_POD_IP</span><span class="o">=</span><span class="k">$(</span>kubectl -n istio-system logs deploy/istio-ingressgateway <span class="se">\
+</span><span class="se"></span><span class="p">|</span> grep <span class="m">504</span> <span class="p">|</span> tail -n <span class="m">1</span> <span class="p">|</span> jq -r .upstream_host <span class="p">|</span> cut -d <span class="s2">&#34;:&#34;</span> -f1<span class="k">)</span>
+$  <span class="nv">SLOW_POD</span><span class="o">=</span><span class="k">$(</span>kubectl get pods -n istioinaction <span class="se">\
+</span><span class="se"></span>     --field-selector status.podIP<span class="o">=</span><span class="nv">$SLOW_POD_IP</span> <span class="se">\
+</span><span class="se"></span>     -o <span class="nv">jsonpath</span><span class="o">={</span>.items..metadata.name<span class="o">}</span><span class="k">)</span>
+</code></pre></td></tr></table>
+</div>
+</div><h4 id="日志等级">日志等级</h4>
+<p><strong>查找</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># &#39; istioctl &#39;为我们提供了读取和更改Envoy代理的日志级别的工具。当前日志级别打印如下图所示:</span>
+
+$  istioctl proxy-config log deploy/istio-ingressgateway -n istio-system
+
+active loggers:
+  connection: warning
+  conn_handler: warning
+  filter: warning
+  http: warning
+  http2: warning
+  jwt: warning
+  pool: warning
+  router: warning
+  stats: warning
+<span class="c1"># output is truncated</span>
+
+<span class="c1"># 让我们从输出中详细说明“connection: warning”的含义。键&#39; connection &#39;表示日志记录范围。同时，值&#39; warning &#39;表示此范围的日志级别，这意味着只有日志级别为warning的日志才会打印与连接相关的日志。</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>日志级别：</p>
+<ul>
+<li>none</li>
+<li>error</li>
+<li>warning</li>
+<li>info</li>
+<li>debug</li>
+</ul>
+<p>在我们的例子中，我们可以在这些范围中找到有用的日志:</p>
+<ul>
+<li>connection -与第4层(传输)相关的日志;TCP连接细节</li>
+<li>HTTP - 7层相关的日志(应用程序);HTTP的细节</li>
+<li>router与HTTP请求路由相关的日志</li>
+<li>pool -连接池获取或丢弃上游主机连接的相关日志</li>
+</ul>
+<p><strong>更改日志级别</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 增加连接、http和路由器日志记录级别，以便我们对envoy行为有更多的了解:</span>
+
+$  istioctl proxy-config log deploy/istio-ingressgateway <span class="se">\
+</span><span class="se"></span>   -n istio-system <span class="se">\
+</span><span class="se"></span>   --level http:debug,router:debug,connection:debug,pool:debug
+</code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 现在继续打印入口网关的日志。为简单起见，将输出重定向到一个临时文件，如下所示:</span>
+
+$  kubectl logs -n istio-system deploy/istio-ingressgateway <span class="se">\
+</span><span class="se"></span>&gt; /tmp/ingress-logs.txt
+</code></pre></td></tr></table>
+</div>
+</div><p>打开<code>txt</code>文件后 搜索关键词 <code>HTTP 504</code> ：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">2020-08-29T13:59:47.678259Z    debug   envoy http
+<span class="o">[</span>C198<span class="o">][</span>S86652966017378412<span class="o">]</span> encoding headers via codec <span class="o">(</span><span class="nv">end_stream</span><span class="o">=</span><span class="nb">false</span><span class="o">)</span>:
+<span class="s1">&#39;:status&#39;</span>, <span class="s1">&#39;504&#39;</span>
+<span class="s1">&#39;content-length&#39;</span>, <span class="s1">&#39;24&#39;</span>
+<span class="s1">&#39;content-type&#39;</span>, <span class="s1">&#39;text/plain&#39;</span>
+<span class="s1">&#39;date&#39;</span>, <span class="s1">&#39;Sat, 29 Aug 2020 13:59:47 GMT&#39;</span>
+<span class="s1">&#39;server&#39;</span>, <span class="s1">&#39;istio-envoy&#39;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>可以看到上述中包含了 连接ID （<code>C198</code>），我们可以根据<code>C198</code>关键词 查询与该连接相关的所有日志:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">2020-08-29T13:59:47.178478Z debug   envoy http
+<span class="o">[</span>C198<span class="o">]</span> new stream     <span class="c1"># A new connection stream is created</span>
+2020-08-29T13:59:47.178714Z     debug   envoy http
+<span class="o">[</span>C198<span class="o">][</span>S86652966017378412<span class="o">]</span> request headers <span class="nb">complete</span> <span class="o">(</span><span class="nv">end_stream</span><span class="o">=</span><span class="nb">true</span><span class="o">)</span>:
+<span class="s1">&#39;:authority&#39;</span>, <span class="s1">&#39;catalog.istioinaction.io&#39;</span>
+<span class="s1">&#39;:path&#39;</span>, <span class="s1">&#39;/items&#39;</span>
+
+2020-08-29T13:59:47.178739Z     debug   envoy http
+<span class="o">[</span>C198<span class="o">][</span>S86652966017378412<span class="o">]</span> request end stream
+2020-08-29T13:59:47.178926Z     debug   envoy router
+<span class="o">[</span>C198<span class="o">][</span>S86652966017378412<span class="o">]</span> cluster
+<span class="s1">&#39;outbound|80|version-v2|catalog.istioinaction.svc.cluster.local&#39;</span>
+match <span class="k">for</span> URL <span class="s1">&#39;/items&#39;</span>   <span class="c1"># The cluster to route traffic to is matched</span>
+2020-08-29T13:59:47.179003Z     debug   envoy router
+<span class="o">[</span>C198<span class="o">][</span>S86652966017378412<span class="o">]</span> router decoding headers:
+<span class="s1">&#39;:authority&#39;</span>, <span class="s1">&#39;catalog.istioinaction.io&#39;</span>
+<span class="s1">&#39;:path&#39;</span>, <span class="s1">&#39;/items&#39;</span>
+<span class="s1">&#39;:method&#39;</span>, <span class="s1">&#39;GET&#39;</span>
+<span class="s1">&#39;:scheme&#39;</span>, <span class="s1">&#39;https&#39;</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="通过抓包查找问题">通过抓包查找问题</h2>
+<p>抓包用到两个工具：</p>
+<ul>
+<li><code>ksniff</code>        一个kubectl插件，可以通过tcpdump抓取pod的网络流量，并将其重定向到Wireshark**</li>
+<li><code>Wireshark</code> 网络报文分析工具</li>
+</ul>
+<h3 id="installing-krew-ksniff-and-wireshark">Installing Krew, Ksniff, and Wireshark</h3>
+<p>要安装<code>ksniff </code> , 我们需要Krew的kubectl插件管理器。<code>Krew</code>的安装过程在其官方文件<a href="https://krew.sigs.k8s.io/docs/user-guide/setup/install/" target="_blank" rel="noopener noreffer">documentation</a> (<a href="https://krew.sigs.k8s.io/docs/user-guide/setup/install/" target="_blank" rel="noopener noreffer">https://krew.sigs.k8s.io/docs/user-guide/setup/install/</a>)中进行了记录。</p>
+<p>安装完<code>Krew</code>后，再安装<code>Ksniff</code> ：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">$  kubectl krew install sniff
+</code></pre></td></tr></table>
+</div>
+</div><p><code>Wireshark</code>安装直接参考网上别的教程。</p>
+<h3 id="inspecting-network-traffic">Inspecting network traffic</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 捕获slow pod的本地主机网络接口上的流量</span>
+
+$  kubectl sniff -n istioinaction <span class="nv">$SLOW_POD</span> -i lo
+
+<span class="c1"># 在一个成功的连接上，&#39; ksniff&#39;将使用tcpdump从本地主机网络接口捕获网络流量，并将输出重定向到本地的Wireshark实例以进行可视化。如果您仍然运行生成流量的脚本，那么在短时间内将捕获足够的流量。如果不是，那么在一个单独的终端窗口中执行该脚本。</span>
+
+$ ./query-catalog.sh get-items-cont
+</code></pre></td></tr></table>
+</div>
+</div><p>停止捕获额外的网络数据包</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/11.stop-capturing-packets.png"
+        data-srcset="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/11.stop-capturing-packets.png, https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/11.stop-capturing-packets.png 1.5x, https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/11.stop-capturing-packets.png 2x"
+        data-sizes="auto"
+        alt="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/11.stop-capturing-packets.png"
+        title="11.stop capturing packets" /></p>
+<p>为了更好地了解，让我们只显示路径为' /items &lsquo;的&rsquo; get &lsquo;方法的HTTP协议数据包。这可以使用Wireshark显示过滤器，使用查询&rsquo; http contains &ldquo;GET /items&rdquo;，如下图所示。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/12.filtering-with-display-filter.png"
+        data-srcset="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/12.filtering-with-display-filter.png, https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/12.filtering-with-display-filter.png 1.5x, https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/12.filtering-with-display-filter.png 2x"
+        data-sizes="auto"
+        alt="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/12.filtering-with-display-filter.png"
+        title="12.filtering with display filter" /></p>
+<p>​       这减少了输出到我们感兴趣的请求，我们可以得到更多关于<em>TCP连接</em>的开始和它被取消的时间的细节，通过跟踪它的<em>TCP流</em>。右键单击第一行，选择菜单项“Follow”，然后选择“TCP Stream”。这将打开“跟随TCP流窗口”，它显示了一个易于理解的TCP流格式。请随意关闭此窗口，因为在主Wireshark窗口中过滤的输出就足够了，如下图所示。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/13.stream-of-packets-annotated.png"
+        data-srcset="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/13.stream-of-packets-annotated.png, https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/13.stream-of-packets-annotated.png 1.5x, https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/13.stream-of-packets-annotated.png 2x"
+        data-sizes="auto"
+        alt="https://drek4537l1klr.cloudfront.net/posta2/v-14/Figures/13.stream-of-packets-annotated.png"
+        title="13.stream of packets annotated" /></p>
+<ul>
+<li><strong>Point 1:</strong> The TCP three-way handshake was performed to set up a TCP connection. Indicated by the TCP flags <code>[SYN]</code>, <code>[SYN, ACK]</code>, and <code>[ACK]</code></li>
+<li><strong>Point 2:</strong> After the connection is set up we can see that the connection is reused for multiple requests from the client, and all of those are successfully served.</li>
+<li><strong>Point 3:</strong> Another request comes in from the client, which is acknowledged by the server, but the response takes longer than half a second. This can be seen from the time difference from the packet no. 95 to the packet no. 102.</li>
+<li><strong>Point 4:</strong> The client initiates a TCP Connection Termination by sending a FIN flag, due to the request taking too long, this is acknowledged by the server-side, and the connection is terminated.</li>
+</ul>
+<h2 id="总结">总结</h2>
+<p>本章向您展示了如何排除数据平面故障，并让您练习使用调试工具，并告诉您如何:</p>
+<ul>
+<li>
+<p>使用<code>istioctl</code>命令了解服务网格和服务代理，例如:</p>
+<ul>
+<li><code>proxy-status</code>   用于查看数据平面的同步状态</li>
+<li><code>analyze</code>            用于分析服务网格配置</li>
+<li><code>description</code>     用于获取摘要和验证服务代理配置</li>
+<li><code>proxy-config</code>   用于查询和修改业务代理配置</li>
+</ul>
+</li>
+<li>
+<p>在应用到集群之前，使用<code>istioctl analyze</code>来验证配置</p>
+</li>
+<li>
+<p>使用Kiali及其提供的验证功能来检测常见的配置错误</p>
+</li>
+<li>
+<p>使用<code>ksniff</code>捕获受影响 pod 的网络流量</p>
+</li>
+<li>
+<p>解释<code>envoy logs</code>的含义，以及如何使用<code>istioctl</code>提高日志级别</p>
+</li>
+</ul>
+<h2 id="附录">附录</h2>
+<p>catalog.yaml</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">v1</span><span class="w">
+</span><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">ServiceAccount</span><span class="w">
+</span><span class="w"></span><span class="nt">metadata</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">catalog</span><span class="w">
+</span><span class="w"></span><span class="nn">---</span><span class="w">
+</span><span class="w"></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">v1</span><span class="w">
+</span><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">Service</span><span class="w">
+</span><span class="w"></span><span class="nt">metadata</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">labels</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l">catalog</span><span class="w">
+</span><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">catalog</span><span class="w">
+</span><span class="w"></span><span class="nt">spec</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">ports</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">http</span><span class="w">
+</span><span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="m">80</span><span class="w">
+</span><span class="w">    </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l">TCP</span><span class="w">
+</span><span class="w">    </span><span class="nt">targetPort</span><span class="p">:</span><span class="w"> </span><span class="m">3000</span><span class="w">
+</span><span class="w">  </span><span class="nt">selector</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l">catalog</span><span class="w">
+</span><span class="w"></span><span class="nn">---</span><span class="w">
+</span><span class="w"></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">apps/v1</span><span class="w">
+</span><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">Deployment</span><span class="w">
+</span><span class="w"></span><span class="nt">metadata</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">labels</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l">catalog</span><span class="w">
+</span><span class="w">    </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l">v1</span><span class="w">
+</span><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">catalog</span><span class="w">
+</span><span class="w"></span><span class="nt">spec</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="m">1</span><span class="w">
+</span><span class="w">  </span><span class="nt">selector</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l">catalog</span><span class="w">
+</span><span class="w">      </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l">v1</span><span class="w">
+</span><span class="w">  </span><span class="nt">template</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span><span class="nt">metadata</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span><span class="nt">labels</span><span class="p">:</span><span class="w">
+</span><span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l">catalog</span><span class="w">
+</span><span class="w">        </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l">v1</span><span class="w">
+</span><span class="w">    </span><span class="nt">spec</span><span class="p">:</span><span class="w"> 
+</span><span class="w">      </span><span class="nt">serviceAccountName</span><span class="p">:</span><span class="w"> </span><span class="l">catalog</span><span class="w">
+</span><span class="w">      </span><span class="nt">containers</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span>- <span class="nt">env</span><span class="p">:</span><span class="w">
+</span><span class="w">        </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">KUBERNETES_NAMESPACE</span><span class="w">
+</span><span class="w">          </span><span class="nt">valueFrom</span><span class="p">:</span><span class="w">
+</span><span class="w">            </span><span class="nt">fieldRef</span><span class="p">:</span><span class="w">
+</span><span class="w">              </span><span class="nt">fieldPath</span><span class="p">:</span><span class="w"> </span><span class="l">metadata.namespace</span><span class="w">
+</span><span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">istioinaction/catalog:latest</span><span class="w">
+</span><span class="w">        </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l">IfNotPresent</span><span class="w">
+</span><span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">catalog</span><span class="w">
+</span><span class="w">        </span><span class="nt">ports</span><span class="p">:</span><span class="w">
+</span><span class="w">        </span>- <span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="m">3000</span><span class="w">
+</span><span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">http</span><span class="w">
+</span><span class="w">          </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l">TCP</span><span class="w">
+</span><span class="w">        </span><span class="nt">securityContext</span><span class="p">:</span><span class="w">
+</span><span class="w">          </span><span class="nt">privileged</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>Catalog-deployment-v2.yaml</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">apps/v1</span><span class="w">
+</span><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">Deployment</span><span class="w">
+</span><span class="w"></span><span class="nt">metadata</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">labels</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l">catalog</span><span class="w">
+</span><span class="w">    </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l">v2</span><span class="w">
+</span><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">catalog-v2</span><span class="w">
+</span><span class="w"></span><span class="nt">spec</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="m">2</span><span class="w">
+</span><span class="w">  </span><span class="nt">selector</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l">catalog</span><span class="w">
+</span><span class="w">      </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l">v2</span><span class="w">
+</span><span class="w">  </span><span class="nt">template</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span><span class="nt">metadata</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span><span class="nt">labels</span><span class="p">:</span><span class="w">
+</span><span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l">catalog</span><span class="w">
+</span><span class="w">        </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l">v2</span><span class="w">
+</span><span class="w">      </span><span class="c"># annotations:</span><span class="w">
+</span><span class="w">        </span><span class="c"># sidecar.istio.io/extraStatTags: destination_ip,source_ip,source_port</span><span class="w">
+</span><span class="w">        </span><span class="c"># readiness.status.sidecar.istio.io/applicationPorts: &#34;&#34;</span><span class="w">
+</span><span class="w">    </span><span class="nt">spec</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span><span class="nt">serviceAccountName</span><span class="p">:</span><span class="w"> </span><span class="l">catalog</span><span class="w">
+</span><span class="w">      </span><span class="nt">containers</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span>- <span class="nt">env</span><span class="p">:</span><span class="w">
+</span><span class="w">        </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">KUBERNETES_NAMESPACE</span><span class="w">
+</span><span class="w">          </span><span class="nt">valueFrom</span><span class="p">:</span><span class="w">
+</span><span class="w">            </span><span class="nt">fieldRef</span><span class="p">:</span><span class="w">
+</span><span class="w">              </span><span class="nt">fieldPath</span><span class="p">:</span><span class="w"> </span><span class="l">metadata.namespace</span><span class="w">
+</span><span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">istioinaction/catalog:latency</span><span class="w">
+</span><span class="w">        </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l">IfNotPresent</span><span class="w">
+</span><span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">catalog</span><span class="w">
+</span><span class="w">        </span><span class="nt">ports</span><span class="p">:</span><span class="w">
+</span><span class="w">        </span>- <span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="m">3000</span><span class="w">
+</span><span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">http</span><span class="w">
+</span><span class="w">          </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l">TCP</span><span class="w">
+</span><span class="w">        </span><span class="nt">securityContext</span><span class="p">:</span><span class="w">
+</span><span class="w">          </span><span class="nt">privileged</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>query-catalog.sh</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="cp">#!/usr/bin/env bash
+</span><span class="cp"></span>
+<span class="nb">help</span> <span class="o">()</span> <span class="o">{</span>
+        cat <span class="s">&lt;&lt;EOF
+</span><span class="s">        This script is a collection of request that are used in the book. 
+</span><span class="s">        Below is a list of arguments and the requests that those make:
+</span><span class="s">            - &#39;get-items&#39; Continuous requests that print the response status code 
+</span><span class="s">            - &#39;random-agent&#39; Adds either chrome or firefox in the request header.
+</span><span class="s">
+</span><span class="s">        Usage: ./bin/query-catalog.sh status-code
+</span><span class="s">EOF</span>
+    <span class="nb">exit</span> <span class="m">1</span>
+<span class="o">}</span>
+
+<span class="nv">TYPE</span><span class="o">=</span><span class="nv">$1</span>
+
+<span class="k">case</span> <span class="si">${</span><span class="nv">TYPE</span><span class="si">}</span> in
+    get-items-cont<span class="o">)</span>
+        <span class="nb">echo</span> <span class="s2">&#34;#&#34;</span> curl -s -H <span class="se">\&#34;</span>Host: catalog.istioinaction.io<span class="se">\&#34;</span> -w <span class="se">\&#34;\\</span>nStatus Code %<span class="o">{</span>http_code<span class="o">}</span><span class="se">\&#34;</span> localhost/items
+        <span class="nb">echo</span> 
+        sleep <span class="m">2</span>
+        <span class="k">while</span> :
+        <span class="k">do</span>
+            curl -s -H <span class="s2">&#34;Host: catalog.istioinaction.io&#34;</span> -w <span class="s2">&#34;\nStatus Code %{http_code}\n\n&#34;</span> localhost/items
+            sleep .5
+        <span class="k">done</span>
+        <span class="p">;;</span>
+    get-items<span class="o">)</span>
+        <span class="nb">echo</span> <span class="s2">&#34;#&#34;</span> curl -s -H <span class="se">\&#34;</span>Host: catalog.istioinaction.io<span class="se">\&#34;</span> -w <span class="se">\&#34;\\</span>nStatus Code %<span class="o">{</span>http_code<span class="o">}</span><span class="se">\&#34;</span> localhost/items
+        <span class="nb">echo</span> 
+        curl -s -H <span class="s2">&#34;Host: catalog.istioinaction.io&#34;</span> -w <span class="s2">&#34;\nStatus Code %{http_code}&#34;</span> localhost/items
+        <span class="p">;;</span>
+    random-agent<span class="o">)</span>
+        <span class="nb">echo</span> <span class="s2">&#34;== REQUEST EXECUTED ==&#34;</span>
+        <span class="nb">echo</span> curl -s -H <span class="s2">&#34;Host: catalog.istioinaction.io&#34;</span> -H <span class="s2">&#34;User-Agent: RANDOM_AGENT&#34;</span> -w <span class="s2">&#34;\nStatus Code %{http_code}\n\n&#34;</span> localhost/items
+        <span class="nb">echo</span> 
+        <span class="k">while</span> :
+        <span class="k">do</span>
+          <span class="nv">useragents</span><span class="o">=(</span>chrome firefox<span class="o">)</span>
+          <span class="nv">agent</span><span class="o">=</span><span class="si">${</span><span class="nv">useragents</span><span class="p">[ (</span><span class="nv">$RANDOM</span><span class="p"> % 2) ]</span><span class="si">}</span>
+          curl -s -H <span class="s2">&#34;Host: catalog.istioinaction.io&#34;</span> -H <span class="s2">&#34;User-Agent: </span><span class="nv">$agent</span><span class="s2">&#34;</span> -w <span class="s2">&#34;\nStatus Code %{http_code}\n\n&#34;</span> localhost/items
+          sleep .5
+        <span class="k">done</span>
+        <span class="p">;;</span>
+    delayed-responses<span class="o">)</span>
+        <span class="nv">CATALOG_POD</span><span class="o">=</span><span class="k">$(</span>kubectl get pods -l <span class="nv">version</span><span class="o">=</span>v2 -n istioinaction -o <span class="nv">jsonpath</span><span class="o">={</span>.items..metadata.name<span class="o">}</span> <span class="p">|</span> cut -d <span class="s1">&#39; &#39;</span> -f1<span class="k">)</span>
+        <span class="k">if</span> <span class="o">[</span> -z <span class="s2">&#34;</span><span class="nv">$CATALOG_POD</span><span class="s2">&#34;</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+            <span class="nb">echo</span> <span class="s2">&#34;No pods found with the following query:&#34;</span>
+            <span class="nb">echo</span> <span class="s2">&#34;-&gt; kubectl get pods -l version=v2 -n istioinaction&#34;</span>
+            <span class="nb">exit</span> <span class="m">1</span>
+        <span class="k">fi</span>
+
+        kubectl -n istioinaction <span class="nb">exec</span> -c catalog <span class="nv">$CATALOG_POD</span> <span class="se">\
+</span><span class="se"></span>            -- curl -s -X POST -H <span class="s2">&#34;Content-Type: application/json&#34;</span> <span class="se">\
+</span><span class="se"></span>            -d <span class="s1">&#39;{&#34;active&#34;: true,  &#34;type&#34;: &#34;latency&#34;, &#34;latencyMs&#34;: 1000, &#34;volatile&#34;: true}&#39;</span> <span class="se">\
+</span><span class="se"></span>            localhost:3000/blowup
+        <span class="p">;;</span>
+    *<span class="o">)</span>
+        <span class="nb">help</span>
+        <span class="p">;;</span>
+<span class="k">esac</span>
+</code></pre></td></tr></table>
+</div>
+</div></div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>更新于 1011-08-10</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/index.md" target="_blank">阅读原始文档</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://zhengtianchi.github.io/%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/" data-title=""><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://zhengtianchi.github.io/%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Hacker News" data-sharer="hackernews" data-url="https://zhengtianchi.github.io/%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/" data-title=""><i class="fab fa-hacker-news fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://zhengtianchi.github.io/%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/" data-title=""><i data-svg-src="https://cdn.jsdelivr.net/npm/simple-icons@2.14.0/icons/line.svg"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://zhengtianchi.github.io/%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/" data-title="" data-ralateuid="xxxx"><i class="fab fa-weibo fa-fw"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav">
+            <a href="/envoy_1/" class="next" rel="next" title="Envoy入门介绍">Envoy入门介绍<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"><div id="valine" class="comment"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://valine.js.org/">Valine</a>.
+            </noscript></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.87.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/dillonzq/LoveIt" target="_blank" rel="noopener noreffer" title="LoveIt 0.2.10"><i class="far fa-kiss-wink-heart fa-fw"></i> LoveIt</a>
+                </div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2021</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">xxxx</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/valine/valine.min.css"><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/algoliasearch@4.2.0/dist/algoliasearch-lite.umd.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lazysizes@5.2.2/lazysizes.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sharer.js@0.4.0/sharer.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{"valine":{"appId":"QGzwQXOqs5JOhN4RGPOkR2mR-MdYXbMMI","appKey":"WBmoGyJtbqUswvfLh6L8iEBr","avatar":"mp","el":"#valine","emojiCDN":"https://cdn.jsdelivr.net/npm/emoji-datasource-google@5.0.1/img/google/64/","emojiMaps":{"100":"1f4af.png","alien":"1f47d.png","anger":"1f4a2.png","angry":"1f620.png","anguished":"1f627.png","astonished":"1f632.png","black_heart":"1f5a4.png","blue_heart":"1f499.png","blush":"1f60a.png","bomb":"1f4a3.png","boom":"1f4a5.png","broken_heart":"1f494.png","brown_heart":"1f90e.png","clown_face":"1f921.png","cold_face":"1f976.png","cold_sweat":"1f630.png","confounded":"1f616.png","confused":"1f615.png","cry":"1f622.png","crying_cat_face":"1f63f.png","cupid":"1f498.png","dash":"1f4a8.png","disappointed":"1f61e.png","disappointed_relieved":"1f625.png","dizzy":"1f4ab.png","dizzy_face":"1f635.png","drooling_face":"1f924.png","exploding_head":"1f92f.png","expressionless":"1f611.png","face_vomiting":"1f92e.png","face_with_cowboy_hat":"1f920.png","face_with_hand_over_mouth":"1f92d.png","face_with_head_bandage":"1f915.png","face_with_monocle":"1f9d0.png","face_with_raised_eyebrow":"1f928.png","face_with_rolling_eyes":"1f644.png","face_with_symbols_on_mouth":"1f92c.png","face_with_thermometer":"1f912.png","fearful":"1f628.png","flushed":"1f633.png","frowning":"1f626.png","ghost":"1f47b.png","gift_heart":"1f49d.png","green_heart":"1f49a.png","grimacing":"1f62c.png","grin":"1f601.png","grinning":"1f600.png","hankey":"1f4a9.png","hear_no_evil":"1f649.png","heart":"2764-fe0f.png","heart_decoration":"1f49f.png","heart_eyes":"1f60d.png","heart_eyes_cat":"1f63b.png","heartbeat":"1f493.png","heartpulse":"1f497.png","heavy_heart_exclamation_mark_ornament":"2763-fe0f.png","hole":"1f573-fe0f.png","hot_face":"1f975.png","hugging_face":"1f917.png","hushed":"1f62f.png","imp":"1f47f.png","innocent":"1f607.png","japanese_goblin":"1f47a.png","japanese_ogre":"1f479.png","joy":"1f602.png","joy_cat":"1f639.png","kiss":"1f48b.png","kissing":"1f617.png","kissing_cat":"1f63d.png","kissing_closed_eyes":"1f61a.png","kissing_heart":"1f618.png","kissing_smiling_eyes":"1f619.png","laughing":"1f606.png","left_speech_bubble":"1f5e8-fe0f.png","love_letter":"1f48c.png","lying_face":"1f925.png","mask":"1f637.png","money_mouth_face":"1f911.png","nauseated_face":"1f922.png","nerd_face":"1f913.png","neutral_face":"1f610.png","no_mouth":"1f636.png","open_mouth":"1f62e.png","orange_heart":"1f9e1.png","partying_face":"1f973.png","pensive":"1f614.png","persevere":"1f623.png","pleading_face":"1f97a.png","pouting_cat":"1f63e.png","purple_heart":"1f49c.png","rage":"1f621.png","relaxed":"263a-fe0f.png","relieved":"1f60c.png","revolving_hearts":"1f49e.png","right_anger_bubble":"1f5ef-fe0f.png","robot_face":"1f916.png","rolling_on_the_floor_laughing":"1f923.png","scream":"1f631.png","scream_cat":"1f640.png","see_no_evil":"1f648.png","shushing_face":"1f92b.png","skull":"1f480.png","skull_and_crossbones":"2620-fe0f.png","sleeping":"1f634.png","sleepy":"1f62a.png","slightly_frowning_face":"1f641.png","slightly_smiling_face":"1f642.png","smile":"1f604.png","smile_cat":"1f638.png","smiley":"1f603.png","smiley_cat":"1f63a.png","smiling_face_with_3_hearts":"1f970.png","smiling_imp":"1f608.png","smirk":"1f60f.png","smirk_cat":"1f63c.png","sneezing_face":"1f927.png","sob":"1f62d.png","space_invader":"1f47e.png","sparkling_heart":"1f496.png","speak_no_evil":"1f64a.png","speech_balloon":"1f4ac.png","star-struck":"1f929.png","stuck_out_tongue":"1f61b.png","stuck_out_tongue_closed_eyes":"1f61d.png","stuck_out_tongue_winking_eye":"1f61c.png","sunglasses":"1f60e.png","sweat":"1f613.png","sweat_drops":"1f4a6.png","sweat_smile":"1f605.png","thinking_face":"1f914.png","thought_balloon":"1f4ad.png","tired_face":"1f62b.png","triumph":"1f624.png","two_hearts":"1f495.png","unamused":"1f612.png","upside_down_face":"1f643.png","weary":"1f629.png","white_frowning_face":"2639-fe0f.png","white_heart":"1f90d.png","wink":"1f609.png","woozy_face":"1f974.png","worried":"1f61f.png","yawning_face":"1f971.png","yellow_heart":"1f49b.png","yum":"1f60b.png","zany_face":"1f92a.png","zipper_mouth_face":"1f910.png","zzz":"1f4a4.png"},"enableQQ":false,"highlight":true,"lang":"zh-cn","pageSize":10,"placeholder":"你的评论 ...","recordIP":true,"serverURLs":"https://leancloud.hugoloveit.com","visitor":true}},"search":{"algoliaAppID":"PASDMWALPK","algoliaIndex":"index.zh-cn","algoliaSearchKey":"b42948e51daaa93df92381c8e2ac0f93","highlightTag":"em","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50,"type":"algolia"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>
