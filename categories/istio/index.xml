@@ -1,9 +1,10 @@
 <rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
     <channel>
-        <title>istio - 分类 - 卷王郑天驰</title>
+        <title>istio - 分类 - skyrun</title>
         <link>https://zhengtianchi.github.io/categories/istio/</link>
-        <description>istio - 分类 - 卷王郑天驰</description>
-        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Fri, 26 Nov 2021 12:51:58 &#43;0800</lastBuildDate><atom:link href="https://zhengtianchi.github.io/categories/istio/" rel="self" type="application/rss+xml" /><item>
+        <description>istio - 分类 - skyrun</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>17826828065@163.com (郑天驰)</managingEditor>
+            <webMaster>17826828065@163.com (郑天驰)</webMaster><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Fri, 26 Nov 2021 12:51:58 &#43;0800</lastBuildDate><atom:link href="https://zhengtianchi.github.io/categories/istio/" rel="self" type="application/rss+xml" /><item>
     <title>istio - 网易轻舟（转载）</title>
     <link>https://zhengtianchi.github.io/%E7%BD%91%E6%98%93%E8%BD%BB%E8%88%9F/</link>
     <pubDate>Fri, 26 Nov 2021 12:51:58 &#43;0800</pubDate>

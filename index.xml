@@ -1,9 +1,10 @@
 <rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
     <channel>
-        <title>卷王郑天驰</title>
+        <title>skyrun</title>
         <link>https://zhengtianchi.github.io/</link>
-        <description>杭州奋斗逼，云原生卷王，兰溪土狗</description>
-        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Fri, 26 Nov 2021 12:51:58 &#43;0800</lastBuildDate>
+        <description>为梦想，为生活</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>17826828065@163.com (郑天驰)</managingEditor>
+            <webMaster>17826828065@163.com (郑天驰)</webMaster><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Fri, 26 Nov 2021 12:51:58 &#43;0800</lastBuildDate>
             <atom:link href="https://zhengtianchi.github.io/index.xml" rel="self" type="application/rss+xml" />
         <item>
     <title>istio - 网易轻舟（转载）</title>

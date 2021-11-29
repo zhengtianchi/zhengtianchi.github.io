@@ -1,9 +1,10 @@
 <rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
     <channel>
-        <title>calico - 分类 - 卷王郑天驰</title>
+        <title>calico - 分类 - skyrun</title>
         <link>https://zhengtianchi.github.io/categories/calico/</link>
-        <description>calico - 分类 - 卷王郑天驰</description>
-        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Sun, 21 Nov 2021 18:51:58 &#43;0800</lastBuildDate><atom:link href="https://zhengtianchi.github.io/categories/calico/" rel="self" type="application/rss+xml" /><item>
+        <description>calico - 分类 - skyrun</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>17826828065@163.com (郑天驰)</managingEditor>
+            <webMaster>17826828065@163.com (郑天驰)</webMaster><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Sun, 21 Nov 2021 18:51:58 &#43;0800</lastBuildDate><atom:link href="https://zhengtianchi.github.io/categories/calico/" rel="self" type="application/rss+xml" /><item>
     <title>calico - 网络流通以及抓包实战</title>
     <link>https://zhengtianchi.github.io/%E4%B8%80%E6%96%87%E6%98%8E%E7%99%BDcalico%E7%9A%84ipip%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%BC%8F/</link>
     <pubDate>Sun, 21 Nov 2021 18:51:58 &#43;0800</pubDate>

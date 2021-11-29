@@ -1,9 +1,10 @@
 <rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
     <channel>
-        <title>docker - 分类 - 卷王郑天驰</title>
+        <title>docker - 分类 - skyrun</title>
         <link>https://zhengtianchi.github.io/categories/docker/</link>
-        <description>docker - 分类 - 卷王郑天驰</description>
-        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Sun, 21 Nov 2021 18:51:58 &#43;0800</lastBuildDate><atom:link href="https://zhengtianchi.github.io/categories/docker/" rel="self" type="application/rss+xml" /><item>
+        <description>docker - 分类 - skyrun</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>17826828065@163.com (郑天驰)</managingEditor>
+            <webMaster>17826828065@163.com (郑天驰)</webMaster><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Sun, 21 Nov 2021 18:51:58 &#43;0800</lastBuildDate><atom:link href="https://zhengtianchi.github.io/categories/docker/" rel="self" type="application/rss+xml" /><item>
     <title>docker - Dockerfile</title>
     <link>https://zhengtianchi.github.io/docker_dockerbuilder/</link>
     <pubDate>Sun, 21 Nov 2021 18:51:58 &#43;0800</pubDate>
