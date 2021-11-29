@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Abouts on skyrun</title>
+    <link>https://zhengtianchi.github.io/about/</link>
+    <description>Recent content in Abouts on skyrun</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <managingEditor>17826828065@163.com (郑天驰)</managingEditor>
+    <webMaster>17826828065@163.com (郑天驰)</webMaster>
+    <copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright>
+    <lastBuildDate>Tue, 02 Nov 2021 11:04:49 +0800</lastBuildDate><atom:link href="https://zhengtianchi.github.io/about/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>关于卷王郑天驰</title>
+      <link>https://zhengtianchi.github.io/about/about/</link>
+      <pubDate>Tue, 02 Nov 2021 11:04:49 +0800</pubDate>
+      <author>17826828065@163.com (郑天驰)</author>
+      <guid>https://zhengtianchi.github.io/about/about/</guid>
+      <description>个人介绍 郑天驰，浙江工业大学硕士研究生。 云原生领域从业者，擅长 golang、c++、kubernetes、service mesh、istio</description>
+    </item>
+    
+  </channel>
+</rss>
