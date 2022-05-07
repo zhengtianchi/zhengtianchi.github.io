@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>docker - Docker容器运行时引擎-runC分析 - skyrun</title><meta name="Description" content="Docker容器运行时引擎-runC分析"><meta property="og:title" content="docker - Docker容器运行时引擎-runC分析" />
+<meta property="og:description" content="Docker容器运行时引擎-runC分析" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://zhengtianchi.github.io/runc_analyse/" /><meta property="og:image" content="https://zhengtianchi.github.io/logo.png"/><meta property="article:section" content="posts" />
+
+
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://zhengtianchi.github.io/logo.png"/>
+
+<meta name="twitter:title" content="docker - Docker容器运行时引擎-runC分析"/>
+<meta name="twitter:description" content="Docker容器运行时引擎-runC分析"/>
+<meta name="application-name" content="ztc">
+<meta name="apple-mobile-web-app-title" content="ztc"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://zhengtianchi.github.io/runc_analyse/" /><link rel="next" href="https://zhengtianchi.github.io/envoy_1/" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "docker - Docker容器运行时引擎-runC分析",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/zhengtianchi.github.io\/runc_analyse\/"
+        },"image": ["https:\/\/zhengtianchi.github.io\/images\/Apple-Devices-Preview.png"],"genre": "posts","keywords": "docker","wordcount":  6895 ,
+        "url": "https:\/\/zhengtianchi.github.io\/runc_analyse\/","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
+            "@type": "Organization",
+            "name": "xxxx","logo": "https:\/\/zhengtianchi.github.io\/images\/avatar.png"},"author": {
+                "@type": "Person",
+                "name": "郑天驰"
+            },"description": "Docker容器运行时引擎-runC分析"
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="skyrun"><img
+        class="lazyload logo"
+        src="/svg/loading.min.svg"
+        data-src="https://imgo.hackhome.com/img2021/9/1/10/472248698.jpg"
+        data-srcset="https://imgo.hackhome.com/img2021/9/1/10/472248698.jpg, https://imgo.hackhome.com/img2021/9/1/10/472248698.jpg 1.5x, https://imgo.hackhome.com/img2021/9/1/10/472248698.jpg 2x"
+        data-sizes="auto"
+        alt="https://imgo.hackhome.com/img2021/9/1/10/472248698.jpg"
+        title="https://imgo.hackhome.com/img2021/9/1/10/472248698.jpg" /><span class="header-title-pre"><i class='far fa-kiss-wink-heart fa-fw'></i></span>skyrun郑天驰</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 所有文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/categories/documentation/"> 文档 </a><a class="menu-item" href="/about/"> 关于 </a><a class="menu-item" href="https://github.com/zhengtianchi/" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="skyrun"><img
+        class="lazyload logo"
+        src="/svg/loading.min.svg"
+        data-src="https://imgo.hackhome.com/img2021/9/1/10/472248698.jpg"
+        data-srcset="https://imgo.hackhome.com/img2021/9/1/10/472248698.jpg, https://imgo.hackhome.com/img2021/9/1/10/472248698.jpg 1.5x, https://imgo.hackhome.com/img2021/9/1/10/472248698.jpg 2x"
+        data-sizes="auto"
+        alt="https://imgo.hackhome.com/img2021/9/1/10/472248698.jpg"
+        title="https://imgo.hackhome.com/img2021/9/1/10/472248698.jpg" /><span class="header-title-pre"><i class='far fa-kiss-wink-heart fa-fw'></i></span>skyrun郑天驰</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">所有文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/categories/documentation/" title="">文档</a><a class="menu-item" href="/about/" title="">关于</a><a class="menu-item" href="https://github.com/zhengtianchi/" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content always-active" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">docker - Docker容器运行时引擎-runC分析</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="https://zhengtianchi.github.io" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw"></i>郑天驰</a></span>&nbsp;<span class="post-category">收录于 <a href="/categories/docker/"><i class="far fa-folder fa-fw"></i>docker</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="1011-08-10">1011-08-10</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 6895 字&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 14 分钟&nbsp;<span id="/runc_analyse/" class="leancloud_visitors" data-flag-title="docker - Docker容器运行时引擎-runC分析">
+                        <i class="far fa-eye fa-fw"></i>&nbsp;<span class=leancloud-visitors-count></span>&nbsp;次阅读
+                    </span>&nbsp;</div>
+        </div><div class="featured-image"><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/docker-cover.png"
+        data-srcset="/images/docker-cover.png, /images/docker-cover.png 1.5x, /images/docker-cover.png 2x"
+        data-sizes="auto"
+        alt="/images/docker-cover.png"
+        title="Docker容器运行时引擎-runC分析" /></div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#dockercontainerdrunckubernetes">Docker、containerd、runC、Kubernetes</a>
+      <ul>
+        <li><a href="#从docker到containerdrunc">从Docker到containerd、runC</a></li>
+        <li><a href="#docker-daemoncontainerd与runc">Docker Daemon、containerd与runC</a></li>
+        <li><a href="#kubernetes与docker">Kubernetes与Docker</a></li>
+      </ul>
+    </li>
+    <li><a href="#容器运行时-runc分析">容器运行时-runC分析</a>
+      <ul>
+        <li><a href="#oci标准">OCI标准</a></li>
+        <li><a href="#runc相关命令">runC相关命令</a></li>
+        <li><a href="#runc-run">runC-run</a></li>
+        <li><a href="#runc-init">runC-init</a></li>
+        <li><a href="#runc-run-init-运行流程">runC-run-init-运行流程</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><h2 id="dockercontainerdrunckubernetes">Docker、containerd、runC、Kubernetes</h2>
+<h3 id="从docker到containerdrunc">从Docker到containerd、runC</h3>
+<p>Docker 是一个开源工具，它可以将你的应用打包成一个标准格式的镜像，并且以容器的方式运行。Docker 容器将一系列软件包装在一个完整的文件系统中（代码、运行时工具、系统工具、系统依赖…)，保证了容器内应用程序运行环境的稳定性，不会被容器外的系统环境所影响。</p>
+<p>2013年Docker宣布开源，初始阶段的Docker容器化基于LXC实现，镜像分层文件系统基于AUFS，核心功能都是基于当时的现成技术组装实现，但由于其工具生态完善、公共镜像仓库、组建重用、多版本支持、以应用为中心的容器封装等特性，这也使得Docker火速地流行了起来。</p>
+<blockquote>
+<p>可以参考Docker相关的FAQ：<a href="https://docs.docker.com/engine/faq/#what-does-docker-technology-add-to-just-plain-lxc" target="_blank" rel="noopener noreffer">https://docs.docker.com/engine/faq</a></p>
+</blockquote>
+<p>在2014年开源了基于Golang开发的libcontainer，越过LXC直接操作系统内核模块，不必依赖LXC来提供容器化隔离能力了，自身架构也不断发展拆分成了如下几个模块：</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://user-images.githubusercontent.com/19829495/118020412-a0d46700-b38c-11eb-8dad-3be7e8c0bb71.png"
+        data-srcset="https://user-images.githubusercontent.com/19829495/118020412-a0d46700-b38c-11eb-8dad-3be7e8c0bb71.png, https://user-images.githubusercontent.com/19829495/118020412-a0d46700-b38c-11eb-8dad-3be7e8c0bb71.png 1.5x, https://user-images.githubusercontent.com/19829495/118020412-a0d46700-b38c-11eb-8dad-3be7e8c0bb71.png 2x"
+        data-sizes="auto"
+        alt="https://user-images.githubusercontent.com/19829495/118020412-a0d46700-b38c-11eb-8dad-3be7e8c0bb71.png"
+        title="DeepinScreenshot_select-area_20210513013836" /></p>
+<p>2015年，Docker联合多家公司制定了开放容器交互标准（Open Container Initiative），即OCI；制定了关于容器相关的规范，包含运行时标准（<a href="https://github.com/opencontainers/runtime-spec/blob/master/spec.md" target="_blank" rel="noopener noreffer">runtime-spec</a><a href="https://github.com/opencontainers/runtime-spec/blob/master/spec.md" target="_blank" rel="noopener noreffer"> </a>）、容器镜像标准（<a href="https://github.com/opencontainers/image-spec/blob/master/spec.md" target="_blank" rel="noopener noreffer">image-spec</a><a href="https://github.com/opencontainers/image-spec/blob/master/spec.md" target="_blank" rel="noopener noreffer"> </a>）和镜像分发标准（<a href="https://github.com/opencontainers/distribution-spec/blob/master/spec.md" target="_blank" rel="noopener noreffer">distribution-spec</a><a href="https://github.com/opencontainers/distribution-spec/blob/master/spec.md" target="_blank" rel="noopener noreffer"> </a>）。</p>
+<p>2016年，Docker为了符合OCI标准，将原本libcontainer模块独立出来，封装重构成<a href="https://github.com/opencontainers/runc" target="_blank" rel="noopener noreffer">runC项目</a><a href="https://github.com/opencontainers/runc" target="_blank" rel="noopener noreffer"> </a>，捐献给了Linux基金会管理，而后为了能够兼容所有符合标准的OCI Runtime实现，Docker重构了Docker Daemon子系统，将其中与运行时交互的部分抽象为<a href="https://containerd.io/" target="_blank" rel="noopener noreffer">containerd项目</a><a href="https://containerd.io/" target="_blank" rel="noopener noreffer"> </a>捐献给了CNCF基金会管理，内部为每个容器运行时创建一个containerd-shim适配进程，与runC搭配工作。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://user-images.githubusercontent.com/19829495/118022236-b8145400-b38e-11eb-942c-57e68e255ae7.png"
+        data-srcset="https://user-images.githubusercontent.com/19829495/118022236-b8145400-b38e-11eb-942c-57e68e255ae7.png, https://user-images.githubusercontent.com/19829495/118022236-b8145400-b38e-11eb-942c-57e68e255ae7.png 1.5x, https://user-images.githubusercontent.com/19829495/118022236-b8145400-b38e-11eb-942c-57e68e255ae7.png 2x"
+        data-sizes="auto"
+        alt="https://user-images.githubusercontent.com/19829495/118022236-b8145400-b38e-11eb-942c-57e68e255ae7.png"
+        title="图片" /></p>
+<h3 id="docker-daemoncontainerd与runc">Docker Daemon、containerd与runC</h3>
+<p>containerd提供了镜像管理（镜像、元信息等）、容器运行（调用最终运行时组件执行）的功能，向上为 Docker Daemon 提供了 gRPC 接口，使得 Docker Daemon 屏蔽下面的结构变化，确保原有接口向下兼容；向下运行容器由符合OCI规范的容器支持，如runC，使得引擎可以独立升级。</p>
+<h3 id="kubernetes与docker">Kubernetes与Docker</h3>
+<p>Kubernetes 是一个自动化部署，缩放，以及容器化管理应用程序的开源系统，前身是Google内部运行多年的集群管理系统Borg。</p>
+<p>2014年Google使用Golang完全重写后开源，诞生后备受云计算相关的业界巨头追捧，成为云原生时代的操作系统，让复杂软件在云计算下获得韧性（Resilience）、弹性（Elasticity）、可观测性（Observability）的最佳路径。</p>
+<p>2015年Kubernetes发布了第一个正式版本，Google宣布与Linux基金会共同筹建<a href="https://www.cncf.io/" target="_blank" rel="noopener noreffer">云原生基金会</a><a href="https://www.cncf.io/" target="_blank" rel="noopener noreffer"> </a>（Cloud Native Computing Foundation，CNCF），并且将Kubernetes托管到CNCF，成为其第一个项目。</p>
+<p>随着Kubernetes的火速流行，自身的架构也在渐进演化，演进路线如下：</p>
+<p>Kubernetes 1.5之前与Docker是强绑定的关系，Kubernetes 管理容器的方式都是通过内部的DockerManager向Docker Engine发送指令（HTTP方式），通过Docker来操作镜像；调用链路如下所示</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">    Kubernetes Master → kubelet → DockerManager → Docker Engine → containerd → runC
+</code></pre></td></tr></table>
+</div>
+</div><p>Kubernetes 1.5版本开始引入容器运行时接口（Container Runtime Interface，CRI），CRI为定义容器运行时应该如何接入到kubelet的规范标准，内部的DockerManager也被KubeGenericRuntimeManager替代，已提供更通用的实现；kubelet与KubeGenericRuntimeManager之间通过gRPC协议通信。由于Docker不能直接支持CRI，所以Kubernetes提供了DockerShim服务作为Docker与CRI的适配层，实现了DockerManager的功能，<strong>演化到这里Docker Engine对Kubernetes来说只是一项默认依赖</strong>；调用链路如下所示：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">    Kubernetes Master → kubelet → KubeGenericRuntimeManager → DockerShim → Docker Engine → containerd → runC
+</code></pre></td></tr></table>
+</div>
+</div><p>2017年，由Google、RedHat、Intel、SUSE、IBM联合发起的<a href="https://github.com/cri-o/cri-o" target="_blank" rel="noopener noreffer">CRI-O</a><a href="https://github.com/cri-o/cri-o" target="_blank" rel="noopener noreffer"> </a>（Container Runtime Interface Orchestrator）项目发布了首个正式版本。CRI-O是完全遵循CRI规范进行实现的，而且可以支持所有符合OCI运行时标准的容器引擎，默认使用runC搭配工作也可换成其他OCI运行时。此时Kubernetes可以选择使用CRI-O、cri-containerd、DockerShim作为CRI实现，<strong>演化到这里Docker Engine对Kubernetes来说只是一个可选项</strong>；调用链路如下所示：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">    Kubernetes Master → kubelet → KubeGenericRuntimeManager → CRI-O→ runC
+</code></pre></td></tr></table>
+</div>
+</div><p>2018年，由Docker捐献给CNCF的containerd发布了1.1版，与1.0的区别是完全支持CRI标准，意味着原本用作CRI适配器的cri-containerd不再需要了，Kubernetes也在1.10版本宣布开始支持containerd 1.1，<strong>演化到这里Kubernetes已经可以完全脱开Docker Engine</strong>；调用链路如下所示：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">    Kubernetes Master → kubelet → KubeGenericRuntimeManager → containerd → runC
+</code></pre></td></tr></table>
+</div>
+</div><p>2020年，Kubernetes官方宣布从1.20版本起放弃对Docker的支持，即不在维护DockerShim这一Docker与CRI的适配层；往后CRI适配器可以选择CRI-O或者containerd。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://user-images.githubusercontent.com/19829495/154808848-2c154bed-128d-4a7b-85ca-5ee48b5cd672.jpg"
+        data-srcset="https://user-images.githubusercontent.com/19829495/154808848-2c154bed-128d-4a7b-85ca-5ee48b5cd672.jpg, https://user-images.githubusercontent.com/19829495/154808848-2c154bed-128d-4a7b-85ca-5ee48b5cd672.jpg 1.5x, https://user-images.githubusercontent.com/19829495/154808848-2c154bed-128d-4a7b-85ca-5ee48b5cd672.jpg 2x"
+        data-sizes="auto"
+        alt="https://user-images.githubusercontent.com/19829495/154808848-2c154bed-128d-4a7b-85ca-5ee48b5cd672.jpg"
+        title="118159973-47ce0700-b450-11eb-84aa-a54af0d9adb2" /></p>
+<h2 id="容器运行时-runc分析">容器运行时-runC分析</h2>
+<p>runc是一个CLI工具，用于根据OCI规范生成和运行容器，这里会通过runC源码简单分析其运行原理与流程。runC可以说是Docker容器中最为核心的部分，容器的创建，运行，销毁等等操作最终都将通过调用runC完成。</p>
+<h3 id="oci标准">OCI标准</h3>
+<p><strong>image spec</strong></p>
+<p>OCI 容器镜像标准包含如下几个模块：</p>
+<ol>
+<li>config.json：包含容器必需的元信息</li>
+<li>rootfs：容器root文件系统，保存在一个文件夹里</li>
+</ol>
+<p>config.json包含的元素如下所示，具体可以参考<a href="https://github.com/opencontainers/runtime-spec/blob/master/config.md" target="_blank" rel="noopener noreffer">runtime-spec相关文档</a></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">ociVersion：指定OCI容器的版本号
+root：配置容器的root文件系统
+process：配置容器进程信息
+hostname：配置容器的主机名
+mounts：配置额外的挂载点
+hook：配置容器生命周期触发钩子
+</code></pre></td></tr></table>
+</div>
+</div><p><strong>runtime spec</strong></p>
+<p>OCI 容器运行时标准主要是指定容器的运行状态，和 runtime 需要提供的命令，如下状态流转图所示：</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://user-images.githubusercontent.com/19829495/118305620-cd1dee00-b51a-11eb-8fa5-814f86ca0f42.png"
+        data-srcset="https://user-images.githubusercontent.com/19829495/118305620-cd1dee00-b51a-11eb-8fa5-814f86ca0f42.png, https://user-images.githubusercontent.com/19829495/118305620-cd1dee00-b51a-11eb-8fa5-814f86ca0f42.png 1.5x, https://user-images.githubusercontent.com/19829495/118305620-cd1dee00-b51a-11eb-8fa5-814f86ca0f42.png 2x"
+        data-sizes="auto"
+        alt="https://user-images.githubusercontent.com/19829495/118305620-cd1dee00-b51a-11eb-8fa5-814f86ca0f42.png"
+        title="DeepinScreenshot_select-area_20210515011303" /></p>
+<p><strong>基于busybox创建OCI runtime bundle相关文件</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">docker pull busybox
+mkdir mycontainer <span class="o">&amp;&amp;</span> <span class="nb">cd</span> mycontainer
+mkdir rootfs
+<span class="c1"># 创建rootfs，基于busybox镜像</span>
+docker <span class="nb">export</span> <span class="k">$(</span>docker create busybox<span class="k">)</span> <span class="p">|</span> tar -C rootfs -xvf -
+<span class="c1"># 根据OCI规范来生成配置文件</span>
+runc spec
+</code></pre></td></tr></table>
+</div>
+</div><p>文件目录如下所示</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">└── mycontainer
+    ├── config.json
+    └── rootfs
+        ├── bin
+        ├── dev
+        ├── etc
+        ├── home
+        ├── proc
+        ├── root
+        ├── sys
+        ├── tmp
+        ├── usr
+        └── var
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="runc相关命令">runC相关命令</h3>
+<p>通过runc -h可以看到runc支持的命令如下所示：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">checkpoint  checkpoint正在运行的容器，配合restore使用
+create      创建容器
+delete      删除容器及容器所拥有的任何资源
+events      显示容器事件，如OOM通知，cpu，内存和IO使用情况统计信息
+exec        在容器内执行新的进程
+init        初始化namespace并启动进程
+kill        发送指定的kill信号（默认值：SIGTERM）到容器的init进程
+list        列出容器
+pause       暂停容器内的所有进程
+ps          显示在容器内运行的进程
+restore     从之前的checkpoint还原容器
+resume      恢复容器内暂停的所有进程
+run         创建并运行容器
+spec        创建specification文件
+start       在创建的容器中执行用户定义的进程
+state       输出容器的状态
+update      更新容器资源约束，如cgroup参数
+</code></pre></td></tr></table>
+</div>
+</div><p>实践操作：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># 1. 修改config文件中的process元素的terminal与args</span>
+<span class="s2">&#34;process&#34;</span>: <span class="o">{</span>
+		<span class="s2">&#34;terminal&#34;</span>: false,
+		<span class="s2">&#34;args&#34;</span>: <span class="o">[</span>
+			<span class="s2">&#34;/bin/sleep&#34;</span>, <span class="s2">&#34;3600&#34;</span>
+		<span class="o">]</span>
+<span class="c1"># 2. runc create创建容器（此时状态为created,容器内进程为init进程）</span>
+sudo runc create mycontainer
+<span class="c1"># 3. runc start启动容器（此时状态为running，容器内进程为我们指定的进程）</span>
+sudo runc start mycontainer
+<span class="c1"># 4. runc 暂停/恢复容器（暂停时状态为pause）</span>
+sudo runc pause mycontainer
+sudo runc resume mycontainer
+<span class="c1"># 5. runc kill关闭容器（此时状态为stopped）</span>
+sudo runc <span class="nb">kill</span> mycontainer
+<span class="c1"># 6. runc delete删除容器</span>
+sudo runc delete mycontainer
+<span class="c1"># 7. runc run组合命令，组合了runc create创建，runc start启动以及在退出之后runc delete的删除命令</span>
+sudo runc run mycontainer
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="runc-run">runC-run</h3>
+<p>runC源码在github <a href="https://github.com/opencontainers/runc" target="_blank" rel="noopener noreffer">runc项目</a>可以获取到，项目结构如下所示，其中如<code>create.go</code>、<code>delete.go</code>等文件为runC命令的实现；<code>libcontainer</code>目录为核心包（参考上文runC的由来），可见runC本质上是对<code>libcontainer</code>的一层封装，在<code>libcontainer</code>上加了一层OCI的适配操作与hook；<code>main.go</code>是入口文件，使用 <code>github.com/urfave/cli</code> 库进行命令行解析与执行函数：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">$ tree -L <span class="m">1</span> -F --dirsfirst
+.
+├── contrib/
+├── docs/
+├── libcontainer/
+├── man/
+├── script/
+├── tests/
+├── types/
+├── vendor/
+├── checkpoint.go
+├── create.go
+├── delete.go
+├── events.go
+├── exec.go
+├── init.go
+├── kill.go
+├── list.go
+├── main.go
+├── pause.go
+├── ps.go
+├── restore.go
+├── run.go
+├── spec.go
+├── start.go
+├── state.go
+...
+</code></pre></td></tr></table>
+</div>
+</div><p>通过<code>run.go</code>我们可以看到runCommand相关的执行逻辑：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="nx">Action</span><span class="p">:</span> <span class="kd">func</span><span class="p">(</span><span class="nx">context</span> <span class="o">*</span><span class="nx">cli</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span> <span class="kt">error</span> <span class="p">{</span>
+		<span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">checkArgs</span><span class="p">(</span><span class="nx">context</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">exactArgs</span><span class="p">);</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+			<span class="k">return</span> <span class="nx">err</span>
+		<span class="p">}</span>
+		<span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">revisePidFile</span><span class="p">(</span><span class="nx">context</span><span class="p">);</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+			<span class="k">return</span> <span class="nx">err</span>
+		<span class="p">}</span>
+		<span class="nx">spec</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">setupSpec</span><span class="p">(</span><span class="nx">context</span><span class="p">)</span>
+		<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+			<span class="k">return</span> <span class="nx">err</span>
+		<span class="p">}</span>
+		<span class="nx">status</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">startContainer</span><span class="p">(</span><span class="nx">context</span><span class="p">,</span> <span class="nx">spec</span><span class="p">,</span> <span class="nx">CT_ACT_RUN</span><span class="p">,</span> <span class="kc">nil</span><span class="p">)</span>
+		<span class="k">if</span> <span class="nx">err</span> <span class="o">==</span> <span class="kc">nil</span> <span class="p">{</span>
+			<span class="nx">os</span><span class="p">.</span><span class="nf">Exit</span><span class="p">(</span><span class="nx">status</span><span class="p">)</span>
+		<span class="p">}</span>
+		<span class="k">return</span> <span class="nx">err</span>
+	<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>这里主要涉及四步操作：</p>
+<ol>
+<li>参数校验</li>
+<li>若指定了pidFile，进行路径转换</li>
+<li>读取 <code>config.json</code> 文件转换成 spec 结构对象</li>
+<li>根据配置启动容器</li>
+</ol>
+<p>第四步是操作调用了<code>utils_linux.go</code>下<code>startContainer</code>方法进行容器创建、运行，具体实现如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">startContainer</span><span class="p">(</span><span class="nx">context</span> <span class="o">*</span><span class="nx">cli</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span> <span class="nx">spec</span> <span class="o">*</span><span class="nx">specs</span><span class="p">.</span><span class="nx">Spec</span><span class="p">,</span> <span class="nx">action</span> <span class="nx">CtAct</span><span class="p">,</span> <span class="nx">criuOpts</span> <span class="o">*</span><span class="nx">libcontainer</span><span class="p">.</span><span class="nx">CriuOpts</span><span class="p">)</span> <span class="p">(</span><span class="kt">int</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">id</span> <span class="o">:=</span> <span class="nx">context</span><span class="p">.</span><span class="nf">Args</span><span class="p">().</span><span class="nf">First</span><span class="p">()</span>
+	<span class="o">...</span>
+	<span class="nx">container</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">createContainer</span><span class="p">(</span><span class="nx">context</span><span class="p">,</span> <span class="nx">id</span><span class="p">,</span> <span class="nx">spec</span><span class="p">)</span>
+	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nx">err</span>
+	<span class="p">}</span>
+	<span class="o">...</span>
+	<span class="nx">r</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">runner</span><span class="p">{</span>
+		<span class="nx">enableSubreaper</span><span class="p">:</span> <span class="p">!</span><span class="nx">context</span><span class="p">.</span><span class="nf">Bool</span><span class="p">(</span><span class="s">&#34;no-subreaper&#34;</span><span class="p">),</span>
+		<span class="nx">shouldDestroy</span><span class="p">:</span>   <span class="kc">true</span><span class="p">,</span>
+		<span class="nx">container</span><span class="p">:</span>       <span class="nx">container</span><span class="p">,</span>
+		<span class="nx">listenFDs</span><span class="p">:</span>       <span class="nx">listenFDs</span><span class="p">,</span>
+		<span class="nx">notifySocket</span><span class="p">:</span>    <span class="nx">notifySocket</span><span class="p">,</span>
+		<span class="nx">consoleSocket</span><span class="p">:</span>   <span class="nx">context</span><span class="p">.</span><span class="nf">String</span><span class="p">(</span><span class="s">&#34;console-socket&#34;</span><span class="p">),</span>
+		<span class="nx">detach</span><span class="p">:</span>          <span class="nx">context</span><span class="p">.</span><span class="nf">Bool</span><span class="p">(</span><span class="s">&#34;detach&#34;</span><span class="p">),</span>
+		<span class="nx">pidFile</span><span class="p">:</span>         <span class="nx">context</span><span class="p">.</span><span class="nf">String</span><span class="p">(</span><span class="s">&#34;pid-file&#34;</span><span class="p">),</span>
+		<span class="nx">preserveFDs</span><span class="p">:</span>     <span class="nx">context</span><span class="p">.</span><span class="nf">Int</span><span class="p">(</span><span class="s">&#34;preserve-fds&#34;</span><span class="p">),</span>
+		<span class="nx">action</span><span class="p">:</span>          <span class="nx">action</span><span class="p">,</span>
+		<span class="nx">criuOpts</span><span class="p">:</span>        <span class="nx">criuOpts</span><span class="p">,</span>
+		<span class="nx">init</span><span class="p">:</span>            <span class="kc">true</span><span class="p">,</span>
+		<span class="nx">logLevel</span><span class="p">:</span>        <span class="nx">logLevel</span><span class="p">,</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="nx">r</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="nx">spec</span><span class="p">.</span><span class="nx">Process</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><ol>
+<li>通过调用<code>createContainer</code>创建出逻辑容器（包含保存了namespace、cgroups、mounts…容器配置）</li>
+<li>创建<code>runner</code>对象，通过调用<code>runner</code>的run方法运行容器进程，并进行对应的设置</li>
+</ol>
+<p><strong>Factory创建逻辑容器</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">createContainer</span><span class="p">(</span><span class="nx">context</span> <span class="o">*</span><span class="nx">cli</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span> <span class="nx">id</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">spec</span> <span class="o">*</span><span class="nx">specs</span><span class="p">.</span><span class="nx">Spec</span><span class="p">)</span> <span class="p">(</span><span class="nx">libcontainer</span><span class="p">.</span><span class="nx">Container</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+	<span class="o">...</span>
+    <span class="nx">config</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">specconv</span><span class="p">.</span><span class="nf">CreateLibcontainerConfig</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">specconv</span><span class="p">.</span><span class="nx">CreateOpts</span><span class="p">{</span>
+		<span class="nx">CgroupName</span><span class="p">:</span>       <span class="nx">id</span><span class="p">,</span>
+		<span class="nx">UseSystemdCgroup</span><span class="p">:</span> <span class="nx">context</span><span class="p">.</span><span class="nf">GlobalBool</span><span class="p">(</span><span class="s">&#34;systemd-cgroup&#34;</span><span class="p">),</span>
+		<span class="nx">NoPivotRoot</span><span class="p">:</span>      <span class="nx">context</span><span class="p">.</span><span class="nf">Bool</span><span class="p">(</span><span class="s">&#34;no-pivot&#34;</span><span class="p">),</span>
+		<span class="nx">NoNewKeyring</span><span class="p">:</span>     <span class="nx">context</span><span class="p">.</span><span class="nf">Bool</span><span class="p">(</span><span class="s">&#34;no-new-keyring&#34;</span><span class="p">),</span>
+		<span class="nx">Spec</span><span class="p">:</span>             <span class="nx">spec</span><span class="p">,</span>
+		<span class="nx">RootlessEUID</span><span class="p">:</span>     <span class="nx">os</span><span class="p">.</span><span class="nf">Geteuid</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">,</span>
+		<span class="nx">RootlessCgroups</span><span class="p">:</span>  <span class="nx">rootlessCg</span><span class="p">,</span>
+	<span class="p">})</span>
+	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="nx">err</span>
+	<span class="p">}</span>
+
+	<span class="nx">factory</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">loadFactory</span><span class="p">(</span><span class="nx">context</span><span class="p">)</span>
+	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="nx">err</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="nx">factory</span><span class="p">.</span><span class="nf">Create</span><span class="p">(</span><span class="nx">id</span><span class="p">,</span> <span class="nx">config</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><ol>
+<li>通过<code>specconv.CreateLibcontainerConfig</code>把spec转换成libcontainer内部config对象</li>
+<li>通过factory 模式获取对应平台的factory实现（目前仅linux平台支持）,如<code>libcontainer/factory_linux.go</code>，并调用其Create方法构建返回<code>libcontainer.Container</code> 对象（包含容器命令的实现，如Run、Start、State…）</li>
+<li>注意<code>libcontainer/factory_linux.go</code>New方法的InitPath为<code>/proc/self/exe</code>,InitArgs为init</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="p">(</span><span class="nx">l</span> <span class="o">*</span><span class="nx">LinuxFactory</span><span class="p">)</span> <span class="nf">Create</span><span class="p">(</span><span class="nx">id</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">config</span> <span class="o">*</span><span class="nx">configs</span><span class="p">.</span><span class="nx">Config</span><span class="p">)</span> <span class="p">(</span><span class="nx">Container</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+	<span class="o">...</span>
+	<span class="nx">c</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">linuxContainer</span><span class="p">{</span>
+		<span class="nx">id</span><span class="p">:</span>            <span class="nx">id</span><span class="p">,</span>
+		<span class="nx">root</span><span class="p">:</span>          <span class="nx">containerRoot</span><span class="p">,</span>
+		<span class="nx">config</span><span class="p">:</span>        <span class="nx">config</span><span class="p">,</span>
+		<span class="nx">initPath</span><span class="p">:</span>      <span class="nx">l</span><span class="p">.</span><span class="nx">InitPath</span><span class="p">,</span>
+		<span class="nx">initArgs</span><span class="p">:</span>      <span class="nx">l</span><span class="p">.</span><span class="nx">InitArgs</span><span class="p">,</span>
+		<span class="nx">criuPath</span><span class="p">:</span>      <span class="nx">l</span><span class="p">.</span><span class="nx">CriuPath</span><span class="p">,</span>
+		<span class="nx">newuidmapPath</span><span class="p">:</span> <span class="nx">l</span><span class="p">.</span><span class="nx">NewuidmapPath</span><span class="p">,</span>
+		<span class="nx">newgidmapPath</span><span class="p">:</span> <span class="nx">l</span><span class="p">.</span><span class="nx">NewgidmapPath</span><span class="p">,</span>
+		<span class="nx">cgroupManager</span><span class="p">:</span> <span class="nx">l</span><span class="p">.</span><span class="nf">NewCgroupsManager</span><span class="p">(</span><span class="nx">config</span><span class="p">.</span><span class="nx">Cgroups</span><span class="p">,</span> <span class="kc">nil</span><span class="p">),</span>
+	<span class="p">}</span>
+	<span class="k">if</span> <span class="nx">l</span><span class="p">.</span><span class="nx">NewIntelRdtManager</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="nx">c</span><span class="p">.</span><span class="nx">intelRdtManager</span> <span class="p">=</span> <span class="nx">l</span><span class="p">.</span><span class="nf">NewIntelRdtManager</span><span class="p">(</span><span class="nx">config</span><span class="p">,</span> <span class="nx">id</span><span class="p">,</span> <span class="s">&#34;&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+	<span class="nx">c</span><span class="p">.</span><span class="nx">state</span> <span class="p">=</span> <span class="o">&amp;</span><span class="nx">stoppedState</span><span class="p">{</span><span class="nx">c</span><span class="p">:</span> <span class="nx">c</span><span class="p">}</span>
+	<span class="k">return</span> <span class="nx">c</span><span class="p">,</span> <span class="kc">nil</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">New</span><span class="p">(</span><span class="nx">root</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">options</span> <span class="o">...</span><span class="kd">func</span><span class="p">(</span><span class="o">*</span><span class="nx">LinuxFactory</span><span class="p">)</span> <span class="kt">error</span><span class="p">)</span> <span class="p">(</span><span class="nx">Factory</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+	<span class="o">...</span>
+	<span class="nx">l</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">LinuxFactory</span><span class="p">{</span>
+		<span class="nx">Root</span><span class="p">:</span>      <span class="nx">root</span><span class="p">,</span>
+		<span class="nx">InitPath</span><span class="p">:</span>  <span class="s">&#34;/proc/self/exe&#34;</span><span class="p">,</span>
+		<span class="nx">InitArgs</span><span class="p">:</span>  <span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="nx">os</span><span class="p">.</span><span class="nx">Args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s">&#34;init&#34;</span><span class="p">},</span>
+		<span class="nx">Validator</span><span class="p">:</span> <span class="nx">validate</span><span class="p">.</span><span class="nf">New</span><span class="p">(),</span>
+		<span class="nx">CriuPath</span><span class="p">:</span>  <span class="s">&#34;criu&#34;</span><span class="p">,</span>
+	<span class="p">}</span>
+	<span class="nf">Cgroupfs</span><span class="p">(</span><span class="nx">l</span><span class="p">)</span>
+	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">opt</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">options</span> <span class="p">{</span>
+		<span class="k">if</span> <span class="nx">opt</span> <span class="o">==</span> <span class="kc">nil</span> <span class="p">{</span>
+			<span class="k">continue</span>
+		<span class="p">}</span>
+		<span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">opt</span><span class="p">(</span><span class="nx">l</span><span class="p">);</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+			<span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="nx">err</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="nx">l</span><span class="p">,</span> <span class="kc">nil</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p><strong>Runner运行容器-container_linux.start</strong></p>
+<p>runner的run方法会根据OCI specs.Process生成 <code>libcontainer.Process</code>逻辑process对象（包含进程的命令、参数、环境变量、用户…）；根据对应的command如run会调用container的Run方法，在linux平台下最终会调用<code>container_linux</code>的start方法与exec方法，start方法如下所示：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">linuxContainer</span><span class="p">)</span> <span class="nf">start</span><span class="p">(</span><span class="nx">process</span> <span class="o">*</span><span class="nx">Process</span><span class="p">)</span> <span class="p">(</span><span class="nx">retErr</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">parent</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">c</span><span class="p">.</span><span class="nf">newParentProcess</span><span class="p">(</span><span class="nx">process</span><span class="p">)</span>
+	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="nf">newSystemErrorWithCause</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="s">&#34;creating new parent process&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+    <span class="c1">//
+</span><span class="c1"></span>	<span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">parent</span><span class="p">.</span><span class="nf">start</span><span class="p">();</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="nf">newSystemErrorWithCause</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="s">&#34;starting container process&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+	<span class="o">...</span>
+	<span class="c1">//更新容器状态，PostStart Hook回调
+</span><span class="c1"></span>	<span class="k">return</span> <span class="kc">nil</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">linuxContainer</span><span class="p">)</span> <span class="nf">newParentProcess</span><span class="p">(</span><span class="nx">p</span> <span class="o">*</span><span class="nx">Process</span><span class="p">)</span> <span class="p">(</span><span class="nx">parentProcess</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">parentInitPipe</span><span class="p">,</span> <span class="nx">childInitPipe</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">utils</span><span class="p">.</span><span class="nf">NewSockPair</span><span class="p">(</span><span class="s">&#34;init&#34;</span><span class="p">)</span>
+	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="nf">newSystemErrorWithCause</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="s">&#34;creating new init pipe&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+	<span class="nx">messageSockPair</span> <span class="o">:=</span> <span class="nx">filePair</span><span class="p">{</span><span class="nx">parentInitPipe</span><span class="p">,</span> <span class="nx">childInitPipe</span><span class="p">}</span>
+
+	<span class="nx">parentLogPipe</span><span class="p">,</span> <span class="nx">childLogPipe</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">os</span><span class="p">.</span><span class="nf">Pipe</span><span class="p">()</span>
+	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="nx">fmt</span><span class="p">.</span><span class="nf">Errorf</span><span class="p">(</span><span class="s">&#34;Unable to create the log pipe:  %s&#34;</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
+	<span class="p">}</span>
+	<span class="nx">logFilePair</span> <span class="o">:=</span> <span class="nx">filePair</span><span class="p">{</span><span class="nx">parentLogPipe</span><span class="p">,</span> <span class="nx">childLogPipe</span><span class="p">}</span>
+
+	<span class="nx">cmd</span> <span class="o">:=</span> <span class="nx">c</span><span class="p">.</span><span class="nf">commandTemplate</span><span class="p">(</span><span class="nx">p</span><span class="p">,</span> <span class="nx">childInitPipe</span><span class="p">,</span> <span class="nx">childLogPipe</span><span class="p">)</span>
+	<span class="k">if</span> <span class="p">!</span><span class="nx">p</span><span class="p">.</span><span class="nx">Init</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="nx">c</span><span class="p">.</span><span class="nf">newSetnsProcess</span><span class="p">(</span><span class="nx">p</span><span class="p">,</span> <span class="nx">cmd</span><span class="p">,</span> <span class="nx">messageSockPair</span><span class="p">,</span> <span class="nx">logFilePair</span><span class="p">)</span>
+	<span class="p">}</span>
+	<span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">c</span><span class="p">.</span><span class="nf">includeExecFifo</span><span class="p">(</span><span class="nx">cmd</span><span class="p">);</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="nf">newSystemErrorWithCause</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="s">&#34;including execfifo in cmd.Exec setup&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="nx">c</span><span class="p">.</span><span class="nf">newInitProcess</span><span class="p">(</span><span class="nx">p</span><span class="p">,</span> <span class="nx">cmd</span><span class="p">,</span> <span class="nx">messageSockPair</span><span class="p">,</span> <span class="nx">logFilePair</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p><code>newParentProcess</code>方法执行如下操作：</p>
+<ol>
+<li>创建<code>parentPipe</code> 和 <code>childPipe</code> 进程通信管道用于父进程与容器内父进程进行通信</li>
+<li>cmd封装容器父进程运行模板<code>/proc/self/exe - init</code></li>
+<li>创建initProcess，即容器内父进程逻辑对象，包含（cmd、逻辑process对象、paerentPipe<code>和</code>childPipe等）</li>
+</ol>
+<p><code>newParentProcess</code>返回initProcess后<code>container_linux</code>的start方法会调用initProcess的start方法</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="o">*</span><span class="nx">initProcess</span><span class="p">)</span> <span class="nf">start</span><span class="p">()</span> <span class="p">(</span><span class="nx">retErr</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">defer</span> <span class="nx">p</span><span class="p">.</span><span class="nx">messageSockPair</span><span class="p">.</span><span class="nx">parent</span><span class="p">.</span><span class="nf">Close</span><span class="p">()</span>
+    <span class="c1">//启动容器init进程
+</span><span class="c1"></span>	<span class="nx">err</span> <span class="o">:=</span> <span class="nx">p</span><span class="p">.</span><span class="nx">cmd</span><span class="p">.</span><span class="nf">Start</span><span class="p">()</span>
+	<span class="nx">p</span><span class="p">.</span><span class="nx">process</span><span class="p">.</span><span class="nx">ops</span> <span class="p">=</span> <span class="nx">p</span>
+	<span class="nx">p</span><span class="p">.</span><span class="nx">messageSockPair</span><span class="p">.</span><span class="nx">child</span><span class="p">.</span><span class="nf">Close</span><span class="p">()</span>
+	<span class="nx">p</span><span class="p">.</span><span class="nx">logFilePair</span><span class="p">.</span><span class="nx">child</span><span class="p">.</span><span class="nf">Close</span><span class="p">()</span>
+    <span class="nx">waitInit</span> <span class="o">:=</span> <span class="nf">initWaiter</span><span class="p">(</span><span class="nx">p</span><span class="p">.</span><span class="nx">messageSockPair</span><span class="p">.</span><span class="nx">parent</span><span class="p">)</span>
+	<span class="o">...</span>
+    <span class="c1">//将容器pid加入到cgroup 中
+</span><span class="c1"></span>	<span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">p</span><span class="p">.</span><span class="nx">manager</span><span class="p">.</span><span class="nf">Apply</span><span class="p">(</span><span class="nx">p</span><span class="p">.</span><span class="nf">pid</span><span class="p">());</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="nf">newSystemErrorWithCause</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="s">&#34;applying cgroup configuration for process&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+	<span class="k">if</span> <span class="nx">p</span><span class="p">.</span><span class="nx">intelRdtManager</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">p</span><span class="p">.</span><span class="nx">intelRdtManager</span><span class="p">.</span><span class="nf">Apply</span><span class="p">(</span><span class="nx">p</span><span class="p">.</span><span class="nf">pid</span><span class="p">());</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+			<span class="k">return</span> <span class="nf">newSystemErrorWithCause</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="s">&#34;applying Intel RDT configuration for process&#34;</span><span class="p">)</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+    <span class="c1">//向容器init进程发送bootstrapData，即初始化数据
+</span><span class="c1"></span>	<span class="k">if</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">io</span><span class="p">.</span><span class="nf">Copy</span><span class="p">(</span><span class="nx">p</span><span class="p">.</span><span class="nx">messageSockPair</span><span class="p">.</span><span class="nx">parent</span><span class="p">,</span> <span class="nx">p</span><span class="p">.</span><span class="nx">bootstrapData</span><span class="p">);</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="nf">newSystemErrorWithCause</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="s">&#34;copying bootstrap data to pipe&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+    <span class="c1">//等待容器init进程初始化
+</span><span class="c1"></span>	<span class="nx">err</span> <span class="p">=</span> <span class="o">&lt;-</span><span class="nx">waitInit</span>
+	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="nx">err</span>
+	<span class="p">}</span>
+	<span class="o">...</span>
+	<span class="c1">//创建网络 interface
+</span><span class="c1"></span>	<span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">p</span><span class="p">.</span><span class="nf">createNetworkInterfaces</span><span class="p">();</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="nf">newSystemErrorWithCause</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="s">&#34;creating network interfaces&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+    <span class="c1">//更新Spec状态
+</span><span class="c1"></span>	<span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">p</span><span class="p">.</span><span class="nf">updateSpecState</span><span class="p">();</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="nf">newSystemErrorWithCause</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="s">&#34;updating the spec state&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+    <span class="c1">// 给容器init进程发送进程配置信息
+</span><span class="c1"></span>	<span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">p</span><span class="p">.</span><span class="nf">sendConfig</span><span class="p">();</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="nf">newSystemErrorWithCause</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="s">&#34;sending config to init process&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+	<span class="c1">//和容器init进程进行同步,待其初始化完成之后，执行Hook回调操作，设置cgroup，最后，关闭init管道，容器创建完成
+</span><span class="c1"></span>	<span class="nx">ierr</span> <span class="o">:=</span> <span class="nf">parseSync</span><span class="p">(</span><span class="nx">p</span><span class="p">.</span><span class="nx">messageSockPair</span><span class="p">.</span><span class="nx">parent</span><span class="p">,</span> <span class="kd">func</span><span class="p">(</span><span class="nx">sync</span> <span class="o">*</span><span class="nx">syncT</span><span class="p">)</span> <span class="kt">error</span> <span class="p">{</span>
+    <span class="o">...</span>
+    <span class="p">}</span>
+	<span class="o">...</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>initProcess的start操作主要涉及如下几个步骤：</p>
+<ol>
+<li>执行cmd命令，通过<code>/proc/self/exe - init</code>启动容器init进程执行init command操作</li>
+<li>向容器init进程发送bootstrapData初始化数据</li>
+<li>创建网络 interface</li>
+<li>和容器init进程进行同步,待其初始化完成之后，执行Hook回调操作，设置cgroup，最后，关闭init管道，容器创建完成</li>
+</ol>
+<p><strong>Runner运行容器-container_linux.exec</strong></p>
+<p>具体实现如下</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">linuxContainer</span><span class="p">)</span> <span class="nf">exec</span><span class="p">()</span> <span class="kt">error</span> <span class="p">{</span>
+	<span class="nx">path</span> <span class="o">:=</span> <span class="nx">filepath</span><span class="p">.</span><span class="nf">Join</span><span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">root</span><span class="p">,</span> <span class="nx">execFifoFilename</span><span class="p">)</span>
+	<span class="nx">pid</span> <span class="o">:=</span> <span class="nx">c</span><span class="p">.</span><span class="nx">initProcess</span><span class="p">.</span><span class="nf">pid</span><span class="p">()</span>
+	<span class="nx">blockingFifoOpenCh</span> <span class="o">:=</span> <span class="nf">awaitFifoOpen</span><span class="p">(</span><span class="nx">path</span><span class="p">)</span>
+	<span class="k">for</span> <span class="p">{</span>
+		<span class="k">select</span> <span class="p">{</span>
+		<span class="k">case</span> <span class="nx">result</span> <span class="o">:=</span> <span class="o">&lt;-</span><span class="nx">blockingFifoOpenCh</span><span class="p">:</span>
+			<span class="k">return</span> <span class="nf">handleFifoResult</span><span class="p">(</span><span class="nx">result</span><span class="p">)</span>
+
+		<span class="k">case</span> <span class="o">&lt;-</span><span class="nx">time</span><span class="p">.</span><span class="nf">After</span><span class="p">(</span><span class="nx">time</span><span class="p">.</span><span class="nx">Millisecond</span> <span class="o">*</span> <span class="mi">100</span><span class="p">):</span>
+			<span class="nx">stat</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">system</span><span class="p">.</span><span class="nf">Stat</span><span class="p">(</span><span class="nx">pid</span><span class="p">)</span>
+			<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="o">||</span> <span class="nx">stat</span><span class="p">.</span><span class="nx">State</span> <span class="o">==</span> <span class="nx">system</span><span class="p">.</span><span class="nx">Zombie</span> <span class="p">{</span>
+				<span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">handleFifoResult</span><span class="p">(</span><span class="nf">fifoOpen</span><span class="p">(</span><span class="nx">path</span><span class="p">,</span> <span class="kc">false</span><span class="p">));</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+					<span class="k">return</span> <span class="nx">errors</span><span class="p">.</span><span class="nf">New</span><span class="p">(</span><span class="s">&#34;container process is already dead&#34;</span><span class="p">)</span>
+				<span class="p">}</span>
+				<span class="k">return</span> <span class="kc">nil</span>
+			<span class="p">}</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>通过打开路径<code>exec.fifo</code>的管道，调用<code>readFromExecFifo</code>从管道中将容器init进程从写入的信息读出。一旦管道中的数据被读出，容器init进程将不再被阻塞，完成之后的<code>Exec</code>系统调用，这时候容器init进程切换为command指定的进程。</p>
+<h3 id="runc-init">runC-init</h3>
+<p>上文分析runc run流程，在最后通过<code>/proc/self/exe - init</code>启动容器init进程执行init command操作，这里直接追溯到init操作的核心方法<code>standard_init_linux.go</code>下的Init方法，如下所示：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="p">(</span><span class="nx">l</span> <span class="o">*</span><span class="nx">linuxStandardInit</span><span class="p">)</span> <span class="nf">Init</span><span class="p">()</span> <span class="kt">error</span> <span class="p">{</span>
+
+	<span class="c1">//配置容器网络与路由
+</span><span class="c1"></span>	<span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">setupNetwork</span><span class="p">(</span><span class="nx">l</span><span class="p">.</span><span class="nx">config</span><span class="p">);</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="nx">err</span>
+	<span class="p">}</span>
+	<span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">setupRoute</span><span class="p">(</span><span class="nx">l</span><span class="p">.</span><span class="nx">config</span><span class="p">.</span><span class="nx">Config</span><span class="p">);</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="nx">err</span>
+	<span class="p">}</span>
+
+	<span class="c1">//设置rootfs，挂载文件系统，chroot
+</span><span class="c1"></span>	<span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">prepareRootfs</span><span class="p">(</span><span class="nx">l</span><span class="p">.</span><span class="nx">pipe</span><span class="p">,</span> <span class="nx">l</span><span class="p">.</span><span class="nx">config</span><span class="p">);</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="nx">err</span>
+	<span class="p">}</span>
+	<span class="c1">//配置console, hostname, apparmor, sysctl，seccomp，user namespace...
+</span><span class="c1"></span>	<span class="o">...</span>
+	<span class="c1">//同步父进程 init进程准备执行exec
+</span><span class="c1"></span>	<span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">syncParentReady</span><span class="p">(</span><span class="nx">l</span><span class="p">.</span><span class="nx">pipe</span><span class="p">);</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="nx">errors</span><span class="p">.</span><span class="nf">Wrap</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="s">&#34;sync ready&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+	<span class="o">...</span>
+	<span class="c1">//已完成初始化，关闭管道
+</span><span class="c1"></span>	<span class="nx">l</span><span class="p">.</span><span class="nx">pipe</span><span class="p">.</span><span class="nf">Close</span><span class="p">()</span>
+	<span class="o">...</span>
+	<span class="c1">//向exec.fifo管道写入数据，阻塞到exec执行，读取管道中的数据
+</span><span class="c1"></span>	<span class="nx">fd</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">unix</span><span class="p">.</span><span class="nf">Open</span><span class="p">(</span><span class="s">&#34;/proc/self/fd/&#34;</span><span class="o">+</span><span class="nx">strconv</span><span class="p">.</span><span class="nf">Itoa</span><span class="p">(</span><span class="nx">l</span><span class="p">.</span><span class="nx">fifoFd</span><span class="p">),</span> <span class="nx">unix</span><span class="p">.</span><span class="nx">O_WRONLY</span><span class="p">|</span><span class="nx">unix</span><span class="p">.</span><span class="nx">O_CLOEXEC</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="nf">newSystemErrorWithCause</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="s">&#34;open exec fifo&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+	<span class="k">if</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">unix</span><span class="p">.</span><span class="nf">Write</span><span class="p">(</span><span class="nx">fd</span><span class="p">,</span> <span class="p">[]</span><span class="nb">byte</span><span class="p">(</span><span class="s">&#34;0&#34;</span><span class="p">));</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="nf">newSystemErrorWithCause</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="s">&#34;write 0 exec fifo&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+	<span class="c1">//调用Exec系统命令，执行用户进程
+</span><span class="c1"></span>	<span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">unix</span><span class="p">.</span><span class="nf">Exec</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">l</span><span class="p">.</span><span class="nx">config</span><span class="p">.</span><span class="nx">Args</span><span class="p">[</span><span class="mi">0</span><span class="p">:],</span> <span class="nx">os</span><span class="p">.</span><span class="nf">Environ</span><span class="p">());</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="nf">newSystemErrorWithCause</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="s">&#34;exec user process&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="kc">nil</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>这里涉及如下几步操作：</p>
+<ol>
+<li>配置容器网络与路由</li>
+<li>设置rootfs，挂载文件系统，chroot</li>
+<li>配置console, hostname, apparmor, sysctl，seccomp，user namespace</li>
+<li>同步父进程，让父进程执行hook等操作</li>
+<li>调用Exec系统命令，执行用户进程，此时容器的init进程会替换成用户进程</li>
+</ol>
+<p>最后，在Init执行之前，会被<code>/runc/libcontainer/nsenter</code>劫持，在Go的runtime之前执行对应的C代码，从init管道中读取容器的配置，设置namespace，调用<code>setns</code>系统调用，将容器init进程加入到对应的namespace中。</p>
+<h3 id="runc-run-init-运行流程">runC-run-init-运行流程</h3>
+<p><strong>runC-run运行流程</strong></p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://user-images.githubusercontent.com/19829495/118503688-6f2d1880-b75d-11eb-9942-6e277f249012.jpg"
+        data-srcset="https://user-images.githubusercontent.com/19829495/118503688-6f2d1880-b75d-11eb-9942-6e277f249012.jpg, https://user-images.githubusercontent.com/19829495/118503688-6f2d1880-b75d-11eb-9942-6e277f249012.jpg 1.5x, https://user-images.githubusercontent.com/19829495/118503688-6f2d1880-b75d-11eb-9942-6e277f249012.jpg 2x"
+        data-sizes="auto"
+        alt="https://user-images.githubusercontent.com/19829495/118503688-6f2d1880-b75d-11eb-9942-6e277f249012.jpg"
+        title="runc-run" /></p>
+<p><strong>runC-init运行流程</strong></p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://user-images.githubusercontent.com/19829495/118503773-81a75200-b75d-11eb-8d0d-85b912864e9b.jpg"
+        data-srcset="https://user-images.githubusercontent.com/19829495/118503773-81a75200-b75d-11eb-8d0d-85b912864e9b.jpg, https://user-images.githubusercontent.com/19829495/118503773-81a75200-b75d-11eb-8d0d-85b912864e9b.jpg 1.5x, https://user-images.githubusercontent.com/19829495/118503773-81a75200-b75d-11eb-8d0d-85b912864e9b.jpg 2x"
+        data-sizes="auto"
+        alt="https://user-images.githubusercontent.com/19829495/118503773-81a75200-b75d-11eb-8d0d-85b912864e9b.jpg"
+        title="runc-init" /></p>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>更新于 1011-08-10</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/runc_analyse/index.md" target="_blank">阅读原始文档</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://zhengtianchi.github.io/runc_analyse/" data-title="docker - Docker容器运行时引擎-runC分析" data-hashtags="docker"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://zhengtianchi.github.io/runc_analyse/" data-hashtag="docker"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Hacker News" data-sharer="hackernews" data-url="https://zhengtianchi.github.io/runc_analyse/" data-title="docker - Docker容器运行时引擎-runC分析"><i class="fab fa-hacker-news fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://zhengtianchi.github.io/runc_analyse/" data-title="docker - Docker容器运行时引擎-runC分析"><i data-svg-src="https://cdn.jsdelivr.net/npm/simple-icons@2.14.0/icons/line.svg"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://zhengtianchi.github.io/runc_analyse/" data-title="docker - Docker容器运行时引擎-runC分析" data-image="/images/docker-cover.png"><i class="fab fa-weibo fa-fw"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/docker/">docker</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav">
+            <a href="/envoy_1/" class="next" rel="next" title="Envoy入门介绍">Envoy入门介绍<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"><div id="valine" class="comment"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://valine.js.org/">Valine</a>.
+            </noscript></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.87.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/dillonzq/LoveIt" target="_blank" rel="noopener noreffer" title="LoveIt 0.2.10"><i class="far fa-kiss-wink-heart fa-fw"></i> LoveIt</a>
+                </div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2021 - 2022</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">郑天驰</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/valine/valine.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/css/lightgallery.min.css"><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/algoliasearch@4.2.0/dist/algoliasearch-lite.umd.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lazysizes@5.2.2/lazysizes.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/js/lightgallery.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lg-thumbnail.js@1.2.0/dist/lg-thumbnail.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lg-zoom.js@1.2.0/dist/lg-zoom.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sharer.js@0.4.0/sharer.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{"valine":{"appId":"QGzwQXOqs5JOhN4RGPOkR2mR-MdYXbMMI","appKey":"WBmoGyJtbqUswvfLh6L8iEBr","avatar":"mp","el":"#valine","emojiCDN":"https://cdn.jsdelivr.net/npm/emoji-datasource-google@5.0.1/img/google/64/","emojiMaps":{"100":"1f4af.png","alien":"1f47d.png","anger":"1f4a2.png","angry":"1f620.png","anguished":"1f627.png","astonished":"1f632.png","black_heart":"1f5a4.png","blue_heart":"1f499.png","blush":"1f60a.png","bomb":"1f4a3.png","boom":"1f4a5.png","broken_heart":"1f494.png","brown_heart":"1f90e.png","clown_face":"1f921.png","cold_face":"1f976.png","cold_sweat":"1f630.png","confounded":"1f616.png","confused":"1f615.png","cry":"1f622.png","crying_cat_face":"1f63f.png","cupid":"1f498.png","dash":"1f4a8.png","disappointed":"1f61e.png","disappointed_relieved":"1f625.png","dizzy":"1f4ab.png","dizzy_face":"1f635.png","drooling_face":"1f924.png","exploding_head":"1f92f.png","expressionless":"1f611.png","face_vomiting":"1f92e.png","face_with_cowboy_hat":"1f920.png","face_with_hand_over_mouth":"1f92d.png","face_with_head_bandage":"1f915.png","face_with_monocle":"1f9d0.png","face_with_raised_eyebrow":"1f928.png","face_with_rolling_eyes":"1f644.png","face_with_symbols_on_mouth":"1f92c.png","face_with_thermometer":"1f912.png","fearful":"1f628.png","flushed":"1f633.png","frowning":"1f626.png","ghost":"1f47b.png","gift_heart":"1f49d.png","green_heart":"1f49a.png","grimacing":"1f62c.png","grin":"1f601.png","grinning":"1f600.png","hankey":"1f4a9.png","hear_no_evil":"1f649.png","heart":"2764-fe0f.png","heart_decoration":"1f49f.png","heart_eyes":"1f60d.png","heart_eyes_cat":"1f63b.png","heartbeat":"1f493.png","heartpulse":"1f497.png","heavy_heart_exclamation_mark_ornament":"2763-fe0f.png","hole":"1f573-fe0f.png","hot_face":"1f975.png","hugging_face":"1f917.png","hushed":"1f62f.png","imp":"1f47f.png","innocent":"1f607.png","japanese_goblin":"1f47a.png","japanese_ogre":"1f479.png","joy":"1f602.png","joy_cat":"1f639.png","kiss":"1f48b.png","kissing":"1f617.png","kissing_cat":"1f63d.png","kissing_closed_eyes":"1f61a.png","kissing_heart":"1f618.png","kissing_smiling_eyes":"1f619.png","laughing":"1f606.png","left_speech_bubble":"1f5e8-fe0f.png","love_letter":"1f48c.png","lying_face":"1f925.png","mask":"1f637.png","money_mouth_face":"1f911.png","nauseated_face":"1f922.png","nerd_face":"1f913.png","neutral_face":"1f610.png","no_mouth":"1f636.png","open_mouth":"1f62e.png","orange_heart":"1f9e1.png","partying_face":"1f973.png","pensive":"1f614.png","persevere":"1f623.png","pleading_face":"1f97a.png","pouting_cat":"1f63e.png","purple_heart":"1f49c.png","rage":"1f621.png","relaxed":"263a-fe0f.png","relieved":"1f60c.png","revolving_hearts":"1f49e.png","right_anger_bubble":"1f5ef-fe0f.png","robot_face":"1f916.png","rolling_on_the_floor_laughing":"1f923.png","scream":"1f631.png","scream_cat":"1f640.png","see_no_evil":"1f648.png","shushing_face":"1f92b.png","skull":"1f480.png","skull_and_crossbones":"2620-fe0f.png","sleeping":"1f634.png","sleepy":"1f62a.png","slightly_frowning_face":"1f641.png","slightly_smiling_face":"1f642.png","smile":"1f604.png","smile_cat":"1f638.png","smiley":"1f603.png","smiley_cat":"1f63a.png","smiling_face_with_3_hearts":"1f970.png","smiling_imp":"1f608.png","smirk":"1f60f.png","smirk_cat":"1f63c.png","sneezing_face":"1f927.png","sob":"1f62d.png","space_invader":"1f47e.png","sparkling_heart":"1f496.png","speak_no_evil":"1f64a.png","speech_balloon":"1f4ac.png","star-struck":"1f929.png","stuck_out_tongue":"1f61b.png","stuck_out_tongue_closed_eyes":"1f61d.png","stuck_out_tongue_winking_eye":"1f61c.png","sunglasses":"1f60e.png","sweat":"1f613.png","sweat_drops":"1f4a6.png","sweat_smile":"1f605.png","thinking_face":"1f914.png","thought_balloon":"1f4ad.png","tired_face":"1f62b.png","triumph":"1f624.png","two_hearts":"1f495.png","unamused":"1f612.png","upside_down_face":"1f643.png","weary":"1f629.png","white_frowning_face":"2639-fe0f.png","white_heart":"1f90d.png","wink":"1f609.png","woozy_face":"1f974.png","worried":"1f61f.png","yawning_face":"1f971.png","yellow_heart":"1f49b.png","yum":"1f60b.png","zany_face":"1f92a.png","zipper_mouth_face":"1f910.png","zzz":"1f4a4.png"},"enableQQ":false,"highlight":true,"lang":"zh-cn","pageSize":10,"placeholder":"你的评论 ...","recordIP":true,"serverURLs":"https://leancloud.hugoloveit.com","visitor":true}},"lightGallery":{"actualSize":false,"exThumbImage":"data-thumbnail","hideBarsDelay":2000,"selector":".lightgallery","speed":400,"thumbContHeight":80,"thumbWidth":80,"thumbnail":true},"search":{"algoliaAppID":"PASDMWALPK","algoliaIndex":"index.zh-cn","algoliaSearchKey":"b42948e51daaa93df92381c8e2ac0f93","highlightTag":"em","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50,"type":"algolia"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>
