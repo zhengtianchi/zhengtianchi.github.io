@@ -15,13 +15,13 @@ Docker 是一个开源工具，它可以将你的应用打包成一个标准格�
 
 在2014年开源了基于Golang开发的libcontainer，越过LXC直接操作系统内核模块，不必依赖LXC来提供容器化隔离能力了，自身架构也不断发展拆分成了如下几个模块：
 
-![DeepinScreenshot_select-area_20210513013836](https://user-images.githubusercontent.com/19829495/118020412-a0d46700-b38c-11eb-8dad-3be7e8c0bb71.png)
+<img src="https://user-images.githubusercontent.com/19829495/118020412-a0d46700-b38c-11eb-8dad-3be7e8c0bb71.png" alt="DeepinScreenshot_select-area_20210513013836" style="zoom:200%;" />
 
 2015年，Docker联合多家公司制定了开放容器交互标准（Open Container Initiative），即OCI；制定了关于容器相关的规范，包含运行时标准（[runtime-spec](https://github.com/opencontainers/runtime-spec/blob/master/spec.md)[ ](https://github.com/opencontainers/runtime-spec/blob/master/spec.md)）、容器镜像标准（[image-spec](https://github.com/opencontainers/image-spec/blob/master/spec.md)[ ](https://github.com/opencontainers/image-spec/blob/master/spec.md)）和镜像分发标准（[distribution-spec](https://github.com/opencontainers/distribution-spec/blob/master/spec.md)[ ](https://github.com/opencontainers/distribution-spec/blob/master/spec.md)）。
 
 2016年，Docker为了符合OCI标准，将原本libcontainer模块独立出来，封装重构成[runC项目](https://github.com/opencontainers/runc)[ ](https://github.com/opencontainers/runc)，捐献给了Linux基金会管理，而后为了能够兼容所有符合标准的OCI Runtime实现，Docker重构了Docker Daemon子系统，将其中与运行时交互的部分抽象为[containerd项目](https://containerd.io/)[ ](https://containerd.io/)捐献给了CNCF基金会管理，内部为每个容器运行时创建一个containerd-shim适配进程，与runC搭配工作。
 
-![图片](https://user-images.githubusercontent.com/19829495/118022236-b8145400-b38e-11eb-942c-57e68e255ae7.png)
+<img src="https://user-images.githubusercontent.com/19829495/118022236-b8145400-b38e-11eb-942c-57e68e255ae7.png" alt="图片" style="zoom:200%;" />
 
 ### Docker Daemon、containerd与runC
 

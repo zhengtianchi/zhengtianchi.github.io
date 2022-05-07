@@ -164,24 +164,10 @@
 <p>可以参考Docker相关的FAQ：<a href="https://docs.docker.com/engine/faq/#what-does-docker-technology-add-to-just-plain-lxc" target="_blank" rel="noopener noreffer">https://docs.docker.com/engine/faq</a></p>
 </blockquote>
 <p>在2014年开源了基于Golang开发的libcontainer，越过LXC直接操作系统内核模块，不必依赖LXC来提供容器化隔离能力了，自身架构也不断发展拆分成了如下几个模块：</p>
-<p><img
-        class="lazyload"
-        src="/svg/loading.min.svg"
-        data-src="https://user-images.githubusercontent.com/19829495/118020412-a0d46700-b38c-11eb-8dad-3be7e8c0bb71.png"
-        data-srcset="https://user-images.githubusercontent.com/19829495/118020412-a0d46700-b38c-11eb-8dad-3be7e8c0bb71.png, https://user-images.githubusercontent.com/19829495/118020412-a0d46700-b38c-11eb-8dad-3be7e8c0bb71.png 1.5x, https://user-images.githubusercontent.com/19829495/118020412-a0d46700-b38c-11eb-8dad-3be7e8c0bb71.png 2x"
-        data-sizes="auto"
-        alt="https://user-images.githubusercontent.com/19829495/118020412-a0d46700-b38c-11eb-8dad-3be7e8c0bb71.png"
-        title="DeepinScreenshot_select-area_20210513013836" /></p>
+<p><img src="https://user-images.githubusercontent.com/19829495/118020412-a0d46700-b38c-11eb-8dad-3be7e8c0bb71.png" alt="DeepinScreenshot_select-area_20210513013836" style="zoom:200%;" /></p>
 <p>2015年，Docker联合多家公司制定了开放容器交互标准（Open Container Initiative），即OCI；制定了关于容器相关的规范，包含运行时标准（<a href="https://github.com/opencontainers/runtime-spec/blob/master/spec.md" target="_blank" rel="noopener noreffer">runtime-spec</a><a href="https://github.com/opencontainers/runtime-spec/blob/master/spec.md" target="_blank" rel="noopener noreffer"> </a>）、容器镜像标准（<a href="https://github.com/opencontainers/image-spec/blob/master/spec.md" target="_blank" rel="noopener noreffer">image-spec</a><a href="https://github.com/opencontainers/image-spec/blob/master/spec.md" target="_blank" rel="noopener noreffer"> </a>）和镜像分发标准（<a href="https://github.com/opencontainers/distribution-spec/blob/master/spec.md" target="_blank" rel="noopener noreffer">distribution-spec</a><a href="https://github.com/opencontainers/distribution-spec/blob/master/spec.md" target="_blank" rel="noopener noreffer"> </a>）。</p>
 <p>2016年，Docker为了符合OCI标准，将原本libcontainer模块独立出来，封装重构成<a href="https://github.com/opencontainers/runc" target="_blank" rel="noopener noreffer">runC项目</a><a href="https://github.com/opencontainers/runc" target="_blank" rel="noopener noreffer"> </a>，捐献给了Linux基金会管理，而后为了能够兼容所有符合标准的OCI Runtime实现，Docker重构了Docker Daemon子系统，将其中与运行时交互的部分抽象为<a href="https://containerd.io/" target="_blank" rel="noopener noreffer">containerd项目</a><a href="https://containerd.io/" target="_blank" rel="noopener noreffer"> </a>捐献给了CNCF基金会管理，内部为每个容器运行时创建一个containerd-shim适配进程，与runC搭配工作。</p>
-<p><img
-        class="lazyload"
-        src="/svg/loading.min.svg"
-        data-src="https://user-images.githubusercontent.com/19829495/118022236-b8145400-b38e-11eb-942c-57e68e255ae7.png"
-        data-srcset="https://user-images.githubusercontent.com/19829495/118022236-b8145400-b38e-11eb-942c-57e68e255ae7.png, https://user-images.githubusercontent.com/19829495/118022236-b8145400-b38e-11eb-942c-57e68e255ae7.png 1.5x, https://user-images.githubusercontent.com/19829495/118022236-b8145400-b38e-11eb-942c-57e68e255ae7.png 2x"
-        data-sizes="auto"
-        alt="https://user-images.githubusercontent.com/19829495/118022236-b8145400-b38e-11eb-942c-57e68e255ae7.png"
-        title="图片" /></p>
+<p><img src="https://user-images.githubusercontent.com/19829495/118022236-b8145400-b38e-11eb-942c-57e68e255ae7.png" alt="图片" style="zoom:200%;" /></p>
 <h3 id="docker-daemoncontainerd与runc">Docker Daemon、containerd与runC</h3>
 <p>containerd提供了镜像管理（镜像、元信息等）、容器运行（调用最终运行时组件执行）的功能，向上为 Docker Daemon 提供了 gRPC 接口，使得 Docker Daemon 屏蔽下面的结构变化，确保原有接口向下兼容；向下运行容器由符合OCI规范的容器支持，如runC，使得引擎可以独立升级。</p>
 <h3 id="kubernetes与docker">Kubernetes与Docker</h3>
