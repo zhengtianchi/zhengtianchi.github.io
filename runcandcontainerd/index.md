@@ -71,17 +71,17 @@ COMMANDS:
 
 更具体的调用逻辑：
 
-![img](https://res.cloudinary.com/dqxtn0ick/image/upload/v1631854201/article/kubernetes/containerd/containerd-shim.png)
+<img src="https://res.cloudinary.com/dqxtn0ick/image/upload/v1631854201/article/kubernetes/containerd/containerd-shim.png" alt="img" style="zoom:200%;" />
 
 # 5. CRI  Container Runtime Interface
 
 **CRI即容器运行时接口，主要用来定义k8s与容器运行时的API调用**，kubelet通过CRI来调用容器运行时，只要实现了CRI接口的容器运行时就可以对接到k8s的kubelet组件。
 
-![img](https://res.cloudinary.com/dqxtn0ick/image/upload/v1631849764/article/kubernetes/containerd/kubelet-cri.png)
+<img src="https://res.cloudinary.com/dqxtn0ick/image/upload/v1631849764/article/kubernetes/containerd/kubelet-cri.png" alt="img" style="zoom:200%;" />
 
 ## 5.1. docker与k8s调用containerd的关系图
 
-![img](https://res.cloudinary.com/dqxtn0ick/image/upload/v1631847625/article/kubernetes/containerd/container-ecosystem.drawio.png)
+<img src="https://res.cloudinary.com/dqxtn0ick/image/upload/v1631847625/article/kubernetes/containerd/container-ecosystem.drawio.png" alt="img" style="zoom:200%;" />
 
 ## 5.2. [cri-api](https://github.com/kubernetes/cri-api/blob/master/pkg/apis/runtime/v1/api.proto)
 
@@ -193,7 +193,7 @@ service ImageService {
 
 ## 5.3. cri-containerd
 
-![img](https://res.cloudinary.com/dqxtn0ick/image/upload/v1631849203/article/kubernetes/containerd/cri-plugin-architecture.png)
+<img src="https://res.cloudinary.com/dqxtn0ick/image/upload/v1631849203/article/kubernetes/containerd/cri-plugin-architecture.png" alt="img" style="zoom:200%;" />
 
 ### 5.3.1. CRI Plugin调用流程
 
@@ -209,7 +209,7 @@ service ImageService {
 
 由原来通过dockershim调用docker再调用containerd，直接变成通过cri-containerd调用containerd，从而减少了一层docker调用逻辑。
 
-![img](https://res.cloudinary.com/dqxtn0ick/image/upload/v1631854007/article/kubernetes/containerd/cri-performance.png)
+<img src="https://res.cloudinary.com/dqxtn0ick/image/upload/v1631854007/article/kubernetes/containerd/cri-performance.png" alt="img" style="zoom:200%;" />
 
 > 具体参考：https://github.com/containerd/cri/blob/release/1.4/docs/proposal.md
 

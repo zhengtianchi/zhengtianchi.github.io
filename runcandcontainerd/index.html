@@ -263,33 +263,12 @@ COMMANDS:
         alt="https://res.cloudinary.com/dqxtn0ick/image/upload/v1631847625/article/kubernetes/containerd/container-ecosystem-docker.drawio.png"
         title="img" /></p>
 <p>更具体的调用逻辑：</p>
-<p><img
-        class="lazyload"
-        src="/svg/loading.min.svg"
-        data-src="https://res.cloudinary.com/dqxtn0ick/image/upload/v1631854201/article/kubernetes/containerd/containerd-shim.png"
-        data-srcset="https://res.cloudinary.com/dqxtn0ick/image/upload/v1631854201/article/kubernetes/containerd/containerd-shim.png, https://res.cloudinary.com/dqxtn0ick/image/upload/v1631854201/article/kubernetes/containerd/containerd-shim.png 1.5x, https://res.cloudinary.com/dqxtn0ick/image/upload/v1631854201/article/kubernetes/containerd/containerd-shim.png 2x"
-        data-sizes="auto"
-        alt="https://res.cloudinary.com/dqxtn0ick/image/upload/v1631854201/article/kubernetes/containerd/containerd-shim.png"
-        title="img" /></p>
+<p><img src="https://res.cloudinary.com/dqxtn0ick/image/upload/v1631854201/article/kubernetes/containerd/containerd-shim.png" alt="img" style="zoom:200%;" /></p>
 <h1 id="5-cri--container-runtime-interface">5. CRI  Container Runtime Interface</h1>
 <p><strong>CRI即容器运行时接口，主要用来定义k8s与容器运行时的API调用</strong>，kubelet通过CRI来调用容器运行时，只要实现了CRI接口的容器运行时就可以对接到k8s的kubelet组件。</p>
-<p><img
-        class="lazyload"
-        src="/svg/loading.min.svg"
-        data-src="https://res.cloudinary.com/dqxtn0ick/image/upload/v1631849764/article/kubernetes/containerd/kubelet-cri.png"
-        data-srcset="https://res.cloudinary.com/dqxtn0ick/image/upload/v1631849764/article/kubernetes/containerd/kubelet-cri.png, https://res.cloudinary.com/dqxtn0ick/image/upload/v1631849764/article/kubernetes/containerd/kubelet-cri.png 1.5x, https://res.cloudinary.com/dqxtn0ick/image/upload/v1631849764/article/kubernetes/containerd/kubelet-cri.png 2x"
-        data-sizes="auto"
-        alt="https://res.cloudinary.com/dqxtn0ick/image/upload/v1631849764/article/kubernetes/containerd/kubelet-cri.png"
-        title="img" /></p>
+<p><img src="https://res.cloudinary.com/dqxtn0ick/image/upload/v1631849764/article/kubernetes/containerd/kubelet-cri.png" alt="img" style="zoom:200%;" /></p>
 <h2 id="51-docker与k8s调用containerd的关系图">5.1. docker与k8s调用containerd的关系图</h2>
-<p><img
-        class="lazyload"
-        src="/svg/loading.min.svg"
-        data-src="https://res.cloudinary.com/dqxtn0ick/image/upload/v1631847625/article/kubernetes/containerd/container-ecosystem.drawio.png"
-        data-srcset="https://res.cloudinary.com/dqxtn0ick/image/upload/v1631847625/article/kubernetes/containerd/container-ecosystem.drawio.png, https://res.cloudinary.com/dqxtn0ick/image/upload/v1631847625/article/kubernetes/containerd/container-ecosystem.drawio.png 1.5x, https://res.cloudinary.com/dqxtn0ick/image/upload/v1631847625/article/kubernetes/containerd/container-ecosystem.drawio.png 2x"
-        data-sizes="auto"
-        alt="https://res.cloudinary.com/dqxtn0ick/image/upload/v1631847625/article/kubernetes/containerd/container-ecosystem.drawio.png"
-        title="img" /></p>
+<p><img src="https://res.cloudinary.com/dqxtn0ick/image/upload/v1631847625/article/kubernetes/containerd/container-ecosystem.drawio.png" alt="img" style="zoom:200%;" /></p>
 <h2 id="52-cri-apihttpsgithubcomkubernetescri-apiblobmasterpkgapisruntimev1apiproto">5.2. <a href="https://github.com/kubernetes/cri-api/blob/master/pkg/apis/runtime/v1/api.proto" target="_blank" rel="noopener noreffer">cri-api</a></h2>
 <h3 id="521-runtime-service">5.2.1. runtime service</h3>
 <div class="highlight"><div class="chroma">
@@ -498,14 +477,7 @@ COMMANDS:
 </code></pre></td></tr></table>
 </div>
 </div><h2 id="53-cri-containerd">5.3. cri-containerd</h2>
-<p><img
-        class="lazyload"
-        src="/svg/loading.min.svg"
-        data-src="https://res.cloudinary.com/dqxtn0ick/image/upload/v1631849203/article/kubernetes/containerd/cri-plugin-architecture.png"
-        data-srcset="https://res.cloudinary.com/dqxtn0ick/image/upload/v1631849203/article/kubernetes/containerd/cri-plugin-architecture.png, https://res.cloudinary.com/dqxtn0ick/image/upload/v1631849203/article/kubernetes/containerd/cri-plugin-architecture.png 1.5x, https://res.cloudinary.com/dqxtn0ick/image/upload/v1631849203/article/kubernetes/containerd/cri-plugin-architecture.png 2x"
-        data-sizes="auto"
-        alt="https://res.cloudinary.com/dqxtn0ick/image/upload/v1631849203/article/kubernetes/containerd/cri-plugin-architecture.png"
-        title="img" /></p>
+<p><img src="https://res.cloudinary.com/dqxtn0ick/image/upload/v1631849203/article/kubernetes/containerd/cri-plugin-architecture.png" alt="img" style="zoom:200%;" /></p>
 <h3 id="531-cri-plugin调用流程">5.3.1. CRI Plugin调用流程</h3>
 <ol>
 <li>kubelet调用CRI插件，通过CRI Runtime Service接口创建pod</li>
@@ -519,14 +491,7 @@ COMMANDS:
 </blockquote>
 <h3 id="532-k8s对runtime调用的演进">5.3.2. k8s对runtime调用的演进</h3>
 <p>由原来通过dockershim调用docker再调用containerd，直接变成通过cri-containerd调用containerd，从而减少了一层docker调用逻辑。</p>
-<p><img
-        class="lazyload"
-        src="/svg/loading.min.svg"
-        data-src="https://res.cloudinary.com/dqxtn0ick/image/upload/v1631854007/article/kubernetes/containerd/cri-performance.png"
-        data-srcset="https://res.cloudinary.com/dqxtn0ick/image/upload/v1631854007/article/kubernetes/containerd/cri-performance.png, https://res.cloudinary.com/dqxtn0ick/image/upload/v1631854007/article/kubernetes/containerd/cri-performance.png 1.5x, https://res.cloudinary.com/dqxtn0ick/image/upload/v1631854007/article/kubernetes/containerd/cri-performance.png 2x"
-        data-sizes="auto"
-        alt="https://res.cloudinary.com/dqxtn0ick/image/upload/v1631854007/article/kubernetes/containerd/cri-performance.png"
-        title="img" /></p>
+<p><img src="https://res.cloudinary.com/dqxtn0ick/image/upload/v1631854007/article/kubernetes/containerd/cri-performance.png" alt="img" style="zoom:200%;" /></p>
 <blockquote>
 <p>具体参考：https://github.com/containerd/cri/blob/release/1.4/docs/proposal.md</p>
 </blockquote>
