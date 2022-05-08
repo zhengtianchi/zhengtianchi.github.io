@@ -4,7 +4,16 @@
         <link>https://zhengtianchi.github.io/categories/docker/</link>
         <description>docker - 分类 - skyrun</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>17826828065@163.com (郑天驰)</managingEditor>
-            <webMaster>17826828065@163.com (郑天驰)</webMaster><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Sun, 08 May 2022 10:32:04 &#43;0800</lastBuildDate><atom:link href="https://zhengtianchi.github.io/categories/docker/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>17826828065@163.com (郑天驰)</webMaster><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Sun, 08 May 2022 10:46:21 &#43;0800</lastBuildDate><atom:link href="https://zhengtianchi.github.io/categories/docker/" rel="self" type="application/rss+xml" /><item>
+    <title>一文搞定Containerd</title>
+    <link>https://zhengtianchi.github.io/containerd/</link>
+    <pubDate>Sun, 08 May 2022 10:46:21 &#43;0800</pubDate>
+    <author>作者</author>
+    <guid>https://zhengtianchi.github.io/containerd/</guid>
+    <description><![CDATA[<div class="featured-image">
+                <img src="/images/docker-cover.png" referrerpolicy="no-referrer">
+            </div>在学习 Containerd 之前我们有必要对 Docker 的发展历史做一个简单的回顾，因为这里面牵涉到的组件实战是有点多，有很多我们会经常听到，但是不清楚这些组件到底是干什]]></description>
+</item><item>
     <title>Runc和containerd概述</title>
     <link>https://zhengtianchi.github.io/runcandcontainerd/</link>
     <pubDate>Sun, 08 May 2022 10:32:04 &#43;0800</pubDate>
