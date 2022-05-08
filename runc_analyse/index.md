@@ -93,7 +93,7 @@ hook：配置容器生命周期触发钩子
 
 OCI 容器运行时标准主要是指定容器的运行状态，和 runtime 需要提供的命令，如下状态流转图所示：
 
-![DeepinScreenshot_select-area_20210515011303](https://user-images.githubusercontent.com/19829495/118305620-cd1dee00-b51a-11eb-8fa5-814f86ca0f42.png)
+<img src="https://user-images.githubusercontent.com/19829495/118305620-cd1dee00-b51a-11eb-8fa5-814f86ca0f42.png" alt="DeepinScreenshot_select-area_20210515011303" style="zoom:200%;" />
 
 **基于busybox创建OCI runtime bundle相关文件**
 

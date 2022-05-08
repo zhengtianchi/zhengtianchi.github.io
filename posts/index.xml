@@ -4,7 +4,16 @@
         <link>https://zhengtianchi.github.io/posts/</link>
         <description>所有文章 | skyrun</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>17826828065@163.com (郑天驰)</managingEditor>
-            <webMaster>17826828065@163.com (郑天驰)</webMaster><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Fri, 26 Nov 2021 12:51:58 &#43;0800</lastBuildDate><atom:link href="https://zhengtianchi.github.io/posts/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>17826828065@163.com (郑天驰)</webMaster><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Sun, 08 May 2022 10:32:04 &#43;0800</lastBuildDate><atom:link href="https://zhengtianchi.github.io/posts/" rel="self" type="application/rss+xml" /><item>
+    <title>Runc和containerd概述</title>
+    <link>https://zhengtianchi.github.io/runcandcontainerd/</link>
+    <pubDate>Sun, 08 May 2022 10:32:04 &#43;0800</pubDate>
+    <author>作者</author>
+    <guid>https://zhengtianchi.github.io/runcandcontainerd/</guid>
+    <description><![CDATA[<div class="featured-image">
+                <img src="/images/docker-cover.png" referrerpolicy="no-referrer">
+            </div>1. 概述 各个组件调用关系图如下： 图片来源：https://www.jianshu.com/p/62e71584d1cb 2. OCI. Open Container Initiative OCI（Ope]]></description>
+</item><item>
     <title>istio - 网易轻舟（转载）</title>
     <link>https://zhengtianchi.github.io/%E7%BD%91%E6%98%93%E8%BD%BB%E8%88%9F/</link>
     <pubDate>Fri, 26 Nov 2021 12:51:58 &#43;0800</pubDate>
@@ -85,12 +94,5 @@
     <description><![CDATA[<div class="featured-image">
                 <img src="/images/medium_istio.png" referrerpolicy="no-referrer">
             </div>istio 流量走向详解 前言 Istio作为一个service mesh开源项目,其中最重要的功能就是对网格中微服务之间的流量进行管理,包括服务发现,请求]]></description>
-</item><item>
-    <title>Envoy入门介绍</title>
-    <link>https://zhengtianchi.github.io/envoy_1/</link>
-    <pubDate>Sun, 05 Sep 2021 10:29:40 &#43;0800</pubDate>
-    <author>作者</author>
-    <guid>https://zhengtianchi.github.io/envoy_1/</guid>
-    <description><![CDATA[介绍¶ Envoy 是一个面向服务架构的 L7 代理和通信总线而设计的，这个项目诞生是出于以下目标： 对于应用程序而言，网络应该是透明的，当发生网络和应用程序故]]></description>
 </item></channel>
 </rss>

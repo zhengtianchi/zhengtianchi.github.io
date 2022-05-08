@@ -4,7 +4,16 @@
         <link>https://zhengtianchi.github.io/categories/docker/</link>
         <description>docker - 分类 - skyrun</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>17826828065@163.com (郑天驰)</managingEditor>
-            <webMaster>17826828065@163.com (郑天驰)</webMaster><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Sun, 21 Nov 2021 18:51:58 &#43;0800</lastBuildDate><atom:link href="https://zhengtianchi.github.io/categories/docker/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>17826828065@163.com (郑天驰)</webMaster><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Sun, 08 May 2022 10:32:04 &#43;0800</lastBuildDate><atom:link href="https://zhengtianchi.github.io/categories/docker/" rel="self" type="application/rss+xml" /><item>
+    <title>Runc和containerd概述</title>
+    <link>https://zhengtianchi.github.io/runcandcontainerd/</link>
+    <pubDate>Sun, 08 May 2022 10:32:04 &#43;0800</pubDate>
+    <author>作者</author>
+    <guid>https://zhengtianchi.github.io/runcandcontainerd/</guid>
+    <description><![CDATA[<div class="featured-image">
+                <img src="/images/docker-cover.png" referrerpolicy="no-referrer">
+            </div>1. 概述 各个组件调用关系图如下： 图片来源：https://www.jianshu.com/p/62e71584d1cb 2. OCI. Open Container Initiative OCI（Ope]]></description>
+</item><item>
     <title>docker - Dockerfile</title>
     <link>https://zhengtianchi.github.io/docker_dockerbuilder/</link>
     <pubDate>Sun, 21 Nov 2021 18:51:58 &#43;0800</pubDate>
