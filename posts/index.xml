@@ -4,7 +4,14 @@
         <link>https://zhengtianchi.github.io/posts/</link>
         <description>所有文章 | skyrun</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>17826828065@163.com (郑天驰)</managingEditor>
-            <webMaster>17826828065@163.com (郑天驰)</webMaster><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Sun, 08 May 2022 10:32:04 &#43;0800</lastBuildDate><atom:link href="https://zhengtianchi.github.io/posts/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>17826828065@163.com (郑天驰)</webMaster><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Sun, 08 May 2022 10:46:21 &#43;0800</lastBuildDate><atom:link href="https://zhengtianchi.github.io/posts/" rel="self" type="application/rss+xml" /><item>
+    <title>Containerd</title>
+    <link>https://zhengtianchi.github.io/containerd/</link>
+    <pubDate>Sun, 08 May 2022 10:46:21 &#43;0800</pubDate>
+    <author>作者</author>
+    <guid>https://zhengtianchi.github.io/containerd/</guid>
+    <description><![CDATA[在学习 Containerd 之前我们有必要对 Docker 的发展历史做一个简单的回顾，因为这里面牵涉到的组件实战是有点多，有很多我们会经常听到，但是不清楚这些组件到底是干什]]></description>
+</item><item>
     <title>Runc和containerd概述</title>
     <link>https://zhengtianchi.github.io/runcandcontainerd/</link>
     <pubDate>Sun, 08 May 2022 10:32:04 &#43;0800</pubDate>
@@ -85,14 +92,5 @@
     <description><![CDATA[<div class="featured-image">
                 <img src="/images/featured-image.jpg" referrerpolicy="no-referrer">
             </div>多云管理 Multi-cluster service mesh 多集群服务网格，配置工作负载来路由跨集群的流量。所有这些都符合应用Istio配置，如' VirtualServices &lsquo;， ' DestinationRules &lsquo;， ']]></description>
-</item><item>
-    <title>istio - 流量走向详解</title>
-    <link>https://zhengtianchi.github.io/zhaohuabin_traffic/</link>
-    <pubDate>Sun, 21 Nov 2021 18:51:58 &#43;0800</pubDate>
-    <author>作者</author>
-    <guid>https://zhengtianchi.github.io/zhaohuabin_traffic/</guid>
-    <description><![CDATA[<div class="featured-image">
-                <img src="/images/medium_istio.png" referrerpolicy="no-referrer">
-            </div>istio 流量走向详解 前言 Istio作为一个service mesh开源项目,其中最重要的功能就是对网格中微服务之间的流量进行管理,包括服务发现,请求]]></description>
 </item></channel>
 </rss>

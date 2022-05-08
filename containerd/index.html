@@ -1,0 +1,1712 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>Containerd - skyrun</title><meta name="Description" content="为梦想，为生活"><meta property="og:title" content="Containerd" />
+<meta property="og:description" content="在学习 Containerd 之前我们有必要对 Docker 的发展历史做一个简单的回顾，因为这里面牵涉到的组件实战是有点多，有很多我们会经常听到，但是不清楚这些组件到底是干什" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://zhengtianchi.github.io/containerd/" /><meta property="og:image" content="https://zhengtianchi.github.io/logo.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2022-05-08T10:46:21+08:00" />
+<meta property="article:modified_time" content="2022-05-08T10:46:21+08:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://zhengtianchi.github.io/logo.png"/>
+
+<meta name="twitter:title" content="Containerd"/>
+<meta name="twitter:description" content="在学习 Containerd 之前我们有必要对 Docker 的发展历史做一个简单的回顾，因为这里面牵涉到的组件实战是有点多，有很多我们会经常听到，但是不清楚这些组件到底是干什"/>
+<meta name="application-name" content="ztc">
+<meta name="apple-mobile-web-app-title" content="ztc"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://zhengtianchi.github.io/containerd/" /><link rel="prev" href="https://zhengtianchi.github.io/runcandcontainerd/" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Containerd",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/zhengtianchi.github.io\/containerd\/"
+        },"image": ["https:\/\/zhengtianchi.github.io\/images\/Apple-Devices-Preview.png"],"genre": "posts","wordcount":  8736 ,
+        "url": "https:\/\/zhengtianchi.github.io\/containerd\/","datePublished": "2022-05-08T10:46:21+08:00","dateModified": "2022-05-08T10:46:21+08:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
+            "@type": "Organization",
+            "name": "xxxx","logo": "https:\/\/zhengtianchi.github.io\/images\/avatar.png"},"author": {
+                "@type": "Person",
+                "name": "郑天驰"
+            },"description": ""
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="skyrun"><img
+        class="lazyload logo"
+        src="/svg/loading.min.svg"
+        data-src="https://imgo.hackhome.com/img2021/9/1/10/472248698.jpg"
+        data-srcset="https://imgo.hackhome.com/img2021/9/1/10/472248698.jpg, https://imgo.hackhome.com/img2021/9/1/10/472248698.jpg 1.5x, https://imgo.hackhome.com/img2021/9/1/10/472248698.jpg 2x"
+        data-sizes="auto"
+        alt="https://imgo.hackhome.com/img2021/9/1/10/472248698.jpg"
+        title="https://imgo.hackhome.com/img2021/9/1/10/472248698.jpg" /><span class="header-title-pre"><i class='far fa-kiss-wink-heart fa-fw'></i></span>skyrun郑天驰</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 所有文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/categories/documentation/"> 文档 </a><a class="menu-item" href="/about/"> 关于 </a><a class="menu-item" href="https://github.com/zhengtianchi/" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="skyrun"><img
+        class="lazyload logo"
+        src="/svg/loading.min.svg"
+        data-src="https://imgo.hackhome.com/img2021/9/1/10/472248698.jpg"
+        data-srcset="https://imgo.hackhome.com/img2021/9/1/10/472248698.jpg, https://imgo.hackhome.com/img2021/9/1/10/472248698.jpg 1.5x, https://imgo.hackhome.com/img2021/9/1/10/472248698.jpg 2x"
+        data-sizes="auto"
+        alt="https://imgo.hackhome.com/img2021/9/1/10/472248698.jpg"
+        title="https://imgo.hackhome.com/img2021/9/1/10/472248698.jpg" /><span class="header-title-pre"><i class='far fa-kiss-wink-heart fa-fw'></i></span>skyrun郑天驰</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">所有文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/categories/documentation/" title="">文档</a><a class="menu-item" href="/about/" title="">关于</a><a class="menu-item" href="https://github.com/zhengtianchi/" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">Containerd</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>郑天驰</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="8085-08-846">8085-08-846</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 8736 字&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 18 分钟&nbsp;<span id="/containerd/" class="leancloud_visitors" data-flag-title="Containerd">
+                        <i class="far fa-eye fa-fw"></i>&nbsp;<span class=leancloud-visitors-count></span>&nbsp;次阅读
+                    </span>&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#docker">Docker</a></li>
+    <li><a href="#cri">CRI</a></li>
+    <li><a href="#containerd">Containerd</a>
+      <ul>
+        <li><a href="#架构">架构</a></li>
+        <li><a href="#安装">安装</a></li>
+        <li><a href="#配置">配置</a></li>
+        <li><a href="#使用">使用</a>
+          <ul>
+            <li><a href="#镜像操作">镜像操作</a></li>
+            <li><a href="#容器操作">容器操作</a></li>
+            <li><a href="#任务">任务</a></li>
+            <li><a href="#命名空间">命名空间</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>在学习 Containerd 之前我们有必要对 Docker 的发展历史做一个简单的回顾，因为这里面牵涉到的组件实战是有点多，有很多我们会经常听到，但是不清楚这些组件到底是干什么用的，比如 <code>libcontainer</code>、<code>runc</code>、<code>containerd</code>、<code>CRI</code>、<code>OCI</code> 等等。</p>
+<h2 id="docker">Docker</h2>
+<p>从 Docker 1.11 版本开始，Docker 容器运行就不是简单通过 Docker Daemon 来启动了，而是通过集成 containerd、runc 等多个组件来完成的。虽然 Docker Daemon 守护进程模块在不停的重构，但是基本功能和定位没有太大的变化，一直都是 CS 架构，守护进程负责和 Docker Client 端交互，并管理 Docker 镜像和容器。现在的架构中组件 containerd 就会负责集群节点上容器的生命周期管理，并向上为 Docker Daemon 提供 gRPC 接口。</p>
+<p><img src="https://bxdc-static.oss-cn-beijing.aliyuncs.com/images/20210809154608.png" alt="docker 架构" style="zoom:200%;" />docker 架构</p>
+<p>当我们要创建一个容器的时候，现在 Docker Daemon 并不能直接帮我们创建了，而是请求 <code>containerd</code> 来创建一个容器，containerd 收到请求后，也并不会直接去操作容器，而是创建一个叫做 <code>containerd-shim</code> 的进程，让这个进程去操作容器，我们指定容器进程是需要一个父进程来做状态收集、维持 stdin 等 fd 打开等工作的，假如这个父进程就是 containerd，那如果 containerd 挂掉的话，整个宿主机上所有的容器都得退出了，而引入 <code>containerd-shim</code> 这个垫片就可以来规避这个问题了。</p>
+<p>然后创建容器需要做一些 namespaces 和 cgroups 的配置，以及挂载 root 文件系统等操作，这些操作其实已经有了标准的规范，那就是 OCI（开放容器标准），<code>runc</code> 就是它的一个参考实现（Docker 被逼无耐将 <code>libcontainer</code> 捐献出来改名为 <code>runc</code> 的），这个标准其实就是一个文档，主要规定了容器镜像的结构、以及容器需要接收哪些操作指令，比如 create、start、stop、delete 等这些命令。<code>runc</code> 就可以按照这个 OCI 文档来创建一个符合规范的容器，既然是标准肯定就有其他 OCI 实现，比如 Kata、gVisor 这些容器运行时都是符合 OCI 标准的。</p>
+<p>所以真正启动容器是通过 <code>containerd-shim</code> 去调用 <code>runc</code> 来启动容器的，<code>runc</code> 启动完容器后本身会直接退出，<code>containerd-shim</code> 则会成为容器进程的父进程, 负责收集容器进程的状态, 上报给 containerd, 并在容器中 pid 为 1 的进程退出后接管容器中的子进程进行清理, 确保不会出现僵尸进程。</p>
+<p>而 Docker 将容器操作都迁移到 <code>containerd</code> 中去是因为当前做 Swarm，想要进军 PaaS 市场，做了这个架构切分，让 Docker Daemon 专门去负责上层的封装编排，当然后面的结果我们知道 Swarm 在 Kubernetes 面前是惨败，然后 Docker 公司就把 <code>containerd</code> 项目捐献给了 CNCF 基金会，这个也是现在的 Docker 架构。</p>
+<h2 id="cri">CRI</h2>
+<p>我们知道 Kubernetes 提供了一个 CRI 的容器运行时接口，那么这个 CRI 到底是什么呢？这个其实也和 Docker 的发展密切相关的。</p>
+<p>在 Kubernetes 早期的时候，当时 Docker 实在是太火了，Kubernetes 当然会先选择支持 Docker，而且是通过硬编码的方式直接调用 Docker API，后面随着 Docker 的不断发展以及 Google 的主导，出现了更多容器运行时，Kubernetes 为了支持更多更精简的容器运行时，Google 就和红帽主导推出了 CRI 标准，用于将 Kubernetes 平台和特定的容器运行时（当然主要是为了干掉 Docker）解耦。</p>
+<p><code>CRI</code>（Container Runtime Interface 容器运行时接口）本质上就是 Kubernetes 定义的一组与容器运行时进行交互的接口，所以只要实现了这套接口的容器运行时都可以对接到 Kubernetes 平台上来。不过 Kubernetes 推出 CRI 这套标准的时候还没有现在的统治地位，所以有一些容器运行时可能不会自身就去实现 CRI 接口，于是就有了 <code>shim（垫片）</code>， 一个 shim 的职责就是作为适配器将各种容器运行时本身的接口适配到 Kubernetes 的 CRI 接口上，其中 <code>dockershim</code> 就是 Kubernetes 对接 Docker 到 CRI 接口上的一个垫片实现。</p>
+<p><img src="https://bxdc-static.oss-cn-beijing.aliyuncs.com/images/20210809172030.png" alt="cri shim" style="zoom:200%;" />cri shim</p>
+<p>Kubelet 通过 gRPC 框架与容器运行时或 shim 进行通信，其中 kubelet 作为客户端，CRI shim（也可能是容器运行时本身）作为服务器。</p>
+<p>CRI 定义的 API(<a href="https://github.com/kubernetes/kubernetes/blob/release-1.5/pkg/kubelet/api/v1alpha1/runtime/api.proto" target="_blank" rel="noopener noreffer">https://github.com/kubernetes/kubernetes/blob/release-1.5/pkg/kubelet/api/v1alpha1/runtime/api.proto</a>) 主要包括两个 gRPC 服务，<code>ImageService</code> 和 <code>RuntimeService</code>，<code>ImageService</code> 服务主要是拉取镜像、查看和删除镜像等操作，<code>RuntimeService</code> 则是用来管理 Pod 和容器的生命周期，以及与容器交互的调用（exec/attach/port-forward）等操作，可以通过 kubelet 中的标志 <code>--container-runtime-endpoint</code> 和 <code>--image-service-endpoint</code> 来配置这两个服务的套接字。</p>
+<p><img src="https://bxdc-static.oss-cn-beijing.aliyuncs.com/images/20210809173134.png" alt="kubelet cri" style="zoom:200%;" />kubelet cri</p>
+<p>不过这里同样也有一个例外，那就是 Docker，由于 Docker 当时的江湖地位很高，Kubernetes 是直接内置了 <code>dockershim</code> 在 kubelet 中的，所以如果你使用的是 Docker 这种容器运行时的话是不需要单独去安装配置适配器之类的，当然这个举动似乎也麻痹了 Docker 公司。</p>
+<p><img src="https://bxdc-static.oss-cn-beijing.aliyuncs.com/images/20210809173555.png" alt="dockershim" style="zoom:200%;" />dockershim</p>
+<p>现在如果我们使用的是 Docker 的话，当我们在 Kubernetes 中创建一个 Pod 的时候，首先就是 kubelet 通过 CRI 接口调用 <code>dockershim</code>，请求创建一个容器，kubelet 可以视作一个简单的 CRI Client, 而 dockershim 就是接收请求的 Server，不过他们都是在 kubelet 内置的。</p>
+<p><code>dockershim</code> 收到请求后, 转化成 Docker Daemon 能识别的请求, 发到 Docker Daemon 上请求创建一个容器，请求到了 Docker Daemon 后续就是 Docker 创建容器的流程了，去调用 <code>containerd</code>，然后创建 <code>containerd-shim</code> 进程，通过该进程去调用 <code>runc</code> 去真正创建容器。</p>
+<p>其实我们仔细观察也不难发现使用 Docker 的话其实是调用链比较长的，真正容器相关的操作其实 containerd 就完全足够了，Docker 太过于复杂笨重了，当然 Docker 深受欢迎的很大一个原因就是提供了很多对用户操作比较友好的功能，但是对于 Kubernetes 来说压根不需要这些功能，因为都是通过接口去操作容器的，所以自然也就可以将容器运行时切换到 containerd 来。</p>
+<p><img src="https://bxdc-static.oss-cn-beijing.aliyuncs.com/images/20210810094948.png" alt="切换到containerd" style="zoom:200%;" />切换到containerd</p>
+<p>切换到 containerd 可以消除掉中间环节，操作体验也和以前一样，但是由于直接用容器运行时调度容器，所以它们对 Docker 来说是不可见的。 因此，你以前用来检查这些容器的 Docker 工具就不能使用了。</p>
+<p>你不能再使用 <code>docker ps</code> 或 <code>docker inspect</code> 命令来获取容器信息。由于不能列出容器，因此也不能获取日志、停止容器，甚至不能通过 <code>docker exec</code> 在容器中执行命令。</p>
+<p>当然我们仍然可以下载镜像，或者用 <code>docker build</code> 命令构建镜像，但用 Docker 构建、下载的镜像，对于容器运行时和 Kubernetes，均不可见。为了在 Kubernetes 中使用，需要把镜像推送到镜像仓库中去。</p>
+<p>从上图可以看出在 containerd 1.0 中，对 CRI 的适配是通过一个单独的 <code>CRI-Containerd</code> 进程来完成的，这是因为最开始 containerd 还会去适配其他的系统（比如 swarm），所以没有直接实现 CRI，所以这个对接工作就交给 <code>CRI-Containerd</code> 这个 shim 了。</p>
+<p>然后到了 containerd 1.1 版本后就去掉了 <code>CRI-Containerd</code> 这个 shim，直接把适配逻辑作为插件的方式集成到了 containerd 主进程中，现在这样的调用就更加简洁了。</p>
+<p><img src="https://bxdc-static.oss-cn-beijing.aliyuncs.com/images/20210810095546.png" alt="containerd cri" style="zoom:200%;" />containerd cri</p>
+<p>与此同时 Kubernetes 社区也做了一个专门用于 Kubernetes 的 CRI 运行时 <a href="https://cri-o.io/" target="_blank" rel="noopener noreffer">CRI-O</a>，直接兼容 CRI 和 OCI 规范。</p>
+<p><img src="https://bxdc-static.oss-cn-beijing.aliyuncs.com/images/20210810100752.png" alt="cri-o" style="zoom:200%;" />cri-o</p>
+<p>这个方案和 containerd 的方案显然比默认的 dockershim 简洁很多，不过由于大部分用户都比较习惯使用 Docker，所以大家还是更喜欢使用 <code>dockershim</code> 方案。</p>
+<p>但是随着 CRI 方案的发展，以及其他容器运行时对 CRI 的支持越来越完善，Kubernetes 社区在2020年7月份就开始着手移除 dockershim 方案了：https://github.com/kubernetes/enhancements/tree/master/keps/sig-node/2221-remove-dockershim，现在的移除计划是在 1.20 版本中将 kubelet 中内置的 dockershim 代码分离，将内置的 dockershim 标记为<code>维护模式</code>，当然这个时候仍然还可以使用 dockershim，目标是在 1.23⁄1.24 版本发布没有 dockershim 的版本（代码还在，但是要默认支持开箱即用的 docker 需要自己构建 kubelet，会在某个宽限期过后从 kubelet 中删除内置的 dockershim 代码）。那么这是否就意味这 Kubernetes 不再支持 Docker 了呢？当然不是的，这只是废弃了内置的 <code>dockershim</code> 功能而已，Docker 和其他容器运行时将一视同仁，不会单独对待内置支持，如果我们还想直接使用 Docker 这种容器运行时应该怎么办呢？可以将 dockershim 的功能单独提取出来独立维护一个 <code>cri-dockerd</code> 即可，就类似于 containerd 1.0 版本中提供的 <code>CRI-Containerd</code>，当然还有一种办法就是 Docker 官方社区将 CRI 接口内置到 Dockerd 中去实现。</p>
+<p>但是我们也清楚 Dockerd 也是去直接调用的 Containerd，而 containerd 1.1 版本后就内置实现了 CRI，所以 Docker 也没必要再去单独实现 CRI 了，当 Kubernetes 不再内置支持开箱即用的 Docker 的以后，最好的方式当然也就是直接使用 Containerd 这种容器运行时，而且该容器运行时也已经经过了生产环境实践的，接下来我们就来学习下 Containerd 的使用。</p>
+<h2 id="containerd">Containerd</h2>
+<p>我们知道很早之前的 Docker Engine 中就有了 containerd，只不过现在是将 containerd 从 Docker Engine 里分离出来，作为一个独立的开源项目，目标是提供一个更加开放、稳定的容器运行基础设施。分离出来的 containerd 将具有更多的功能，涵盖整个容器运行时管理的所有需求，提供更强大的支持。</p>
+<p>containerd 是一个工业级标准的容器运行时，它强调<strong>简单性</strong>、<strong>健壮性</strong>和<strong>可移植性</strong>，containerd 可以负责干下面这些事情：</p>
+<ul>
+<li>管理容器的生命周期（从创建容器到销毁容器）</li>
+<li>拉取/推送容器镜像</li>
+<li>存储管理（管理镜像及容器数据的存储）</li>
+<li>调用 runc 运行容器（与 runc 等容器运行时交互）</li>
+<li>管理容器网络接口及网络</li>
+</ul>
+<h3 id="架构">架构</h3>
+<p>containerd 可用作 Linux 和 Windows 的守护程序，它管理其主机系统完整的容器生命周期，从镜像传输和存储到容器执行和监测，再到底层存储到网络附件等等。</p>
+<p><img src="https://bxdc-static.oss-cn-beijing.aliyuncs.com/images/20210810134700.png" alt="containerd 架构" style="zoom:200%;" />containerd 架构</p>
+<p>上图是 containerd 官方提供的架构图，可以看出 containerd 采用的也是 C/S 架构，服务端通过 unix domain socket 暴露低层的 gRPC API 接口出去，客户端通过这些 API 管理节点上的容器，每个 containerd 只负责一台机器，Pull 镜像，对容器的操作（启动、停止等），网络，存储都是由 containerd 完成。具体运行容器由 runc 负责，实际上只要是符合 OCI 规范的容器都可以支持。</p>
+<p>为了解耦，containerd 将系统划分成了不同的组件，每个组件都由一个或多个模块协作完成（Core 部分），每一种类型的模块都以插件的形式集成到 Containerd 中，而且插件之间是相互依赖的，例如，上图中的每一个长虚线的方框都表示一种类型的插件，包括 Service Plugin、Metadata Plugin、GC Plugin、Runtime Plugin 等，其中 Service Plugin 又会依赖 Metadata Plugin、GC Plugin 和 Runtime Plugin。每一个小方框都表示一个细分的插件，例如 Metadata Plugin 依赖 Containers Plugin、Content Plugin 等。比如:</p>
+<ul>
+<li><code>Content Plugin</code>: 提供对镜像中可寻址内容的访问，所有不可变的内容都被存储在这里。</li>
+<li><code>Snapshot Plugin</code>: 用来管理容器镜像的文件系统快照，镜像中的每一层都会被解压成文件系统快照，类似于 Docker 中的 graphdriver。</li>
+</ul>
+<p>总体来看 containerd 可以分为三个大块：Storage、Metadata 和 Runtime。</p>
+<p><img src="https://bxdc-static.oss-cn-beijing.aliyuncs.com/images/20210810145929.png" alt="containerd 架构2" style="zoom:200%;" />containerd 架构2</p>
+<h3 id="安装">安装</h3>
+<p>这里我使用的系统是 <code>Linux Mint 20.2</code>，首先需要安装 <code>seccomp</code> 依赖：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ apt-get update
+➜  ~ apt-get install libseccomp2 -y
+</code></pre></td></tr></table>
+</div>
+</div><p>由于 containerd 需要调用 runc，所以我们也需要先安装 runc，不过 containerd 提供了一个包含相关依赖的压缩包 <code>cri-containerd-cni-${VERSION}.${OS}-${ARCH}.tar.gz</code>，可以直接使用这个包来进行安装。首先从 <a href="https://github.com/containerd/containerd/releases" target="_blank" rel="noopener noreffer">release 页面</a>下载最新版本的压缩包，当前为 1.5.5 版本：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ wget https://github.com/containerd/containerd/releases/download/v1.5.5/cri-containerd-cni-1.5.5-linux-amd64.tar.gz
+<span class="c1"># 如果有限制，也可以替换成下面的 URL 加速下载</span>
+<span class="c1"># wget https://download.fastgit.org/containerd/containerd/releases/download/v1.5.5/cri-containerd-cni-1.5.5-linux-amd64.tar.gz</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>可以通过 tar 的 <code>-t</code> 选项直接看到压缩包中包含哪些文件：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ tar -tf cri-containerd-cni-1.4.3-linux-amd64.tar.gz
+etc/
+etc/cni/
+etc/cni/net.d/
+etc/cni/net.d/10-containerd-net.conflist
+etc/crictl.yaml
+etc/systemd/
+etc/systemd/system/
+etc/systemd/system/containerd.service
+usr/
+usr/local/
+usr/local/bin/
+usr/local/bin/containerd-shim-runc-v2
+usr/local/bin/ctr
+usr/local/bin/containerd-shim
+usr/local/bin/containerd-shim-runc-v1
+usr/local/bin/crictl
+usr/local/bin/critest
+usr/local/bin/containerd
+usr/local/sbin/
+usr/local/sbin/runc
+opt/
+opt/cni/
+opt/cni/bin/
+opt/cni/bin/vlan
+opt/cni/bin/host-local
+opt/cni/bin/flannel
+opt/cni/bin/bridge
+opt/cni/bin/host-device
+opt/cni/bin/tuning
+opt/cni/bin/firewall
+opt/cni/bin/bandwidth
+opt/cni/bin/ipvlan
+opt/cni/bin/sbr
+opt/cni/bin/dhcp
+opt/cni/bin/portmap
+opt/cni/bin/ptp
+opt/cni/bin/static
+opt/cni/bin/macvlan
+opt/cni/bin/loopback
+opt/containerd/
+opt/containerd/cluster/
+opt/containerd/cluster/version
+opt/containerd/cluster/gce/
+opt/containerd/cluster/gce/cni.template
+opt/containerd/cluster/gce/configure.sh
+opt/containerd/cluster/gce/cloud-init/
+opt/containerd/cluster/gce/cloud-init/master.yaml
+opt/containerd/cluster/gce/cloud-init/node.yaml
+opt/containerd/cluster/gce/env
+</code></pre></td></tr></table>
+</div>
+</div><p>直接将压缩包解压到系统的各个目录中：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ tar -C / -xzf cri-containerd-cni-1.5.5-linux-amd64.tar.gz
+</code></pre></td></tr></table>
+</div>
+</div><p>当然要记得将 <code>/usr/local/bin</code> 和 <code>/usr/local/sbin</code> 追加到 <code>~/.bashrc</code> 文件的 <code>PATH</code> 环境变量中：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="nb">export</span> <span class="nv">PATH</span><span class="o">=</span><span class="nv">$PATH</span>:/usr/local/bin:/usr/local/sbin
+</code></pre></td></tr></table>
+</div>
+</div><p>然后执行下面的命令使其立即生效：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ <span class="nb">source</span> ~/.bashrc
+</code></pre></td></tr></table>
+</div>
+</div><p>containerd 的默认配置文件为 <code>/etc/containerd/config.toml</code>，我们可以通过如下所示的命令生成一个默认的配置：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ mkdir /etc/containerd
+➜  ~ containerd config default &gt; /etc/containerd/config.toml
+</code></pre></td></tr></table>
+</div>
+</div><p>由于上面我们下在的 containerd 压缩包中包含一个 <code>etc/systemd/system/containerd.service</code> 的文件，这样我们就可以通过 systemd 来配置 containerd 作为守护进程运行了，内容如下所示：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ cat /etc/systemd/system/containerd.service
+<span class="o">[</span>Unit<span class="o">]</span>
+<span class="nv">Description</span><span class="o">=</span>containerd container runtime
+<span class="nv">Documentation</span><span class="o">=</span>https://containerd.io
+<span class="nv">After</span><span class="o">=</span>network.target local-fs.target
+
+<span class="o">[</span>Service<span class="o">]</span>
+<span class="nv">ExecStartPre</span><span class="o">=</span>-/sbin/modprobe overlay
+<span class="nv">ExecStart</span><span class="o">=</span>/usr/local/bin/containerd
+
+<span class="nv">Type</span><span class="o">=</span>notify
+<span class="nv">Delegate</span><span class="o">=</span>yes
+<span class="nv">KillMode</span><span class="o">=</span>process
+<span class="nv">Restart</span><span class="o">=</span>always
+<span class="nv">RestartSec</span><span class="o">=</span><span class="m">5</span>
+<span class="c1"># Having non-zero Limit*s causes performance problems due to accounting overhead</span>
+<span class="c1"># in the kernel. We recommend using cgroups to do container-local accounting.</span>
+<span class="nv">LimitNPROC</span><span class="o">=</span>infinity
+<span class="nv">LimitCORE</span><span class="o">=</span>infinity
+<span class="nv">LimitNOFILE</span><span class="o">=</span><span class="m">1048576</span>
+<span class="c1"># Comment TasksMax if your systemd version does not supports it.</span>
+<span class="c1"># Only systemd 226 and above support this version.</span>
+<span class="nv">TasksMax</span><span class="o">=</span>infinity
+<span class="nv">OOMScoreAdjust</span><span class="o">=</span>-999
+
+<span class="o">[</span>Install<span class="o">]</span>
+<span class="nv">WantedBy</span><span class="o">=</span>multi-user.target
+</code></pre></td></tr></table>
+</div>
+</div><p>这里有两个重要的参数：</p>
+<ul>
+<li><code>Delegate</code>: 这个选项允许 containerd 以及运行时自己管理自己创建容器的 cgroups。如果不设置这个选项，systemd 就会将进程移到自己的 cgroups 中，从而导致 containerd 无法正确获取容器的资源使用情况。</li>
+<li><code>KillMode</code>: 这个选项用来处理 containerd 进程被杀死的方式。默认情况下，systemd 会在进程的 cgroup 中查找并杀死 containerd 的所有子进程。KillMode 字段可以设置的值如下。
+<ul>
+<li><code>control-group</code>（默认值）：当前控制组里面的所有子进程，都会被杀掉</li>
+<li><code>process</code>：只杀主进程</li>
+<li><code>mixed</code>：主进程将收到 SIGTERM 信号，子进程收到 SIGKILL 信号</li>
+<li><code>none</code>：没有进程会被杀掉，只是执行服务的 stop 命令</li>
+</ul>
+</li>
+</ul>
+<p>我们需要将 KillMode 的值设置为 process，这样可以确保升级或重启 containerd 时不杀死现有的容器。</p>
+<p>现在我们就可以启动 containerd 了，直接执行下面的命令即可：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ systemctl <span class="nb">enable</span> containerd --now
+</code></pre></td></tr></table>
+</div>
+</div><p>启动完成后就可以使用 containerd 的本地 CLI 工具 <code>ctr</code> 了，比如查看版本：</p>
+<p><img src="https://bxdc-static.oss-cn-beijing.aliyuncs.com/images/20210810164519.png" alt="ctr version" style="zoom:200%;" />ctr version</p>
+<h3 id="配置">配置</h3>
+<p>我们首先来查看下上面默认生成的配置文件 <code>/etc/containerd/config.toml</code>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span><span class="lnt">113
+</span><span class="lnt">114
+</span><span class="lnt">115
+</span><span class="lnt">116
+</span><span class="lnt">117
+</span><span class="lnt">118
+</span><span class="lnt">119
+</span><span class="lnt">120
+</span><span class="lnt">121
+</span><span class="lnt">122
+</span><span class="lnt">123
+</span><span class="lnt">124
+</span><span class="lnt">125
+</span><span class="lnt">126
+</span><span class="lnt">127
+</span><span class="lnt">128
+</span><span class="lnt">129
+</span><span class="lnt">130
+</span><span class="lnt">131
+</span><span class="lnt">132
+</span><span class="lnt">133
+</span><span class="lnt">134
+</span><span class="lnt">135
+</span><span class="lnt">136
+</span><span class="lnt">137
+</span><span class="lnt">138
+</span><span class="lnt">139
+</span><span class="lnt">140
+</span><span class="lnt">141
+</span><span class="lnt">142
+</span><span class="lnt">143
+</span><span class="lnt">144
+</span><span class="lnt">145
+</span><span class="lnt">146
+</span><span class="lnt">147
+</span><span class="lnt">148
+</span><span class="lnt">149
+</span><span class="lnt">150
+</span><span class="lnt">151
+</span><span class="lnt">152
+</span><span class="lnt">153
+</span><span class="lnt">154
+</span><span class="lnt">155
+</span><span class="lnt">156
+</span><span class="lnt">157
+</span><span class="lnt">158
+</span><span class="lnt">159
+</span><span class="lnt">160
+</span><span class="lnt">161
+</span><span class="lnt">162
+</span><span class="lnt">163
+</span><span class="lnt">164
+</span><span class="lnt">165
+</span><span class="lnt">166
+</span><span class="lnt">167
+</span><span class="lnt">168
+</span><span class="lnt">169
+</span><span class="lnt">170
+</span><span class="lnt">171
+</span><span class="lnt">172
+</span><span class="lnt">173
+</span><span class="lnt">174
+</span><span class="lnt">175
+</span><span class="lnt">176
+</span><span class="lnt">177
+</span><span class="lnt">178
+</span><span class="lnt">179
+</span><span class="lnt">180
+</span><span class="lnt">181
+</span><span class="lnt">182
+</span><span class="lnt">183
+</span><span class="lnt">184
+</span><span class="lnt">185
+</span><span class="lnt">186
+</span><span class="lnt">187
+</span><span class="lnt">188
+</span><span class="lnt">189
+</span><span class="lnt">190
+</span><span class="lnt">191
+</span><span class="lnt">192
+</span><span class="lnt">193
+</span><span class="lnt">194
+</span><span class="lnt">195
+</span><span class="lnt">196
+</span><span class="lnt">197
+</span><span class="lnt">198
+</span><span class="lnt">199
+</span><span class="lnt">200
+</span><span class="lnt">201
+</span><span class="lnt">202
+</span><span class="lnt">203
+</span><span class="lnt">204
+</span><span class="lnt">205
+</span><span class="lnt">206
+</span><span class="lnt">207
+</span><span class="lnt">208
+</span><span class="lnt">209
+</span><span class="lnt">210
+</span><span class="lnt">211
+</span><span class="lnt">212
+</span><span class="lnt">213
+</span><span class="lnt">214
+</span><span class="lnt">215
+</span><span class="lnt">216
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-toml" data-lang="toml"><span class="nx">disabled_plugins</span> <span class="p">=</span> <span class="p">[]</span>
+<span class="nx">imports</span> <span class="p">=</span> <span class="p">[]</span>
+<span class="nx">oom_score</span> <span class="p">=</span> <span class="mi">0</span>
+<span class="nx">plugin_dir</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+<span class="nx">required_plugins</span> <span class="p">=</span> <span class="p">[]</span>
+<span class="nx">root</span> <span class="p">=</span> <span class="s2">&#34;/var/lib/containerd&#34;</span>
+<span class="nx">state</span> <span class="p">=</span> <span class="s2">&#34;/run/containerd&#34;</span>
+<span class="nx">version</span> <span class="p">=</span> <span class="mi">2</span>
+
+<span class="p">[</span><span class="nx">cgroup</span><span class="p">]</span>
+  <span class="nx">path</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+
+<span class="p">[</span><span class="nx">debug</span><span class="p">]</span>
+  <span class="nx">address</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+  <span class="nx">format</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+  <span class="nx">gid</span> <span class="p">=</span> <span class="mi">0</span>
+  <span class="nx">level</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+  <span class="nx">uid</span> <span class="p">=</span> <span class="mi">0</span>
+
+<span class="p">[</span><span class="nx">grpc</span><span class="p">]</span>
+  <span class="nx">address</span> <span class="p">=</span> <span class="s2">&#34;/run/containerd/containerd.sock&#34;</span>
+  <span class="nx">gid</span> <span class="p">=</span> <span class="mi">0</span>
+  <span class="nx">max_recv_message_size</span> <span class="p">=</span> <span class="mi">16777216</span>
+  <span class="nx">max_send_message_size</span> <span class="p">=</span> <span class="mi">16777216</span>
+  <span class="nx">tcp_address</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+  <span class="nx">tcp_tls_cert</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+  <span class="nx">tcp_tls_key</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+  <span class="nx">uid</span> <span class="p">=</span> <span class="mi">0</span>
+
+<span class="p">[</span><span class="nx">metrics</span><span class="p">]</span>
+  <span class="nx">address</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+  <span class="nx">grpc_histogram</span> <span class="p">=</span> <span class="kc">false</span>
+
+<span class="p">[</span><span class="nx">plugins</span><span class="p">]</span>
+
+  <span class="p">[</span><span class="nx">plugins</span><span class="p">.</span><span class="s2">&#34;io.containerd.gc.v1.scheduler&#34;</span><span class="p">]</span>
+    <span class="nx">deletion_threshold</span> <span class="p">=</span> <span class="mi">0</span>
+    <span class="nx">mutation_threshold</span> <span class="p">=</span> <span class="mi">100</span>
+    <span class="nx">pause_threshold</span> <span class="p">=</span> <span class="mf">0.02</span>
+    <span class="nx">schedule_delay</span> <span class="p">=</span> <span class="s2">&#34;0s&#34;</span>
+    <span class="nx">startup_delay</span> <span class="p">=</span> <span class="s2">&#34;100ms&#34;</span>
+
+  <span class="p">[</span><span class="nx">plugins</span><span class="p">.</span><span class="s2">&#34;io.containerd.grpc.v1.cri&#34;</span><span class="p">]</span>
+    <span class="nx">disable_apparmor</span> <span class="p">=</span> <span class="kc">false</span>
+    <span class="nx">disable_cgroup</span> <span class="p">=</span> <span class="kc">false</span>
+    <span class="nx">disable_hugetlb_controller</span> <span class="p">=</span> <span class="kc">true</span>
+    <span class="nx">disable_proc_mount</span> <span class="p">=</span> <span class="kc">false</span>
+    <span class="nx">disable_tcp_service</span> <span class="p">=</span> <span class="kc">true</span>
+    <span class="nx">enable_selinux</span> <span class="p">=</span> <span class="kc">false</span>
+    <span class="nx">enable_tls_streaming</span> <span class="p">=</span> <span class="kc">false</span>
+    <span class="nx">ignore_image_defined_volumes</span> <span class="p">=</span> <span class="kc">false</span>
+    <span class="nx">max_concurrent_downloads</span> <span class="p">=</span> <span class="mi">3</span>
+    <span class="nx">max_container_log_line_size</span> <span class="p">=</span> <span class="mi">16384</span>
+    <span class="nx">netns_mounts_under_state_dir</span> <span class="p">=</span> <span class="kc">false</span>
+    <span class="nx">restrict_oom_score_adj</span> <span class="p">=</span> <span class="kc">false</span>
+    <span class="nx">sandbox_image</span> <span class="p">=</span> <span class="s2">&#34;k8s.gcr.io/pause:3.5&#34;</span>
+    <span class="nx">selinux_category_range</span> <span class="p">=</span> <span class="mi">1024</span>
+    <span class="nx">stats_collect_period</span> <span class="p">=</span> <span class="mi">10</span>
+    <span class="nx">stream_idle_timeout</span> <span class="p">=</span> <span class="s2">&#34;4h0m0s&#34;</span>
+    <span class="nx">stream_server_address</span> <span class="p">=</span> <span class="s2">&#34;127.0.0.1&#34;</span>
+    <span class="nx">stream_server_port</span> <span class="p">=</span> <span class="s2">&#34;0&#34;</span>
+    <span class="nx">systemd_cgroup</span> <span class="p">=</span> <span class="kc">false</span>
+    <span class="nx">tolerate_missing_hugetlb_controller</span> <span class="p">=</span> <span class="kc">true</span>
+    <span class="nx">unset_seccomp_profile</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+
+    <span class="p">[</span><span class="nx">plugins</span><span class="p">.</span><span class="s2">&#34;io.containerd.grpc.v1.cri&#34;</span><span class="p">.</span><span class="nx">cni</span><span class="p">]</span>
+      <span class="nx">bin_dir</span> <span class="p">=</span> <span class="s2">&#34;/opt/cni/bin&#34;</span>
+      <span class="nx">conf_dir</span> <span class="p">=</span> <span class="s2">&#34;/etc/cni/net.d&#34;</span>
+      <span class="nx">conf_template</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+      <span class="nx">max_conf_num</span> <span class="p">=</span> <span class="mi">1</span>
+
+    <span class="p">[</span><span class="nx">plugins</span><span class="p">.</span><span class="s2">&#34;io.containerd.grpc.v1.cri&#34;</span><span class="p">.</span><span class="nx">containerd</span><span class="p">]</span>
+      <span class="nx">default_runtime_name</span> <span class="p">=</span> <span class="s2">&#34;runc&#34;</span>
+      <span class="nx">disable_snapshot_annotations</span> <span class="p">=</span> <span class="kc">true</span>
+      <span class="nx">discard_unpacked_layers</span> <span class="p">=</span> <span class="kc">false</span>
+      <span class="nx">no_pivot</span> <span class="p">=</span> <span class="kc">false</span>
+      <span class="nx">snapshotter</span> <span class="p">=</span> <span class="s2">&#34;overlayfs&#34;</span>
+
+      <span class="p">[</span><span class="nx">plugins</span><span class="p">.</span><span class="s2">&#34;io.containerd.grpc.v1.cri&#34;</span><span class="p">.</span><span class="nx">containerd</span><span class="p">.</span><span class="nx">default_runtime</span><span class="p">]</span>
+        <span class="nx">base_runtime_spec</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+        <span class="nx">container_annotations</span> <span class="p">=</span> <span class="p">[]</span>
+        <span class="nx">pod_annotations</span> <span class="p">=</span> <span class="p">[]</span>
+        <span class="nx">privileged_without_host_devices</span> <span class="p">=</span> <span class="kc">false</span>
+        <span class="nx">runtime_engine</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+        <span class="nx">runtime_root</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+        <span class="nx">runtime_type</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+
+        <span class="p">[</span><span class="nx">plugins</span><span class="p">.</span><span class="s2">&#34;io.containerd.grpc.v1.cri&#34;</span><span class="p">.</span><span class="nx">containerd</span><span class="p">.</span><span class="nx">default_runtime</span><span class="p">.</span><span class="nx">options</span><span class="p">]</span>
+
+      <span class="p">[</span><span class="nx">plugins</span><span class="p">.</span><span class="s2">&#34;io.containerd.grpc.v1.cri&#34;</span><span class="p">.</span><span class="nx">containerd</span><span class="p">.</span><span class="nx">runtimes</span><span class="p">]</span>
+
+        <span class="p">[</span><span class="nx">plugins</span><span class="p">.</span><span class="s2">&#34;io.containerd.grpc.v1.cri&#34;</span><span class="p">.</span><span class="nx">containerd</span><span class="p">.</span><span class="nx">runtimes</span><span class="p">.</span><span class="nx">runc</span><span class="p">]</span>
+          <span class="nx">base_runtime_spec</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+          <span class="nx">container_annotations</span> <span class="p">=</span> <span class="p">[]</span>
+          <span class="nx">pod_annotations</span> <span class="p">=</span> <span class="p">[]</span>
+          <span class="nx">privileged_without_host_devices</span> <span class="p">=</span> <span class="kc">false</span>
+          <span class="nx">runtime_engine</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+          <span class="nx">runtime_root</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+          <span class="nx">runtime_type</span> <span class="p">=</span> <span class="s2">&#34;io.containerd.runc.v2&#34;</span>
+
+          <span class="p">[</span><span class="nx">plugins</span><span class="p">.</span><span class="s2">&#34;io.containerd.grpc.v1.cri&#34;</span><span class="p">.</span><span class="nx">containerd</span><span class="p">.</span><span class="nx">runtimes</span><span class="p">.</span><span class="nx">runc</span><span class="p">.</span><span class="nx">options</span><span class="p">]</span>
+            <span class="nx">BinaryName</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+            <span class="nx">CriuImagePath</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+            <span class="nx">CriuPath</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+            <span class="nx">CriuWorkPath</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+            <span class="nx">IoGid</span> <span class="p">=</span> <span class="mi">0</span>
+            <span class="nx">IoUid</span> <span class="p">=</span> <span class="mi">0</span>
+            <span class="nx">NoNewKeyring</span> <span class="p">=</span> <span class="kc">false</span>
+            <span class="nx">NoPivotRoot</span> <span class="p">=</span> <span class="kc">false</span>
+            <span class="nx">Root</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+            <span class="nx">ShimCgroup</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+            <span class="nx">SystemdCgroup</span> <span class="p">=</span> <span class="kc">false</span>
+
+      <span class="p">[</span><span class="nx">plugins</span><span class="p">.</span><span class="s2">&#34;io.containerd.grpc.v1.cri&#34;</span><span class="p">.</span><span class="nx">containerd</span><span class="p">.</span><span class="nx">untrusted_workload_runtime</span><span class="p">]</span>
+        <span class="nx">base_runtime_spec</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+        <span class="nx">container_annotations</span> <span class="p">=</span> <span class="p">[]</span>
+        <span class="nx">pod_annotations</span> <span class="p">=</span> <span class="p">[]</span>
+        <span class="nx">privileged_without_host_devices</span> <span class="p">=</span> <span class="kc">false</span>
+        <span class="nx">runtime_engine</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+        <span class="nx">runtime_root</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+        <span class="nx">runtime_type</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+
+        <span class="p">[</span><span class="nx">plugins</span><span class="p">.</span><span class="s2">&#34;io.containerd.grpc.v1.cri&#34;</span><span class="p">.</span><span class="nx">containerd</span><span class="p">.</span><span class="nx">untrusted_workload_runtime</span><span class="p">.</span><span class="nx">options</span><span class="p">]</span>
+
+    <span class="p">[</span><span class="nx">plugins</span><span class="p">.</span><span class="s2">&#34;io.containerd.grpc.v1.cri&#34;</span><span class="p">.</span><span class="nx">image_decryption</span><span class="p">]</span>
+      <span class="nx">key_model</span> <span class="p">=</span> <span class="s2">&#34;node&#34;</span>
+
+    <span class="p">[</span><span class="nx">plugins</span><span class="p">.</span><span class="s2">&#34;io.containerd.grpc.v1.cri&#34;</span><span class="p">.</span><span class="nx">registry</span><span class="p">]</span>
+      <span class="nx">config_path</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+
+      <span class="p">[</span><span class="nx">plugins</span><span class="p">.</span><span class="s2">&#34;io.containerd.grpc.v1.cri&#34;</span><span class="p">.</span><span class="nx">registry</span><span class="p">.</span><span class="nx">auths</span><span class="p">]</span>
+
+      <span class="p">[</span><span class="nx">plugins</span><span class="p">.</span><span class="s2">&#34;io.containerd.grpc.v1.cri&#34;</span><span class="p">.</span><span class="nx">registry</span><span class="p">.</span><span class="nx">configs</span><span class="p">]</span>
+
+      <span class="p">[</span><span class="nx">plugins</span><span class="p">.</span><span class="s2">&#34;io.containerd.grpc.v1.cri&#34;</span><span class="p">.</span><span class="nx">registry</span><span class="p">.</span><span class="nx">headers</span><span class="p">]</span>
+
+      <span class="p">[</span><span class="nx">plugins</span><span class="p">.</span><span class="s2">&#34;io.containerd.grpc.v1.cri&#34;</span><span class="p">.</span><span class="nx">registry</span><span class="p">.</span><span class="nx">mirrors</span><span class="p">]</span>
+
+    <span class="p">[</span><span class="nx">plugins</span><span class="p">.</span><span class="s2">&#34;io.containerd.grpc.v1.cri&#34;</span><span class="p">.</span><span class="nx">x509_key_pair_streaming</span><span class="p">]</span>
+      <span class="nx">tls_cert_file</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+      <span class="nx">tls_key_file</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+
+  <span class="p">[</span><span class="nx">plugins</span><span class="p">.</span><span class="s2">&#34;io.containerd.internal.v1.opt&#34;</span><span class="p">]</span>
+    <span class="nx">path</span> <span class="p">=</span> <span class="s2">&#34;/opt/containerd&#34;</span>
+
+  <span class="p">[</span><span class="nx">plugins</span><span class="p">.</span><span class="s2">&#34;io.containerd.internal.v1.restart&#34;</span><span class="p">]</span>
+    <span class="nx">interval</span> <span class="p">=</span> <span class="s2">&#34;10s&#34;</span>
+
+  <span class="p">[</span><span class="nx">plugins</span><span class="p">.</span><span class="s2">&#34;io.containerd.metadata.v1.bolt&#34;</span><span class="p">]</span>
+    <span class="nx">content_sharing_policy</span> <span class="p">=</span> <span class="s2">&#34;shared&#34;</span>
+
+  <span class="p">[</span><span class="nx">plugins</span><span class="p">.</span><span class="s2">&#34;io.containerd.monitor.v1.cgroups&#34;</span><span class="p">]</span>
+    <span class="nx">no_prometheus</span> <span class="p">=</span> <span class="kc">false</span>
+
+  <span class="p">[</span><span class="nx">plugins</span><span class="p">.</span><span class="s2">&#34;io.containerd.runtime.v1.linux&#34;</span><span class="p">]</span>
+    <span class="nx">no_shim</span> <span class="p">=</span> <span class="kc">false</span>
+    <span class="nx">runtime</span> <span class="p">=</span> <span class="s2">&#34;runc&#34;</span>
+    <span class="nx">runtime_root</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+    <span class="nx">shim</span> <span class="p">=</span> <span class="s2">&#34;containerd-shim&#34;</span>
+    <span class="nx">shim_debug</span> <span class="p">=</span> <span class="kc">false</span>
+
+  <span class="p">[</span><span class="nx">plugins</span><span class="p">.</span><span class="s2">&#34;io.containerd.runtime.v2.task&#34;</span><span class="p">]</span>
+    <span class="nx">platforms</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;linux/amd64&#34;</span><span class="p">]</span>
+
+  <span class="p">[</span><span class="nx">plugins</span><span class="p">.</span><span class="s2">&#34;io.containerd.service.v1.diff-service&#34;</span><span class="p">]</span>
+    <span class="nx">default</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;walking&#34;</span><span class="p">]</span>
+
+  <span class="p">[</span><span class="nx">plugins</span><span class="p">.</span><span class="s2">&#34;io.containerd.snapshotter.v1.aufs&#34;</span><span class="p">]</span>
+    <span class="nx">root_path</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+
+  <span class="p">[</span><span class="nx">plugins</span><span class="p">.</span><span class="s2">&#34;io.containerd.snapshotter.v1.btrfs&#34;</span><span class="p">]</span>
+    <span class="nx">root_path</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+
+  <span class="p">[</span><span class="nx">plugins</span><span class="p">.</span><span class="s2">&#34;io.containerd.snapshotter.v1.devmapper&#34;</span><span class="p">]</span>
+    <span class="nx">async_remove</span> <span class="p">=</span> <span class="kc">false</span>
+    <span class="nx">base_image_size</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+    <span class="nx">pool_name</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+    <span class="nx">root_path</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+
+  <span class="p">[</span><span class="nx">plugins</span><span class="p">.</span><span class="s2">&#34;io.containerd.snapshotter.v1.native&#34;</span><span class="p">]</span>
+    <span class="nx">root_path</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+
+  <span class="p">[</span><span class="nx">plugins</span><span class="p">.</span><span class="s2">&#34;io.containerd.snapshotter.v1.overlayfs&#34;</span><span class="p">]</span>
+    <span class="nx">root_path</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+
+  <span class="p">[</span><span class="nx">plugins</span><span class="p">.</span><span class="s2">&#34;io.containerd.snapshotter.v1.zfs&#34;</span><span class="p">]</span>
+    <span class="nx">root_path</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+
+<span class="p">[</span><span class="nx">proxy_plugins</span><span class="p">]</span>
+
+<span class="p">[</span><span class="nx">stream_processors</span><span class="p">]</span>
+
+  <span class="p">[</span><span class="nx">stream_processors</span><span class="p">.</span><span class="s2">&#34;io.containerd.ocicrypt.decoder.v1.tar&#34;</span><span class="p">]</span>
+    <span class="nx">accepts</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;application/vnd.oci.image.layer.v1.tar+encrypted&#34;</span><span class="p">]</span>
+    <span class="nx">args</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;--decryption-keys-path&#34;</span><span class="p">,</span> <span class="s2">&#34;/etc/containerd/ocicrypt/keys&#34;</span><span class="p">]</span>
+    <span class="nx">env</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;OCICRYPT_KEYPROVIDER_CONFIG=/etc/containerd/ocicrypt/ocicrypt_keyprovider.conf&#34;</span><span class="p">]</span>
+    <span class="nx">path</span> <span class="p">=</span> <span class="s2">&#34;ctd-decoder&#34;</span>
+    <span class="nx">returns</span> <span class="p">=</span> <span class="s2">&#34;application/vnd.oci.image.layer.v1.tar&#34;</span>
+
+  <span class="p">[</span><span class="nx">stream_processors</span><span class="p">.</span><span class="s2">&#34;io.containerd.ocicrypt.decoder.v1.tar.gzip&#34;</span><span class="p">]</span>
+    <span class="nx">accepts</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;application/vnd.oci.image.layer.v1.tar+gzip+encrypted&#34;</span><span class="p">]</span>
+    <span class="nx">args</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;--decryption-keys-path&#34;</span><span class="p">,</span> <span class="s2">&#34;/etc/containerd/ocicrypt/keys&#34;</span><span class="p">]</span>
+    <span class="nx">env</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;OCICRYPT_KEYPROVIDER_CONFIG=/etc/containerd/ocicrypt/ocicrypt_keyprovider.conf&#34;</span><span class="p">]</span>
+    <span class="nx">path</span> <span class="p">=</span> <span class="s2">&#34;ctd-decoder&#34;</span>
+    <span class="nx">returns</span> <span class="p">=</span> <span class="s2">&#34;application/vnd.oci.image.layer.v1.tar+gzip&#34;</span>
+
+<span class="p">[</span><span class="nx">timeouts</span><span class="p">]</span>
+  <span class="s2">&#34;io.containerd.timeout.shim.cleanup&#34;</span> <span class="p">=</span> <span class="s2">&#34;5s&#34;</span>
+  <span class="s2">&#34;io.containerd.timeout.shim.load&#34;</span> <span class="p">=</span> <span class="s2">&#34;5s&#34;</span>
+  <span class="s2">&#34;io.containerd.timeout.shim.shutdown&#34;</span> <span class="p">=</span> <span class="s2">&#34;3s&#34;</span>
+  <span class="s2">&#34;io.containerd.timeout.task.state&#34;</span> <span class="p">=</span> <span class="s2">&#34;2s&#34;</span>
+
+<span class="p">[</span><span class="nx">ttrpc</span><span class="p">]</span>
+  <span class="nx">address</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
+  <span class="nx">gid</span> <span class="p">=</span> <span class="mi">0</span>
+  <span class="nx">uid</span> <span class="p">=</span> <span class="mi">0</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>这个配置文件比较复杂，我们可以将重点放在其中的 <code>plugins</code> 配置上面，仔细观察我们可以发现每一个顶级配置块的命名都是 <code>plugins.&quot;io.containerd.xxx.vx.xxx&quot;</code> 这种形式，每一个顶级配置块都表示一个插件，其中 <code>io.containerd.xxx.vx</code> 表示插件的类型，<code>vx</code> 后面的 <code>xxx</code> 表示插件的 ID，我们可以通过 <code>ctr</code> 查看插件列表：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ ctr plugin ls
+ctr plugin ls
+TYPE                            ID                       PLATFORMS      STATUS
+io.containerd.content.v1        content                  -              ok
+io.containerd.snapshotter.v1    aufs                     linux/amd64    ok
+io.containerd.snapshotter.v1    btrfs                    linux/amd64    skip
+io.containerd.snapshotter.v1    devmapper                linux/amd64    error
+io.containerd.snapshotter.v1    native                   linux/amd64    ok
+io.containerd.snapshotter.v1    overlayfs                linux/amd64    ok
+io.containerd.snapshotter.v1    zfs                      linux/amd64    skip
+io.containerd.metadata.v1       bolt                     -              ok
+io.containerd.differ.v1         walking                  linux/amd64    ok
+io.containerd.gc.v1             scheduler                -              ok
+io.containerd.service.v1        introspection-service    -              ok
+io.containerd.service.v1        containers-service       -              ok
+io.containerd.service.v1        content-service          -              ok
+io.containerd.service.v1        diff-service             -              ok
+io.containerd.service.v1        images-service           -              ok
+io.containerd.service.v1        leases-service           -              ok
+io.containerd.service.v1        namespaces-service       -              ok
+io.containerd.service.v1        snapshots-service        -              ok
+io.containerd.runtime.v1        linux                    linux/amd64    ok
+io.containerd.runtime.v2        task                     linux/amd64    ok
+io.containerd.monitor.v1        cgroups                  linux/amd64    ok
+io.containerd.service.v1        tasks-service            -              ok
+io.containerd.internal.v1       restart                  -              ok
+io.containerd.grpc.v1           containers               -              ok
+io.containerd.grpc.v1           content                  -              ok
+io.containerd.grpc.v1           diff                     -              ok
+io.containerd.grpc.v1           events                   -              ok
+io.containerd.grpc.v1           healthcheck              -              ok
+io.containerd.grpc.v1           images                   -              ok
+io.containerd.grpc.v1           leases                   -              ok
+io.containerd.grpc.v1           namespaces               -              ok
+io.containerd.internal.v1       opt                      -              ok
+io.containerd.grpc.v1           snapshots                -              ok
+io.containerd.grpc.v1           tasks                    -              ok
+io.containerd.grpc.v1           version                  -              ok
+io.containerd.grpc.v1           cri                      linux/amd64    ok
+</code></pre></td></tr></table>
+</div>
+</div><p>顶级配置块下面的子配置块表示该插件的各种配置，比如 cri 插件下面就分为 containerd、cni 和 registry 的配置，而 containerd 下面又可以配置各种 runtime，还可以配置默认的 runtime。比如现在我们要为镜像配置一个加速器，那么就需要在 cri 配置块下面的 <code>registry</code> 配置块下面进行配置 <code>registry.mirrors</code>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-toml" data-lang="toml"><span class="p">[</span><span class="nx">plugins</span><span class="p">.</span><span class="s2">&#34;io.containerd.grpc.v1.cri&#34;</span><span class="p">.</span><span class="nx">registry</span><span class="p">]</span>
+  <span class="p">[</span><span class="nx">plugins</span><span class="p">.</span><span class="s2">&#34;io.containerd.grpc.v1.cri&#34;</span><span class="p">.</span><span class="nx">registry</span><span class="p">.</span><span class="nx">mirrors</span><span class="p">]</span>
+    <span class="p">[</span><span class="nx">plugins</span><span class="p">.</span><span class="s2">&#34;io.containerd.grpc.v1.cri&#34;</span><span class="p">.</span><span class="nx">registry</span><span class="p">.</span><span class="nx">mirrors</span><span class="p">.</span><span class="s2">&#34;docker.io&#34;</span><span class="p">]</span>
+      <span class="nx">endpoint</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;https://bqr1dr1n.mirror.aliyuncs.com&#34;</span><span class="p">]</span>
+    <span class="p">[</span><span class="nx">plugins</span><span class="p">.</span><span class="s2">&#34;io.containerd.grpc.v1.cri&#34;</span><span class="p">.</span><span class="nx">registry</span><span class="p">.</span><span class="nx">mirrors</span><span class="p">.</span><span class="s2">&#34;k8s.gcr.io&#34;</span><span class="p">]</span>
+      <span class="nx">endpoint</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;https://registry.aliyuncs.com/k8sxio&#34;</span><span class="p">]</span>
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>registry.mirrors.&quot;xxx&quot;</code>: 表示需要配置 mirror 的镜像仓库，例如 <code>registry.mirrors.&quot;docker.io&quot;</code> 表示配置 docker.io 的 mirror。</li>
+<li><code>endpoint</code>: 表示提供 mirror 的镜像加速服务，比如我们可以注册一个阿里云的镜像服务来作为 docker.io 的 mirror。</li>
+</ul>
+<p>另外在默认配置中还有两个关于存储的配置路径：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-toml" data-lang="toml"><span class="nx">root</span> <span class="p">=</span> <span class="s2">&#34;/var/lib/containerd&#34;</span>
+<span class="nx">state</span> <span class="p">=</span> <span class="s2">&#34;/run/containerd&#34;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>其中 <code>root</code> 是用来保存持久化数据，包括 Snapshots, Content, Metadata 以及各种插件的数据，每一个插件都有自己单独的目录，Containerd 本身不存储任何数据，它的所有功能都来自于已加载的插件。而另外的 <code>state</code> 是用来保存运行时的临时数据的，包括 sockets、pid、挂载点、运行时状态以及不需要持久化的插件数据。</p>
+<h3 id="使用">使用</h3>
+<p>我们知道 Docker CLI 工具提供了需要增强用户体验的功能，containerd 同样也提供一个对应的 CLI 工具：<code>ctr</code>，不过 ctr 的功能没有 docker 完善，但是关于镜像和容器的基本功能都是有的。接下来我们就先简单介绍下 <code>ctr</code> 的使用。</p>
+<p><strong>帮助</strong></p>
+<p>直接输入 <code>ctr</code> 命令即可获得所有相关的操作命令使用方式：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ ctr
+NAME:
+   ctr -
+        __
+  _____/ /______
+ / ___/ __/ ___/
+/ /__/ /_/ /
+<span class="se">\_</span>__/<span class="se">\_</span>_/_/
+
+containerd CLI
+
+
+USAGE:
+   ctr <span class="o">[</span>global options<span class="o">]</span> <span class="nb">command</span> <span class="o">[</span><span class="nb">command</span> options<span class="o">]</span> <span class="o">[</span>arguments...<span class="o">]</span>
+
+VERSION:
+   v1.5.5
+
+DESCRIPTION:
+
+ctr is an unsupported debug and administrative client <span class="k">for</span> interacting
+with the containerd daemon. Because it is unsupported, the commands,
+options, and operations are not guaranteed to be backward compatible or
+stable from release to release of the containerd project.
+
+COMMANDS:
+   plugins, plugin            provides information about containerd plugins
+   version                    print the client and server versions
+   containers, c, container   manage containers
+   content                    manage content
+   events, event              display containerd events
+   images, image, i           manage images
+   leases                     manage leases
+   namespaces, namespace, ns  manage namespaces
+   pprof                      provide golang pprof outputs <span class="k">for</span> containerd
+   run                        run a container
+   snapshots, snapshot        manage snapshots
+   tasks, t, task             manage tasks
+   install                    install a new package
+   oci                        OCI tools
+   shim                       interact with a shim directly
+   help, h                    Shows a list of commands or <span class="nb">help</span> <span class="k">for</span> one <span class="nb">command</span>
+
+GLOBAL OPTIONS:
+   --debug                      <span class="nb">enable</span> debug output in logs
+   --address value, -a value    address <span class="k">for</span> containerd<span class="err">&#39;</span>s GRPC server <span class="o">(</span>default: <span class="s2">&#34;/run/containerd/containerd.sock&#34;</span><span class="o">)</span> <span class="o">[</span><span class="nv">$CONTAINERD_ADDRESS</span><span class="o">]</span>
+   --timeout value              total timeout <span class="k">for</span> ctr commands <span class="o">(</span>default: 0s<span class="o">)</span>
+   --connect-timeout value      timeout <span class="k">for</span> connecting to containerd <span class="o">(</span>default: 0s<span class="o">)</span>
+   --namespace value, -n value  namespace to use with commands <span class="o">(</span>default: <span class="s2">&#34;default&#34;</span><span class="o">)</span> <span class="o">[</span><span class="nv">$CONTAINERD_NAMESPACE</span><span class="o">]</span>
+   --help, -h                   show <span class="nb">help</span>
+   --version, -v                print the version
+</code></pre></td></tr></table>
+</div>
+</div><h4 id="镜像操作">镜像操作</h4>
+<p><strong>拉取镜像</strong></p>
+<p>拉取镜像可以使用 <code>ctr image pull</code> 来完成，比如拉取 Docker Hub 官方镜像 <code>nginx:alpine</code>，需要注意的是镜像地址需要加上 <code>docker.io</code> Host 地址：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ ctr image pull docker.io/library/nginx:alpine
+docker.io/library/nginx:alpine:                                                   resolved       <span class="p">|</span>++++++++++++++++++++++++++++++++++++++<span class="p">|</span>
+index-sha256:bead42240255ae1485653a956ef41c9e458eb077fcb6dc664cbc3aa9701a05ce:    exists         <span class="p">|</span>++++++++++++++++++++++++++++++++++++++<span class="p">|</span>
+manifest-sha256:ce6ca11a3fa7e0e6b44813901e3289212fc2f327ee8b1366176666e8fb470f24: <span class="k">done</span>           <span class="p">|</span>++++++++++++++++++++++++++++++++++++++<span class="p">|</span>
+layer-sha256:9a6ac07b84eb50935293bb185d0a8696d03247f74fd7d43ea6161dc0f293f81f:    <span class="k">done</span>           <span class="p">|</span>++++++++++++++++++++++++++++++++++++++<span class="p">|</span>
+layer-sha256:e82f830de071ebcda58148003698f32205b7970b01c58a197ac60d6bb79241b0:    <span class="k">done</span>           <span class="p">|</span>++++++++++++++++++++++++++++++++++++++<span class="p">|</span>
+layer-sha256:d7c9fa7589ae28cd3306b204d5dd9a539612593e35df70f7a1d69ff7548e74cf:    <span class="k">done</span>           <span class="p">|</span>++++++++++++++++++++++++++++++++++++++<span class="p">|</span>
+layer-sha256:bf2b3ee132db5b4c65432e53aca69da4e609c6cb154e0d0e14b2b02259e9c1e3:    <span class="k">done</span>           <span class="p">|</span>++++++++++++++++++++++++++++++++++++++<span class="p">|</span>
+config-sha256:7ce0143dee376bfd2937b499a46fb110bda3c629c195b84b1cf6e19be1a9e23b:   <span class="k">done</span>           <span class="p">|</span>++++++++++++++++++++++++++++++++++++++<span class="p">|</span>
+layer-sha256:3c1eaf69ff492177c34bdbf1735b6f2e5400e417f8f11b98b0da878f4ecad5fb:    <span class="k">done</span>           <span class="p">|</span>++++++++++++++++++++++++++++++++++++++<span class="p">|</span>
+layer-sha256:29291e31a76a7e560b9b7ad3cada56e8c18d50a96cca8a2573e4f4689d7aca77:    <span class="k">done</span>           <span class="p">|</span>++++++++++++++++++++++++++++++++++++++<span class="p">|</span>
+elapsed: 11.9s                                                                    total:  8.7 Mi <span class="o">(</span>748.1 KiB/s<span class="o">)</span>
+unpacking linux/amd64 sha256:bead42240255ae1485653a956ef41c9e458eb077fcb6dc664cbc3aa9701a05ce...
+<span class="k">done</span>: 410.86624ms
+</code></pre></td></tr></table>
+</div>
+</div><p>也可以使用 <code>--platform</code> 选项指定对应平台的镜像。当然对应的也有推送镜像的命令 <code>ctr image push</code>，如果是私有镜像则在推送的时候可以通过 <code>--user</code> 来自定义仓库的用户名和密码。</p>
+<p><strong>列出本地镜像</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ ctr image ls
+REF                            TYPE                                                      DIGEST                                                                  SIZE    PLATFORMS                                                                                LABELS
+docker.io/library/nginx:alpine application/vnd.docker.distribution.manifest.list.v2+json sha256:bead42240255ae1485653a956ef41c9e458eb077fcb6dc664cbc3aa9701a05ce 9.5 MiB linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x -
+➜  ~ ctr image ls -q
+docker.io/library/nginx:alpine
+</code></pre></td></tr></table>
+</div>
+</div><p>使用 <code>-q（--quiet）</code> 选项可以只打印镜像名称。</p>
+<p><strong>检测本地镜像</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ ctr image check
+REF                            TYPE                                                      DIGEST                                                                  STATUS         SIZE            UNPACKED
+docker.io/library/nginx:alpine application/vnd.docker.distribution.manifest.list.v2+json sha256:bead42240255ae1485653a956ef41c9e458eb077fcb6dc664cbc3aa9701a05ce <span class="nb">complete</span> <span class="o">(</span>7/7<span class="o">)</span> 9.5 MiB/9.5 MiB <span class="nb">true</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>主要查看其中的 <code>STATUS</code>，<code>complete</code> 表示镜像是完整可用的状态。</p>
+<p><strong>重新打标签</strong></p>
+<p>同样的我们也可以重新给指定的镜像打一个 Tag：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ ctr image tag docker.io/library/nginx:alpine harbor.k8s.local/course/nginx:alpine
+harbor.k8s.local/course/nginx:alpine
+➜  ~ ctr image ls -q
+docker.io/library/nginx:alpine
+harbor.k8s.local/course/nginx:alpine
+</code></pre></td></tr></table>
+</div>
+</div><p><strong>删除镜像</strong></p>
+<p>不需要使用的镜像也可以使用 <code>ctr image rm</code> 进行删除：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ ctr image rm harbor.k8s.local/course/nginx:alpine
+harbor.k8s.local/course/nginx:alpine
+➜  ~ ctr image ls -q
+docker.io/library/nginx:alpine
+</code></pre></td></tr></table>
+</div>
+</div><p>加上 <code>--sync</code> 选项可以同步删除镜像和所有相关的资源。</p>
+<p><strong>将镜像挂载到主机目录</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ ctr image mount docker.io/library/nginx:alpine /mnt
+sha256:c3554b2d61e3c1cffcaba4b4fa7651c644a3354efaafa2f22cb53542f6c600dc
+/mnt
+➜  ~ tree -L <span class="m">1</span> /mnt
+/mnt
+├── bin
+├── dev
+├── docker-entrypoint.d
+├── docker-entrypoint.sh
+├── etc
+├── home
+├── lib
+├── media
+├── mnt
+├── opt
+├── proc
+├── root
+├── run
+├── sbin
+├── srv
+├── sys
+├── tmp
+├── usr
+└── var
+
+<span class="m">18</span> directories, <span class="m">1</span> file
+</code></pre></td></tr></table>
+</div>
+</div><p><strong>将镜像从主机目录上卸载</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ ctr image unmount /mnt
+/mnt
+</code></pre></td></tr></table>
+</div>
+</div><p><strong>将镜像导出为压缩包</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ ctr image <span class="nb">export</span> nginx.tar.gz docker.io/library/nginx:alpine
+</code></pre></td></tr></table>
+</div>
+</div><p><strong>从压缩包导入镜像</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ ctr image import nginx.tar.gz
+</code></pre></td></tr></table>
+</div>
+</div><h4 id="容器操作">容器操作</h4>
+<p>容器相关操作可以通过 <code>ctr container</code> 获取。</p>
+<p><strong>创建容器</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ ctr container create docker.io/library/nginx:alpine nginx
+</code></pre></td></tr></table>
+</div>
+</div><p><strong>列出容器</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ ctr container ls
+CONTAINER    IMAGE                             RUNTIME
+nginx        docker.io/library/nginx:alpine    io.containerd.runc.v2
+</code></pre></td></tr></table>
+</div>
+</div><p>同样可以加上 <code>-q</code> 选项精简列表内容：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ ctr container ls -q
+nginx
+</code></pre></td></tr></table>
+</div>
+</div><p><strong>查看容器详细配置</strong></p>
+<p>类似于 <code>docker inspect</code> 功能。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ ctr container info nginx
+<span class="o">{</span>
+    <span class="s2">&#34;ID&#34;</span>: <span class="s2">&#34;nginx&#34;</span>,
+    <span class="s2">&#34;Labels&#34;</span>: <span class="o">{</span>
+        <span class="s2">&#34;io.containerd.image.config.stop-signal&#34;</span>: <span class="s2">&#34;SIGQUIT&#34;</span>
+    <span class="o">}</span>,
+    <span class="s2">&#34;Image&#34;</span>: <span class="s2">&#34;docker.io/library/nginx:alpine&#34;</span>,
+    <span class="s2">&#34;Runtime&#34;</span>: <span class="o">{</span>
+        <span class="s2">&#34;Name&#34;</span>: <span class="s2">&#34;io.containerd.runc.v2&#34;</span>,
+        <span class="s2">&#34;Options&#34;</span>: <span class="o">{</span>
+            <span class="s2">&#34;type_url&#34;</span>: <span class="s2">&#34;containerd.runc.v1.Options&#34;</span>
+        <span class="o">}</span>
+    <span class="o">}</span>,
+    <span class="s2">&#34;SnapshotKey&#34;</span>: <span class="s2">&#34;nginx&#34;</span>,
+    <span class="s2">&#34;Snapshotter&#34;</span>: <span class="s2">&#34;overlayfs&#34;</span>,
+    <span class="s2">&#34;CreatedAt&#34;</span>: <span class="s2">&#34;2021-08-12T08:23:13.792871558Z&#34;</span>,
+    <span class="s2">&#34;UpdatedAt&#34;</span>: <span class="s2">&#34;2021-08-12T08:23:13.792871558Z&#34;</span>,
+    <span class="s2">&#34;Extensions&#34;</span>: null,
+    <span class="s2">&#34;Spec&#34;</span>: <span class="o">{</span>
+......
+</code></pre></td></tr></table>
+</div>
+</div><p><strong>删除容器</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ ctr container rm nginx
+➜  ~ ctr container ls
+CONTAINER    IMAGE    RUNTIME
+</code></pre></td></tr></table>
+</div>
+</div><p>除了使用 <code>rm</code> 子命令之外也可以使用 <code>delete</code> 或者 <code>del</code> 删除容器。</p>
+<h4 id="任务">任务</h4>
+<p>上面我们通过 <code>container create</code> 命令创建的容器，并没有处于运行状态，只是一个静态的容器。一个 container 对象只是包含了运行一个容器所需的资源及相关配置数据，表示 namespaces、rootfs 和容器的配置都已经初始化成功了，只是用户进程还没有启动。</p>
+<p>一个容器真正运行起来是由 Task 任务实现的，Task 可以为容器设置网卡，还可以配置工具来对容器进行监控等。</p>
+<p>Task 相关操作可以通过 <code>ctr task</code> 获取，如下我们通过 Task 来启动容器：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ ctr task start -d nginx
+/docker-entrypoint.sh: /docker-entrypoint.d/ is not empty, will attempt to perform configuration
+/docker-entrypoint.sh: Looking <span class="k">for</span> shell scripts in /docker-entrypoint.d/
+</code></pre></td></tr></table>
+</div>
+</div><p>启动容器后可以通过 <code>task ls</code> 查看正在运行的容器：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ ctr task ls
+TASK     PID     STATUS
+nginx    <span class="m">3630</span>    RUNNING
+</code></pre></td></tr></table>
+</div>
+</div><p>同样也可以使用 <code>exec</code> 命令进入容器进行操作：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ ctr task <span class="nb">exec</span> --exec-id <span class="m">0</span> -t nginx sh
+/ <span class="c1">#</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>不过这里需要注意必须要指定 <code>--exec-id</code> 参数，这个 id 可以随便写，只要唯一就行。</p>
+<p>暂停容器，和 <code>docker pause</code> 类似的功能：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ ctr task pause nginx
+</code></pre></td></tr></table>
+</div>
+</div><p>暂停后容器状态变成了 <code>PAUSED</code>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ ctr task ls
+TASK     PID     STATUS
+nginx    <span class="m">3630</span>    PAUSED
+</code></pre></td></tr></table>
+</div>
+</div><p>同样也可以使用 <code>resume</code> 命令来恢复容器：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ ctr task resume nginx
+➜  ~ ctr task ls
+TASK     PID     STATUS
+nginx    <span class="m">3630</span>    RUNNING
+</code></pre></td></tr></table>
+</div>
+</div><p>不过需要注意 ctr 没有 stop 容器的功能，只能暂停或者杀死容器。杀死容器可以使用 <code>task kill</code> 命令:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ ctr task <span class="nb">kill</span> nginx
+➜  ~ ctr task ls
+TASK     PID     STATUS
+nginx    <span class="m">3630</span>    STOPPED
+</code></pre></td></tr></table>
+</div>
+</div><p>杀掉容器后可以看到容器的状态变成了 <code>STOPPED</code>。同样也可以通过 <code>task rm</code> 命令删除 Task：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ ctr task rm nginx
+➜  ~ ctr task ls
+TASK    PID    STATUS
+</code></pre></td></tr></table>
+</div>
+</div><p>除此之外我们还可以获取容器的 cgroup 相关信息，可以使用 <code>task metrics</code> 命令用来获取容器的内存、CPU 和 PID 的限额与使用量。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 重新启动容器</span>
+➜  ~ ctr task metrics nginx
+ID       TIMESTAMP
+nginx    2021-08-12 08:50:46.952769941 +0000 UTC
+
+METRIC                   VALUE
+memory.usage_in_bytes    <span class="m">8855552</span>
+memory.limit_in_bytes    <span class="m">9223372036854771712</span>
+memory.stat.cache        <span class="m">0</span>
+cpuacct.usage            <span class="m">22467106</span>
+cpuacct.usage_percpu     <span class="o">[</span><span class="m">2962708</span> <span class="m">860891</span> <span class="m">1163413</span> <span class="m">1915748</span> <span class="m">1058868</span> <span class="m">2888139</span> <span class="m">6159277</span> 5458062<span class="o">]</span>
+pids.current             <span class="m">9</span>
+pids.limit               <span class="m">0</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>还可以使用 <code>task ps</code> 命令查看容器中所有进程在宿主机中的 PID：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ ctr task ps nginx
+PID     INFO
+<span class="m">3984</span>    -
+<span class="m">4029</span>    -
+<span class="m">4030</span>    -
+<span class="m">4031</span>    -
+<span class="m">4032</span>    -
+<span class="m">4033</span>    -
+<span class="m">4034</span>    -
+<span class="m">4035</span>    -
+<span class="m">4036</span>    -
+➜  ~ ctr task ls
+TASK     PID     STATUS
+nginx    <span class="m">3984</span>    RUNNING
+</code></pre></td></tr></table>
+</div>
+</div><p>其中第一个 PID <code>3984</code> 就是我们容器中的1号进程。</p>
+<h4 id="命名空间">命名空间</h4>
+<p>另外 Containerd 中也支持命名空间的概念，比如查看命名空间：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ ctr ns ls
+NAME    LABELS
+default
+</code></pre></td></tr></table>
+</div>
+</div><p>如果不指定，ctr 默认使用的是 <code>default</code> 空间。同样也可以使用 <code>ns create</code> 命令创建一个命名空间：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ ctr ns create <span class="nb">test</span>
+➜  ~ ctr ns ls
+NAME    LABELS
+default
+<span class="nb">test</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>使用 <code>remove</code> 或者 <code>rm</code> 可以删除 namespace：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ ctr ns rm <span class="nb">test</span>
+<span class="nb">test</span>
+➜  ~ ctr ns ls
+NAME    LABELS
+default
+</code></pre></td></tr></table>
+</div>
+</div><p>有了命名空间后就可以在操作资源的时候指定 namespace，比如查看 test 命名空间的镜像，可以在操作命令后面加上 <code>-n test</code> 选项：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ ctr -n <span class="nb">test</span> image ls
+REF TYPE DIGEST SIZE PLATFORMS LABELS
+</code></pre></td></tr></table>
+</div>
+</div><p>我们知道 Docker 其实也是默认调用的 containerd，事实上 Docker 使用的 containerd 下面的命名空间默认是 <code>moby</code>，而不是 <code>default</code>，所以假如我们有用 docker 启动容器，那么我们也可以通过 <code>ctr -n moby</code> 来定位下面的容器：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">➜  ~ ctr -n moby container ls
+</code></pre></td></tr></table>
+</div>
+</div><p>同样 Kubernetes 下使用的 containerd 默认命名空间是 <code>k8s.io</code>，所以我们可以使用 <code>ctr -n k8s.io</code> 来查看 Kubernetes 下面创建的容器。后续我们再介绍如何将 Kubernetes 集群的容器运行时切换到 <code>containerd</code>。</p>
+<p><a href="https://youdianzhishi.com/web/course/1030" target="_blank" rel="noopener noreffer">
+</a></p>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>更新于 8085-08-846</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/containerd/index.md" target="_blank">阅读原始文档</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://zhengtianchi.github.io/containerd/" data-title="Containerd"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://zhengtianchi.github.io/containerd/"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Hacker News" data-sharer="hackernews" data-url="https://zhengtianchi.github.io/containerd/" data-title="Containerd"><i class="fab fa-hacker-news fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://zhengtianchi.github.io/containerd/" data-title="Containerd"><i data-svg-src="https://cdn.jsdelivr.net/npm/simple-icons@2.14.0/icons/line.svg"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://zhengtianchi.github.io/containerd/" data-title="Containerd"><i class="fab fa-weibo fa-fw"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/runcandcontainerd/" class="prev" rel="prev" title="Runc和containerd概述"><i class="fas fa-angle-left fa-fw"></i>Runc和containerd概述</a></div>
+</div>
+<div id="comments"><div id="valine" class="comment"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://valine.js.org/">Valine</a>.
+            </noscript></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.87.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/dillonzq/LoveIt" target="_blank" rel="noopener noreffer" title="LoveIt 0.2.10"><i class="far fa-kiss-wink-heart fa-fw"></i> LoveIt</a>
+                </div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2021 - 2022</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">郑天驰</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/valine/valine.min.css"><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/algoliasearch@4.2.0/dist/algoliasearch-lite.umd.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lazysizes@5.2.2/lazysizes.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sharer.js@0.4.0/sharer.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":100},"comment":{"valine":{"appId":"QGzwQXOqs5JOhN4RGPOkR2mR-MdYXbMMI","appKey":"WBmoGyJtbqUswvfLh6L8iEBr","avatar":"mp","el":"#valine","emojiCDN":"https://cdn.jsdelivr.net/npm/emoji-datasource-google@5.0.1/img/google/64/","emojiMaps":{"100":"1f4af.png","alien":"1f47d.png","anger":"1f4a2.png","angry":"1f620.png","anguished":"1f627.png","astonished":"1f632.png","black_heart":"1f5a4.png","blue_heart":"1f499.png","blush":"1f60a.png","bomb":"1f4a3.png","boom":"1f4a5.png","broken_heart":"1f494.png","brown_heart":"1f90e.png","clown_face":"1f921.png","cold_face":"1f976.png","cold_sweat":"1f630.png","confounded":"1f616.png","confused":"1f615.png","cry":"1f622.png","crying_cat_face":"1f63f.png","cupid":"1f498.png","dash":"1f4a8.png","disappointed":"1f61e.png","disappointed_relieved":"1f625.png","dizzy":"1f4ab.png","dizzy_face":"1f635.png","drooling_face":"1f924.png","exploding_head":"1f92f.png","expressionless":"1f611.png","face_vomiting":"1f92e.png","face_with_cowboy_hat":"1f920.png","face_with_hand_over_mouth":"1f92d.png","face_with_head_bandage":"1f915.png","face_with_monocle":"1f9d0.png","face_with_raised_eyebrow":"1f928.png","face_with_rolling_eyes":"1f644.png","face_with_symbols_on_mouth":"1f92c.png","face_with_thermometer":"1f912.png","fearful":"1f628.png","flushed":"1f633.png","frowning":"1f626.png","ghost":"1f47b.png","gift_heart":"1f49d.png","green_heart":"1f49a.png","grimacing":"1f62c.png","grin":"1f601.png","grinning":"1f600.png","hankey":"1f4a9.png","hear_no_evil":"1f649.png","heart":"2764-fe0f.png","heart_decoration":"1f49f.png","heart_eyes":"1f60d.png","heart_eyes_cat":"1f63b.png","heartbeat":"1f493.png","heartpulse":"1f497.png","heavy_heart_exclamation_mark_ornament":"2763-fe0f.png","hole":"1f573-fe0f.png","hot_face":"1f975.png","hugging_face":"1f917.png","hushed":"1f62f.png","imp":"1f47f.png","innocent":"1f607.png","japanese_goblin":"1f47a.png","japanese_ogre":"1f479.png","joy":"1f602.png","joy_cat":"1f639.png","kiss":"1f48b.png","kissing":"1f617.png","kissing_cat":"1f63d.png","kissing_closed_eyes":"1f61a.png","kissing_heart":"1f618.png","kissing_smiling_eyes":"1f619.png","laughing":"1f606.png","left_speech_bubble":"1f5e8-fe0f.png","love_letter":"1f48c.png","lying_face":"1f925.png","mask":"1f637.png","money_mouth_face":"1f911.png","nauseated_face":"1f922.png","nerd_face":"1f913.png","neutral_face":"1f610.png","no_mouth":"1f636.png","open_mouth":"1f62e.png","orange_heart":"1f9e1.png","partying_face":"1f973.png","pensive":"1f614.png","persevere":"1f623.png","pleading_face":"1f97a.png","pouting_cat":"1f63e.png","purple_heart":"1f49c.png","rage":"1f621.png","relaxed":"263a-fe0f.png","relieved":"1f60c.png","revolving_hearts":"1f49e.png","right_anger_bubble":"1f5ef-fe0f.png","robot_face":"1f916.png","rolling_on_the_floor_laughing":"1f923.png","scream":"1f631.png","scream_cat":"1f640.png","see_no_evil":"1f648.png","shushing_face":"1f92b.png","skull":"1f480.png","skull_and_crossbones":"2620-fe0f.png","sleeping":"1f634.png","sleepy":"1f62a.png","slightly_frowning_face":"1f641.png","slightly_smiling_face":"1f642.png","smile":"1f604.png","smile_cat":"1f638.png","smiley":"1f603.png","smiley_cat":"1f63a.png","smiling_face_with_3_hearts":"1f970.png","smiling_imp":"1f608.png","smirk":"1f60f.png","smirk_cat":"1f63c.png","sneezing_face":"1f927.png","sob":"1f62d.png","space_invader":"1f47e.png","sparkling_heart":"1f496.png","speak_no_evil":"1f64a.png","speech_balloon":"1f4ac.png","star-struck":"1f929.png","stuck_out_tongue":"1f61b.png","stuck_out_tongue_closed_eyes":"1f61d.png","stuck_out_tongue_winking_eye":"1f61c.png","sunglasses":"1f60e.png","sweat":"1f613.png","sweat_drops":"1f4a6.png","sweat_smile":"1f605.png","thinking_face":"1f914.png","thought_balloon":"1f4ad.png","tired_face":"1f62b.png","triumph":"1f624.png","two_hearts":"1f495.png","unamused":"1f612.png","upside_down_face":"1f643.png","weary":"1f629.png","white_frowning_face":"2639-fe0f.png","white_heart":"1f90d.png","wink":"1f609.png","woozy_face":"1f974.png","worried":"1f61f.png","yawning_face":"1f971.png","yellow_heart":"1f49b.png","yum":"1f60b.png","zany_face":"1f92a.png","zipper_mouth_face":"1f910.png","zzz":"1f4a4.png"},"enableQQ":false,"highlight":true,"lang":"zh-cn","pageSize":10,"placeholder":"你的评论 ...","recordIP":true,"serverURLs":"https://leancloud.hugoloveit.com","visitor":true}},"search":{"algoliaAppID":"PASDMWALPK","algoliaIndex":"index.zh-cn","algoliaSearchKey":"b42948e51daaa93df92381c8e2ac0f93","highlightTag":"em","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50,"type":"algolia"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>
