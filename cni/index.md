@@ -3,10 +3,6 @@
 
 
 
-
-
-
-
 # k8s cni explain in detail
 
 ## 1. Network
