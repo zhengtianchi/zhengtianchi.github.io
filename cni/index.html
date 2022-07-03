@@ -556,14 +556,7 @@ Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
 </ul>
 <p>其中，<strong>Overlay Network</strong>：<strong>是覆盖网络，在基础网络的基础上叠加的一种虚拟网络技术模式，该网络的主机通过虚拟链路连接起来。</strong></p>
 <p>VXLAN：<strong>将原数据包包装在 UDP 中，并使用基础网络的 IP/MAC 作为外层报文头进行封装，然后在以太网上传输，到达目的地后由隧道端点解封并将数据发送给目标地址</strong>。其中，VXLAN网络结构如下：</p>
-<p><img
-        class="lazyload"
-        src="/svg/loading.min.svg"
-        data-src="https://www.guoshaohe.com/wp-content/uploads/2021/10/VXLAN%E7%BD%91%E7%BB%9C%E7%BB%93%E6%9E%84.png"
-        data-srcset="https://www.guoshaohe.com/wp-content/uploads/2021/10/VXLAN%E7%BD%91%E7%BB%9C%E7%BB%93%E6%9E%84.png, https://www.guoshaohe.com/wp-content/uploads/2021/10/VXLAN%E7%BD%91%E7%BB%9C%E7%BB%93%E6%9E%84.png 1.5x, https://www.guoshaohe.com/wp-content/uploads/2021/10/VXLAN%E7%BD%91%E7%BB%9C%E7%BB%93%E6%9E%84.png 2x"
-        data-sizes="auto"
-        alt="https://www.guoshaohe.com/wp-content/uploads/2021/10/VXLAN%E7%BD%91%E7%BB%9C%E7%BB%93%E6%9E%84.png"
-        title="VXLAN网络结构" /></p>
+<p><img src="https://www.guoshaohe.com/wp-content/uploads/2021/10/VXLAN%E7%BD%91%E7%BB%9C%E7%BB%93%E6%9E%84.png" alt="VXLAN网络结构" style="zoom:200%;" /></p>
 <p>Flannel：<strong>是 Overlay Network 的一种，也是将原数据包封装在另一种网络包里面进行的路由转发和通信，目前已经支持 UDP、VXLAN、AWS VPC和GCE路由数据转发方式</strong>。</p>
 <p>具体的通信流程，不同物理节点上的容器<strong>通信流程</strong>：</p>
 <ol>
@@ -593,14 +586,7 @@ Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
 <li>同一主机中的 容器可以使用 docker0 直接通信，而不同主机上的容器需要使用 flanneld 进行封装在传输。</li>
 </ul>
 <p>其中，一个具体的例子，Flannel 网络结构如下：</p>
-<p><img
-        class="lazyload"
-        src="/svg/loading.min.svg"
-        data-src="https://www.guoshaohe.com/wp-content/uploads/2021/10/Flannel%E7%BD%91%E7%BB%9C%E7%BB%93%E6%9E%84-1200x593.png"
-        data-srcset="https://www.guoshaohe.com/wp-content/uploads/2021/10/Flannel%E7%BD%91%E7%BB%9C%E7%BB%93%E6%9E%84-1200x593.png, https://www.guoshaohe.com/wp-content/uploads/2021/10/Flannel%E7%BD%91%E7%BB%9C%E7%BB%93%E6%9E%84-1200x593.png 1.5x, https://www.guoshaohe.com/wp-content/uploads/2021/10/Flannel%E7%BD%91%E7%BB%9C%E7%BB%93%E6%9E%84-1200x593.png 2x"
-        data-sizes="auto"
-        alt="https://www.guoshaohe.com/wp-content/uploads/2021/10/Flannel%E7%BD%91%E7%BB%9C%E7%BB%93%E6%9E%84-1200x593.png"
-        title="Flannel网络结构" /></p>
+<p><img src="https://www.guoshaohe.com/wp-content/uploads/2021/10/Flannel%E7%BD%91%E7%BB%9C%E7%BB%93%E6%9E%84-1200x593.png" alt="Flannel网络结构" style="zoom:200%;" /></p>
 <p>上图表示：</p>
 <ul>
 <li>数据从源容器 cache1 container 中（IP地址为10.1.15.2）发出后，经由所在主机的 Docker0 虚拟网卡转发到 flannel0 虚拟网卡，这是个 P2P 的虚拟网卡，flanneld 服务监听在网卡的另外一端。</li>

@@ -324,7 +324,7 @@ Flannel是 CoreOS 团队针对 Kubernetes 设计的一个**覆盖网络（Overla
 
 VXLAN：**将原数据包包装在 UDP 中，并使用基础网络的 IP/MAC 作为外层报文头进行封装，然后在以太网上传输，到达目的地后由隧道端点解封并将数据发送给目标地址**。其中，VXLAN网络结构如下：
 
-![VXLAN网络结构](https://www.guoshaohe.com/wp-content/uploads/2021/10/VXLAN%E7%BD%91%E7%BB%9C%E7%BB%93%E6%9E%84.png)
+<img src="https://www.guoshaohe.com/wp-content/uploads/2021/10/VXLAN%E7%BD%91%E7%BB%9C%E7%BB%93%E6%9E%84.png" alt="VXLAN网络结构" style="zoom:200%;" />
 
 Flannel：**是 Overlay Network 的一种，也是将原数据包封装在另一种网络包里面进行的路由转发和通信，目前已经支持 UDP、VXLAN、AWS VPC和GCE路由数据转发方式**。
 
@@ -348,7 +348,7 @@ Flannel：**是 Overlay Network 的一种，也是将原数据包封装在另一
 
 其中，一个具体的例子，Flannel 网络结构如下：
 
-![Flannel网络结构](https://www.guoshaohe.com/wp-content/uploads/2021/10/Flannel%E7%BD%91%E7%BB%9C%E7%BB%93%E6%9E%84-1200x593.png)
+<img src="https://www.guoshaohe.com/wp-content/uploads/2021/10/Flannel%E7%BD%91%E7%BB%9C%E7%BB%93%E6%9E%84-1200x593.png" alt="Flannel网络结构" style="zoom:200%;" />
 
 上图表示：
 
