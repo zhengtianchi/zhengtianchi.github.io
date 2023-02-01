@@ -1,0 +1,15 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>golang - 标签 - skyrun</title>
+        <link>https://zhengtianchi.github.io/tags/golang/</link>
+        <description>golang - 标签 - skyrun</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>17826828065@163.com (郑天驰)</managingEditor>
+            <webMaster>17826828065@163.com (郑天驰)</webMaster><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Thu, 05 Jan 2023 10:29:40 &#43;0800</lastBuildDate><atom:link href="https://zhengtianchi.github.io/tags/golang/" rel="self" type="application/rss+xml" /><item>
+    <title>golang context</title>
+    <link>https://zhengtianchi.github.io/context/</link>
+    <pubDate>Thu, 05 Jan 2023 10:29:40 &#43;0800</pubDate>
+    <author>作者</author>
+    <guid>https://zhengtianchi.github.io/context/</guid>
+    <description><![CDATA[golang context context 是 go 中控制协程的一种比较方便的方式。 Select + Chan 我们都知道一个 goroutine 启动后，我们是无法控制他的，大部分情况是等待它自己结束，那么如果这个 goroutine 是一个]]></description>
+</item></channel>
+</rss>

@@ -4,7 +4,14 @@
         <link>https://zhengtianchi.github.io/posts/</link>
         <description>所有文章 | skyrun</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>17826828065@163.com (郑天驰)</managingEditor>
-            <webMaster>17826828065@163.com (郑天驰)</webMaster><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Fri, 01 Jul 2022 15:51:58 &#43;0800</lastBuildDate><atom:link href="https://zhengtianchi.github.io/posts/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>17826828065@163.com (郑天驰)</webMaster><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Thu, 05 Jan 2023 10:29:40 &#43;0800</lastBuildDate><atom:link href="https://zhengtianchi.github.io/posts/" rel="self" type="application/rss+xml" /><item>
+    <title>golang context</title>
+    <link>https://zhengtianchi.github.io/context/</link>
+    <pubDate>Thu, 05 Jan 2023 10:29:40 &#43;0800</pubDate>
+    <author>作者</author>
+    <guid>https://zhengtianchi.github.io/context/</guid>
+    <description><![CDATA[golang context context 是 go 中控制协程的一种比较方便的方式。 Select + Chan 我们都知道一个 goroutine 启动后，我们是无法控制他的，大部分情况是等待它自己结束，那么如果这个 goroutine 是一个]]></description>
+</item><item>
     <title>kubernetes cni</title>
     <link>https://zhengtianchi.github.io/cni/</link>
     <pubDate>Fri, 01 Jul 2022 15:51:58 &#43;0800</pubDate>
@@ -85,14 +92,5 @@
     <description><![CDATA[<div class="featured-image">
                 <img src="/images/docker-cover.png" referrerpolicy="no-referrer">
             </div>docker三种网络代理模式 有时因为网络原因，比如公司NAT，或其它啥的，需要使用代理。 Docker的代理配置，略显复杂，因为有三种场景。 但]]></description>
-</item><item>
-    <title>docker - 常用指令</title>
-    <link>https://zhengtianchi.github.io/docker_cmd/</link>
-    <pubDate>Sun, 21 Nov 2021 18:51:58 &#43;0800</pubDate>
-    <author>作者</author>
-    <guid>https://zhengtianchi.github.io/docker_cmd/</guid>
-    <description><![CDATA[<div class="featured-image">
-                <img src="/images/docker-bg.png" referrerpolicy="no-referrer">
-            </div>docker 常用指令 验证是否安装成功 1 2 3 $ docker version # 查看docker版本 # 或者 $ docker info # 查看docker系统的信息 启动docker 1 $ systemctl start docker 查看docke]]></description>
 </item></channel>
 </rss>
