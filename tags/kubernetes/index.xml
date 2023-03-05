@@ -22,5 +22,14 @@
     <description><![CDATA[<div class="featured-image">
                 <img src="/images/2019-07-30-dockercalico.jpeg" referrerpolicy="no-referrer">
             </div>前言 本文主要分析k8s中网络组件calico的 IPIP网络模式。旨在理解IPIP网络模式下产生的calixxxx，tunl0等设备以及跨节点]]></description>
+</item><item>
+    <title>k8s-ingress 原理和使用</title>
+    <link>https://zhengtianchi.github.io/ingress/</link>
+    <pubDate>Sun, 21 Nov 2021 18:51:58 &#43;0800</pubDate>
+    <author>作者</author>
+    <guid>https://zhengtianchi.github.io/ingress/</guid>
+    <description><![CDATA[<div class="featured-image">
+                <img src="/images/2019-07-30-dockercalico.jpeg" referrerpolicy="no-referrer">
+            </div>ingress是啥东东 上篇文章介绍service时有说了暴露了service的三种方式ClusterIP、NodePort与LoadBala]]></description>
 </item></channel>
 </rss>
